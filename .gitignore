@@ -13,5 +13,6 @@ local.properties
 *.apk
 *.aab
 *.jks
-*.keystore
+# Keep tranzo-debug.keystore for consistent signing
+!tranzo-debug.keystore
 google-services.json

@@ -20,10 +20,23 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
+    signingConfigs {
+        create("release") {
+            val ksFile = rootProject.file("tranzo-debug.keystore")
+            if (ksFile.exists()) {
+                storeFile = ksFile
+                storePassword = "tranzo2026"
+                keyAlias = "tranzo-debug"
+                keyPassword = "tranzo2026"
+            }
+        }
+    }
+
     buildTypes {
         release {
             isMinifyEnabled = true
             isShrinkResources = true
+            signingConfig = signingConfigs.getByName("release")
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
@@ -31,7 +44,10 @@ android {
         }
         debug {
             isMinifyEnabled = false
-            applicationIdSuffix = ".debug"
+            val ksFile = rootProject.file("tranzo-debug.keystore")
+            if (ksFile.exists()) {
+                signingConfig = signingConfigs.getByName("release")
+            }
         }
     }
 
