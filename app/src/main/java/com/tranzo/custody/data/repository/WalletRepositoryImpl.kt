@@ -16,8 +16,8 @@ import javax.inject.Singleton
 @Singleton
 class WalletRepositoryImpl @Inject constructor() : WalletRepository {
 
-    private val _portfolio = MutableStateFlow(getMockPortfolio())
     private val _spendable = MutableStateFlow(SpendableBalance(amount = 420.50, currency = "USD", lastTopUpTimestamp = System.currentTimeMillis() - 86400000))
+    private val _portfolio = MutableStateFlow(getMockPortfolio())
 
     override fun getPortfolio(): Flow<WalletPortfolio> = _portfolio.asStateFlow()
 
