@@ -17,6 +17,7 @@ sealed class Screen(val route: String) {
     data object Receive : Screen("receive")
     data object Swap : Screen("swap")
     data object Buy : Screen("buy")
+    data object Bridge : Screen("bridge")
 
     data object CardSettings : Screen("card_settings")
     data object TransactionDetail : Screen("transaction_detail/{transactionId}") {

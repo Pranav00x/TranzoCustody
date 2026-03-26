@@ -1,6 +1,5 @@
 package com.tranzo.custody.navigation
 
-import androidx.compose.animation.AnimatedContentTransitionScope
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -9,7 +8,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -21,6 +19,7 @@ import com.tranzo.custody.ui.activity.TransactionDetailScreen
 import com.tranzo.custody.ui.card.CardScreen
 import com.tranzo.custody.ui.card.CardSettingsScreen
 import com.tranzo.custody.ui.components.TranzoBottomBar
+import com.tranzo.custody.ui.home.BridgeScreen
 import com.tranzo.custody.ui.home.BuyScreen
 import com.tranzo.custody.ui.home.HomeScreen
 import com.tranzo.custody.ui.home.ReceiveScreen
@@ -71,9 +70,7 @@ fun TranzoNavigation(startDestination: String = Screen.Welcome.route) {
         ) {
             // Onboarding
             composable(Screen.Welcome.route) {
-                WelcomeScreen(
-                    onGetStarted = { navController.navigate(Screen.CreateOrImport.route) }
-                )
+                WelcomeScreen(onGetStarted = { navController.navigate(Screen.CreateOrImport.route) })
             }
             composable(Screen.CreateOrImport.route) {
                 CreateImportScreen(
@@ -117,12 +114,14 @@ fun TranzoNavigation(startDestination: String = Screen.Welcome.route) {
                     onSendClick = { navController.navigate(Screen.Send.route) },
                     onReceiveClick = { navController.navigate(Screen.Receive.route) },
                     onSwapClick = { navController.navigate(Screen.Swap.route) },
-                    onBuyClick = { navController.navigate(Screen.Buy.route) }
+                    onBuyClick = { navController.navigate(Screen.Buy.route) },
+                    onAddToSpend = { navController.navigate(Screen.Bridge.route) }
                 )
             }
             composable(Screen.Card.route) {
                 CardScreen(
-                    onCardSettings = { navController.navigate(Screen.CardSettings.route) }
+                    onCardSettings = { navController.navigate(Screen.CardSettings.route) },
+                    onAddFunds = { navController.navigate(Screen.Bridge.route) }
                 )
             }
             composable(Screen.Activity.route) {
@@ -152,6 +151,9 @@ fun TranzoNavigation(startDestination: String = Screen.Welcome.route) {
             }
             composable(Screen.Buy.route) {
                 BuyScreen(onBack = { navController.popBackStack() })
+            }
+            composable(Screen.Bridge.route) {
+                BridgeScreen(onBack = { navController.popBackStack() })
             }
             composable(Screen.CardSettings.route) {
                 CardSettingsScreen(onBack = { navController.popBackStack() })

@@ -1,6 +1,7 @@
 package com.tranzo.custody.ui.card
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -11,15 +12,22 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AcUnit
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.RemoveRedEye
+import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material.icons.filled.Wallet
+import androidx.compose.material.icons.filled.Warning
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
@@ -31,16 +39,23 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.tranzo.custody.domain.model.CardTransaction
+import com.tranzo.custody.domain.model.KycStatus
+import com.tranzo.custody.domain.model.SpendMode
 import com.tranzo.custody.ui.components.CryptoCardView
 import com.tranzo.custody.ui.components.formatCurrency
 import com.tranzo.custody.ui.theme.Black
+import com.tranzo.custody.ui.theme.Negative
+import com.tranzo.custody.ui.theme.NegativeLight
 import com.tranzo.custody.ui.theme.Positive
+import com.tranzo.custody.ui.theme.PositiveLight
 import com.tranzo.custody.ui.theme.SurfaceSecondary
 import com.tranzo.custody.ui.theme.TextMuted
 import com.tranzo.custody.ui.theme.White
@@ -51,6 +66,7 @@ import java.util.Locale
 @Composable
 fun CardScreen(
     onCardSettings: () -> Unit,
+    onAddFunds: () -> Unit,
     viewModel: CardViewModel = hiltViewModel()
 ) {
     val state by viewModel.state.collectAsState()
@@ -69,14 +85,19 @@ fun CardScreen(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(
-                    text = "My Card",
-                    style = MaterialTheme.typography.headlineMedium,
-                    fontWeight = FontWeight.ExtraBold,
-                    color = Black
-                )
+                Text("My Card", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.ExtraBold, color = Black)
                 IconButton(onClick = { }) {
                     Icon(Icons.Default.Lock, "Lock", tint = Black, modifier = Modifier.size(22.dp))
+                }
+            }
+        }
+
+        // KYC Banner
+        item {
+            state.card?.let { card ->
+                if (card.kycStatus != KycStatus.VERIFIED) {
+                    KycBanner(status = card.kycStatus)
+                    Spacer(modifier = Modifier.height(16.dp))
                 }
             }
         }
@@ -84,12 +105,68 @@ fun CardScreen(
         // Card Visual
         item {
             state.card?.let { card ->
-                CryptoCardView(
-                    card = card,
-                    modifier = Modifier.padding(horizontal = 20.dp)
-                )
+                CryptoCardView(card = card, modifier = Modifier.padding(horizontal = 20.dp))
             }
-            Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(20.dp))
+        }
+
+        // Spendable Balance (prominent)
+        item {
+            state.card?.let { card ->
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 20.dp)
+                        .clip(RoundedCornerShape(16.dp))
+                        .background(SurfaceSecondary)
+                        .padding(20.dp)
+                ) {
+                    Column {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Text("Spendable Balance", style = MaterialTheme.typography.labelLarge, color = TextMuted)
+                            Spacer(modifier = Modifier.weight(1f))
+                            Text(
+                                if (card.spendMode == SpendMode.AUTO_CONVERT) "Auto-convert ON" else "Prepaid",
+                                style = MaterialTheme.typography.labelSmall,
+                                color = if (card.spendMode == SpendMode.AUTO_CONVERT) Positive else TextMuted,
+                                fontWeight = FontWeight.SemiBold,
+                                modifier = Modifier
+                                    .clip(RoundedCornerShape(999.dp))
+                                    .background(if (card.spendMode == SpendMode.AUTO_CONVERT) PositiveLight else White)
+                                    .padding(horizontal = 8.dp, vertical = 3.dp)
+                            )
+                        }
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(
+                            formatCurrency(card.spendableBalance),
+                            style = MaterialTheme.typography.displaySmall,
+                            fontWeight = FontWeight.ExtraBold,
+                            color = Black
+                        )
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(
+                            "Card balance · Used for payments",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = TextMuted
+                        )
+
+                        Spacer(modifier = Modifier.height(16.dp))
+
+                        Button(
+                            onClick = onAddFunds,
+                            modifier = Modifier.fillMaxWidth().height(48.dp),
+                            shape = RoundedCornerShape(999.dp),
+                            colors = ButtonDefaults.buttonColors(containerColor = Black, contentColor = White),
+                            enabled = card.kycStatus == KycStatus.VERIFIED
+                        ) {
+                            Icon(Icons.Default.Add, null, modifier = Modifier.size(18.dp))
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text("Add Funds", fontWeight = FontWeight.SemiBold)
+                        }
+                    }
+                }
+            }
+            Spacer(modifier = Modifier.height(20.dp))
         }
 
         // Card Actions
@@ -116,23 +193,14 @@ fun CardScreen(
                     onClick = { }
                 )
             }
-            Spacer(modifier = Modifier.height(32.dp))
+            Spacer(modifier = Modifier.height(28.dp))
         }
 
-        // Spending Tracker
+        // Monthly Spending
         item {
             state.card?.let { card ->
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 20.dp)
-                ) {
-                    Text(
-                        text = "Monthly Spending",
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.SemiBold,
-                        color = Black
-                    )
+                Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp)) {
+                    Text("Monthly Spending", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold, color = Black)
                     Spacer(modifier = Modifier.height(12.dp))
 
                     Box(
@@ -143,58 +211,31 @@ fun CardScreen(
                             .padding(20.dp)
                     ) {
                         Column {
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.SpaceBetween
-                            ) {
-                                Text(
-                                    text = formatCurrency(card.monthlySpent),
-                                    style = MaterialTheme.typography.titleLarge,
-                                    fontWeight = FontWeight.Bold,
-                                    color = Black
-                                )
-                                Text(
-                                    text = "of ${formatCurrency(card.monthlyLimit)}",
-                                    style = MaterialTheme.typography.bodyMedium,
-                                    color = TextMuted
-                                )
+                            Row(Modifier.fillMaxWidth(), Arrangement.SpaceBetween) {
+                                Text(formatCurrency(card.monthlySpent), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold, color = Black)
+                                Text("of ${formatCurrency(card.monthlyLimit)}", style = MaterialTheme.typography.bodyMedium, color = TextMuted)
                             }
                             Spacer(modifier = Modifier.height(12.dp))
-
                             val progress = (card.monthlySpent / card.monthlyLimit).coerceIn(0.0, 1.0).toFloat()
                             LinearProgressIndicator(
                                 progress = { progress },
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .height(8.dp)
-                                    .clip(RoundedCornerShape(4.dp)),
+                                modifier = Modifier.fillMaxWidth().height(8.dp).clip(RoundedCornerShape(4.dp)),
                                 color = Black,
                                 trackColor = White,
                                 strokeCap = StrokeCap.Round,
                             )
-
                             Spacer(modifier = Modifier.height(8.dp))
-                            Text(
-                                text = "${(progress * 100).toInt()}% of monthly limit used",
-                                style = MaterialTheme.typography.bodySmall,
-                                color = TextMuted
-                            )
+                            Text("${(progress * 100).toInt()}% of monthly limit", style = MaterialTheme.typography.bodySmall, color = TextMuted)
                         }
                     }
                 }
-                Spacer(modifier = Modifier.height(32.dp))
+                Spacer(modifier = Modifier.height(28.dp))
             }
         }
 
         // Recent Transactions
         item {
-            Text(
-                text = "Recent Transactions",
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.SemiBold,
-                color = Black,
-                modifier = Modifier.padding(horizontal = 20.dp)
-            )
+            Text("Recent Transactions", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold, color = Black, modifier = Modifier.padding(horizontal = 20.dp))
             Spacer(modifier = Modifier.height(8.dp))
         }
 
@@ -207,21 +248,37 @@ fun CardScreen(
 }
 
 @Composable
-private fun CardActionItem(
-    icon: ImageVector,
-    label: String,
-    onClick: () -> Unit
-) {
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(8.dp)
+private fun KycBanner(status: KycStatus) {
+    val (bgColor, iconColor, icon, text) = when (status) {
+        KycStatus.NOT_STARTED -> listOf(NegativeLight, Negative, Icons.Default.Warning, "KYC required to activate card")
+        KycStatus.PENDING -> listOf(Color(0xFFFEF3C7), Color(0xFFF59E0B), Icons.Default.Schedule, "KYC verification in progress")
+        KycStatus.REJECTED -> listOf(NegativeLight, Negative, Icons.Default.Warning, "KYC rejected — please resubmit")
+        else -> return
+    }
+
+    @Suppress("UNCHECKED_CAST")
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 20.dp)
+            .clip(RoundedCornerShape(12.dp))
+            .background(bgColor as Color)
+            .padding(14.dp)
     ) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Icon(icon as ImageVector, null, tint = iconColor as Color, modifier = Modifier.size(20.dp))
+            Spacer(modifier = Modifier.width(10.dp))
+            Text(text as String, style = MaterialTheme.typography.bodySmall, fontWeight = FontWeight.SemiBold, color = iconColor)
+        }
+    }
+}
+
+@Composable
+private fun CardActionItem(icon: ImageVector, label: String, onClick: () -> Unit) {
+    Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(8.dp)) {
         IconButton(
             onClick = onClick,
-            modifier = Modifier
-                .size(52.dp)
-                .clip(CircleShape)
-                .background(SurfaceSecondary)
+            modifier = Modifier.size(52.dp).clip(CircleShape).background(SurfaceSecondary)
         ) {
             Icon(icon, label, tint = Black, modifier = Modifier.size(24.dp))
         }
@@ -232,48 +289,30 @@ private fun CardActionItem(
 @Composable
 private fun CardTransactionItem(transaction: CardTransaction) {
     Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 20.dp, vertical = 12.dp),
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Box(
-            modifier = Modifier
-                .size(44.dp)
-                .clip(CircleShape)
-                .background(SurfaceSecondary),
+            modifier = Modifier.size(44.dp).clip(CircleShape).background(SurfaceSecondary),
             contentAlignment = Alignment.Center
         ) {
-            Text(
-                text = transaction.merchantIcon,
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold,
-                color = Black
-            )
+            Text(transaction.merchantIcon, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = Black)
         }
-
-        Column(
-            modifier = Modifier
-                .weight(1f)
-                .padding(start = 12.dp)
-        ) {
-            Text(
-                text = transaction.merchantName,
-                style = MaterialTheme.typography.titleSmall,
-                color = Black
-            )
-            Text(
-                text = SimpleDateFormat("MMM d, h:mm a", Locale.US).format(Date(transaction.timestamp)),
-                style = MaterialTheme.typography.bodySmall,
-                color = TextMuted
-            )
+        Column(modifier = Modifier.weight(1f).padding(start = 12.dp)) {
+            Text(transaction.merchantName, style = MaterialTheme.typography.titleSmall, color = Black)
+            Row {
+                Text(
+                    SimpleDateFormat("MMM d, h:mm a", Locale.US).format(Date(transaction.timestamp)),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = TextMuted
+                )
+                Text(
+                    " · ${transaction.sourceLabel}",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = TextMuted
+                )
+            }
         }
-
-        Text(
-            text = "-${formatCurrency(transaction.amount)}",
-            style = MaterialTheme.typography.titleSmall,
-            fontWeight = FontWeight.SemiBold,
-            color = Black
-        )
+        Text("-${formatCurrency(transaction.amount)}", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold, color = Black)
     }
 }
