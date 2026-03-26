@@ -2,8 +2,6 @@ package com.tranzo.custody.navigation
 
 sealed class Screen(val route: String) {
     data object Welcome : Screen("welcome")
-    /** Nested graph: SignUp → SetPin (shared [OnboardingViewModel]) */
-    data object OnboardingGraph : Screen("onboarding_graph")
     data object SignUp : Screen("sign_up")
     data object SetPin : Screen("set_pin")
 

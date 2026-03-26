@@ -13,14 +13,14 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
 import com.tranzo.custody.ui.components.PinDots
 import com.tranzo.custody.ui.components.PinKeypad
 import com.tranzo.custody.ui.theme.Black
@@ -31,15 +31,54 @@ import com.tranzo.custody.ui.theme.White
 @Composable
 fun SetPinScreen(
     onPinSet: () -> Unit,
-    onBack: () -> Unit,
-    viewModel: OnboardingViewModel = hiltViewModel()
+    onBack: () -> Unit
 ) {
-    val state by viewModel.state.collectAsState()
-    val currentPin = if (state.isSettingPin) state.pin else state.confirmPin
+    var pin by remember { mutableStateOf("") }
+    var confirmPin by remember { mutableStateOf("") }
+    var isSettingPin by remember { mutableStateOf(true) }
+    var error by remember { mutableStateOf<String?>(null) }
+    var done by remember { mutableStateOf(false) }
 
-    LaunchedEffect(state.pinConfirmed) {
-        if (state.pinConfirmed) {
-            onPinSet()
+    val currentPin = if (isSettingPin) pin else confirmPin
+
+    fun onDigit(digit: Int) {
+        if (done) return
+        error = null
+        if (isSettingPin) {
+            if (pin.length < 6) {
+                pin += digit
+                if (pin.length == 6) {
+                    isSettingPin = false
+                }
+            }
+        } else {
+            if (confirmPin.length < 6) {
+                confirmPin += digit
+                if (confirmPin.length == 6) {
+                    if (pin == confirmPin) {
+                        done = true
+                        onPinSet()
+                    } else {
+                        confirmPin = ""
+                        error = "PINs don't match. Try again."
+                    }
+                }
+            }
+        }
+    }
+
+    fun onDelete() {
+        if (done) return
+        error = null
+        if (isSettingPin) {
+            if (pin.isNotEmpty()) pin = pin.dropLast(1)
+        } else {
+            if (confirmPin.isNotEmpty()) {
+                confirmPin = confirmPin.dropLast(1)
+            } else {
+                isSettingPin = true
+                pin = ""
+            }
         }
     }
 
@@ -62,7 +101,7 @@ fun SetPinScreen(
         Spacer(modifier = Modifier.height(48.dp))
 
         Text(
-            text = if (state.isSettingPin) "Create PIN" else "Confirm PIN",
+            text = if (isSettingPin) "Create PIN" else "Confirm PIN",
             style = MaterialTheme.typography.headlineLarge,
             fontWeight = FontWeight.ExtraBold,
             color = Black
@@ -71,7 +110,7 @@ fun SetPinScreen(
         Spacer(modifier = Modifier.height(8.dp))
 
         Text(
-            text = if (state.isSettingPin) "Set a 6-digit PIN to secure your account"
+            text = if (isSettingPin) "Set a 6-digit PIN to secure your account"
             else "Re-enter your PIN to confirm",
             style = MaterialTheme.typography.bodyMedium,
             color = TextMuted
@@ -81,10 +120,10 @@ fun SetPinScreen(
 
         PinDots(pinLength = 6, filledCount = currentPin.length)
 
-        if (state.error != null) {
+        if (error != null) {
             Spacer(modifier = Modifier.height(16.dp))
             Text(
-                text = state.error!!,
+                text = error!!,
                 style = MaterialTheme.typography.bodySmall,
                 color = Negative,
                 fontWeight = FontWeight.Medium
@@ -94,8 +133,8 @@ fun SetPinScreen(
         Spacer(modifier = Modifier.weight(1f))
 
         PinKeypad(
-            onNumberClick = { viewModel.onPinDigit(it) },
-            onDeleteClick = { viewModel.onPinDelete() }
+            onNumberClick = { onDigit(it) },
+            onDeleteClick = { onDelete() }
         )
 
         Spacer(modifier = Modifier.height(48.dp))
