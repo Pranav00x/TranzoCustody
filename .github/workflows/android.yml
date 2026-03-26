@@ -1,0 +1,54 @@
+name: Android CI
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: gradle
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+
+      - name: Build Debug APK
+        run: ./gradlew assembleDebug --no-daemon
+
+      - name: Run Lint
+        run: ./gradlew lintDebug --no-daemon
+        continue-on-error: true
+
+      - name: Upload APK artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-debug
+          path: app/build/outputs/apk/debug/app-debug.apk
+
+      - name: Send Telegram success notification
+        if: success()
+        run: |
+          curl -s -X POST "https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/sendMessage" \
+            -d chat_id="${{ secrets.TELEGRAM_CHAT_ID }}" \
+            -d parse_mode="HTML" \
+            -d text="✅ <b>Tranzo Build Successful</b>%0A%0A📦 Branch: <code>${{ github.ref_name }}</code>%0A🔨 Commit: <code>${{ github.sha }}</code>%0A👤 Author: ${{ github.actor }}%0A📝 Message: ${{ github.event.head_commit.message }}%0A%0A🔗 <a href='${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}'>View Build</a>"
+
+      - name: Send Telegram failure notification
+        if: failure()
+        run: |
+          curl -s -X POST "https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/sendMessage" \
+            -d chat_id="${{ secrets.TELEGRAM_CHAT_ID }}" \
+            -d parse_mode="HTML" \
+            -d text="❌ <b>Tranzo Build Failed</b>%0A%0A📦 Branch: <code>${{ github.ref_name }}</code>%0A🔨 Commit: <code>${{ github.sha }}</code>%0A👤 Author: ${{ github.actor }}%0A📝 Message: ${{ github.event.head_commit.message }}%0A%0A🔗 <a href='${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}'>View Build</a>"
