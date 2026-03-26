@@ -43,13 +43,22 @@ jobs:
           name: app-debug
           path: app/build/outputs/apk/debug/app-debug.apk
 
-      - name: Send Telegram success notification
+      - name: Send APK to Telegram
         if: success()
         run: |
-          curl -s -X POST "https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/sendMessage" \
-            -d chat_id="${{ secrets.TELEGRAM_CHAT_ID }}" \
-            -d parse_mode="HTML" \
-            -d text="✅ <b>Tranzo Build Successful</b>%0A%0A📦 Branch: <code>${{ github.ref_name }}</code>%0A🔨 Commit: <code>${{ github.sha }}</code>%0A👤 Author: ${{ github.actor }}%0A%0A🔗 <a href='${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}'>View Build</a>"
+          APK_PATH="app/build/outputs/apk/debug/app-debug.apk"
+          if [ -f "$APK_PATH" ]; then
+            curl -s -X POST "https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/sendDocument" \
+              -F chat_id="${{ secrets.TELEGRAM_CHAT_ID }}" \
+              -F document=@"$APK_PATH" \
+              -F caption="✅ <b>Tranzo Build Successful</b>
+          
+📦 Branch: <code>${{ github.ref_name }}</code>
+🔨 Commit: <code>${{ github.sha }}</code>
+👤 Author: ${{ github.actor }}
+🔗 <a href='${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}'>View Build</a>" \
+              -F parse_mode="HTML"
+          fi
 
       - name: Send Telegram failure notification
         if: failure()
