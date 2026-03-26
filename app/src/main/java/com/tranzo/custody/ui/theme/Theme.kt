@@ -1,13 +1,26 @@
 package com.tranzo.custody.ui.theme
 
-import androidx.activity.compose.LocalActivity
+import android.app.Activity
+import android.content.Context
+import android.content.ContextWrapper
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
 import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
+
+/** Resolves the hosting [Activity] from a Compose [Context] (unwraps [ContextThemeWrapper]). */
+private fun Context.findActivity(): Activity? {
+    var ctx = this
+    while (ctx is ContextWrapper) {
+        if (ctx is Activity) return ctx
+        ctx = ctx.baseContext
+    }
+    return null
+}
 
 private val TranzoColorScheme = lightColorScheme(
     primary = Black,
@@ -34,7 +47,7 @@ private val TranzoColorScheme = lightColorScheme(
 
 @Composable
 fun TranzoTheme(content: @Composable () -> Unit) {
-    val activity = LocalActivity.current
+    val activity = LocalContext.current.findActivity()
     val view = LocalView.current
     if (!view.isInEditMode && activity != null) {
         SideEffect {
