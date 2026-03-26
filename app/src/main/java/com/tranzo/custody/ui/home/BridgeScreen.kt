@@ -99,7 +99,7 @@ fun BridgeScreen(
         Spacer(modifier = Modifier.height(8.dp))
 
         Text(
-            "Transfer from your on-chain wallet to your card's spendable balance.",
+            "Convert your deposited crypto to card spending balance.",
             style = MaterialTheme.typography.bodyMedium,
             color = TextMuted
         )
@@ -120,7 +120,7 @@ fun BridgeScreen(
                     Spacer(modifier = Modifier.width(8.dp))
                     Text("From: Wallet", style = MaterialTheme.typography.labelLarge, color = TextMuted)
                     Spacer(modifier = Modifier.weight(1f))
-                    Text("On-chain", style = MaterialTheme.typography.labelSmall, color = TextMuted,
+                    Text("Crypto", style = MaterialTheme.typography.labelSmall, color = TextMuted,
                         modifier = Modifier
                             .clip(RoundedCornerShape(999.dp))
                             .background(White)

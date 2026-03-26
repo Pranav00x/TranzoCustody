@@ -83,16 +83,9 @@ fun WelcomeScreen(onGetStarted: () -> Unit) {
                 .fillMaxWidth()
                 .height(56.dp),
             shape = RoundedCornerShape(999.dp),
-            colors = ButtonDefaults.buttonColors(
-                containerColor = Black,
-                contentColor = White
-            )
+            colors = ButtonDefaults.buttonColors(containerColor = Black, contentColor = White)
         ) {
-            Text(
-                text = "Get Started",
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.SemiBold
-            )
+            Text("Get Started", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
         }
 
         Spacer(modifier = Modifier.height(48.dp))

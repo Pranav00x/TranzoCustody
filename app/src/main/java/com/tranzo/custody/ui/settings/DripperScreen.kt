@@ -85,7 +85,7 @@ fun DripperScreen(onBack: () -> Unit) {
             Spacer(modifier = Modifier.height(8.dp))
 
             Text(
-                "Connect your Dripper device for maximum security. Private keys never leave the hardware.",
+                "Connect your Dripper device for maximum transaction security and hardware-based signing.",
                 style = MaterialTheme.typography.bodyMedium,
                 color = TextMuted,
                 textAlign = TextAlign.Center,

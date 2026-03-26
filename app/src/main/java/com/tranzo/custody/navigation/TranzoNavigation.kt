@@ -25,11 +25,8 @@ import com.tranzo.custody.ui.home.HomeScreen
 import com.tranzo.custody.ui.home.ReceiveScreen
 import com.tranzo.custody.ui.home.SendScreen
 import com.tranzo.custody.ui.home.SwapScreen
-import com.tranzo.custody.ui.onboarding.CreateImportScreen
-import com.tranzo.custody.ui.onboarding.ImportWalletScreen
-import com.tranzo.custody.ui.onboarding.SeedPhraseScreen
 import com.tranzo.custody.ui.onboarding.SetPinScreen
-import com.tranzo.custody.ui.onboarding.VerifySeedScreen
+import com.tranzo.custody.ui.onboarding.SignUpScreen
 import com.tranzo.custody.ui.onboarding.WelcomeScreen
 import com.tranzo.custody.ui.settings.DripperScreen
 import com.tranzo.custody.ui.settings.SecurityScreen
@@ -68,32 +65,13 @@ fun TranzoNavigation(startDestination: String = Screen.Welcome.route) {
             enterTransition = { fadeIn(tween(300)) },
             exitTransition = { fadeOut(tween(300)) }
         ) {
-            // Onboarding
+            // Onboarding: Welcome → Sign Up → Set PIN → Home
             composable(Screen.Welcome.route) {
-                WelcomeScreen(onGetStarted = { navController.navigate(Screen.CreateOrImport.route) })
+                WelcomeScreen(onGetStarted = { navController.navigate(Screen.SignUp.route) })
             }
-            composable(Screen.CreateOrImport.route) {
-                CreateImportScreen(
-                    onCreateWallet = { navController.navigate(Screen.SeedPhrase.route) },
-                    onImportWallet = { navController.navigate(Screen.ImportWallet.route) },
-                    onBack = { navController.popBackStack() }
-                )
-            }
-            composable(Screen.SeedPhrase.route) {
-                SeedPhraseScreen(
-                    onContinue = { navController.navigate(Screen.VerifySeed.route) },
-                    onBack = { navController.popBackStack() }
-                )
-            }
-            composable(Screen.VerifySeed.route) {
-                VerifySeedScreen(
-                    onVerified = { navController.navigate(Screen.SetPin.route) },
-                    onBack = { navController.popBackStack() }
-                )
-            }
-            composable(Screen.ImportWallet.route) {
-                ImportWalletScreen(
-                    onImported = { navController.navigate(Screen.SetPin.route) },
+            composable(Screen.SignUp.route) {
+                SignUpScreen(
+                    onContinue = { navController.navigate(Screen.SetPin.route) },
                     onBack = { navController.popBackStack() }
                 )
             }

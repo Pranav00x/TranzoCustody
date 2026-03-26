@@ -169,7 +169,7 @@ fun HomeScreen(
                                 fontSize = 20.sp
                             )
                             Spacer(modifier = Modifier.height(2.dp))
-                            Text("On-chain · User controlled", style = MaterialTheme.typography.labelSmall, color = TextMuted, lineHeight = 14.sp)
+                            Text("Deposited · Crypto assets", style = MaterialTheme.typography.labelSmall, color = TextMuted, lineHeight = 14.sp)
                         }
                     }
 
@@ -259,8 +259,8 @@ fun HomeScreen(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Column {
-                        Text("On-Chain Assets", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold, color = Black)
-                        Text("Self-custody · You hold the keys", style = MaterialTheme.typography.bodySmall, color = TextMuted)
+                        Text("Your Assets", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold, color = Black)
+                        Text("Deposited crypto · Managed by Tranzo", style = MaterialTheme.typography.bodySmall, color = TextMuted)
                     }
                 }
             }

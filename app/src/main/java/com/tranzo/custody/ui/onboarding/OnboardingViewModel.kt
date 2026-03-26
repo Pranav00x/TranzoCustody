@@ -1,19 +1,15 @@
 package com.tranzo.custody.ui.onboarding
 
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
-import com.tranzo.custody.security.SeedPhraseManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 data class OnboardingState(
-    val seedPhrase: List<String> = emptyList(),
-    val verificationIndices: List<Int> = emptyList(),
-    val verificationAnswers: Map<Int, String> = emptyMap(),
+    val email: String = "",
+    val fullName: String = "",
     val pin: String = "",
     val confirmPin: String = "",
     val isSettingPin: Boolean = true,
@@ -22,43 +18,31 @@ data class OnboardingState(
 )
 
 @HiltViewModel
-class OnboardingViewModel @Inject constructor(
-    private val seedPhraseManager: SeedPhraseManager
-) : ViewModel() {
+class OnboardingViewModel @Inject constructor() : ViewModel() {
 
     private val _state = MutableStateFlow(OnboardingState())
     val state: StateFlow<OnboardingState> = _state.asStateFlow()
 
-    fun generateSeedPhrase() {
-        val phrase = seedPhraseManager.generateSeedPhrase()
-        val indices = seedPhraseManager.getVerificationIndices()
-        _state.value = _state.value.copy(
-            seedPhrase = phrase,
-            verificationIndices = indices
-        )
+    fun setEmail(email: String) {
+        _state.value = _state.value.copy(email = email, error = null)
     }
 
-    fun setVerificationAnswer(index: Int, word: String) {
-        val answers = _state.value.verificationAnswers.toMutableMap()
-        answers[index] = word.lowercase().trim()
-        _state.value = _state.value.copy(verificationAnswers = answers)
+    fun setFullName(name: String) {
+        _state.value = _state.value.copy(fullName = name, error = null)
     }
 
-    fun verifySeedPhrase(): Boolean {
-        val phrase = _state.value.seedPhrase
-        val answers = _state.value.verificationAnswers
-        val indices = _state.value.verificationIndices
-        return indices.all { idx ->
-            answers[idx]?.equals(phrase[idx], ignoreCase = true) == true
+    fun validateSignUp(): Boolean {
+        val email = _state.value.email.trim()
+        val name = _state.value.fullName.trim()
+        if (name.length < 2) {
+            _state.value = _state.value.copy(error = "Please enter your name")
+            return false
         }
-    }
-
-    fun validateImportedSeed(words: List<String>): Boolean {
-        return seedPhraseManager.validateSeedPhrase(words)
-    }
-
-    fun importSeedPhrase(words: List<String>) {
-        _state.value = _state.value.copy(seedPhrase = words)
+        if (!email.contains("@") || !email.contains(".")) {
+            _state.value = _state.value.copy(error = "Please enter a valid email")
+            return false
+        }
+        return true
     }
 
     fun onPinDigit(digit: Int) {
@@ -93,9 +77,6 @@ class OnboardingViewModel @Inject constructor(
 
     fun confirmPin(): Boolean {
         return if (_state.value.pin == _state.value.confirmPin) {
-            viewModelScope.launch {
-                seedPhraseManager.storeSeedPhrase(_state.value.seedPhrase)
-            }
             true
         } else {
             _state.value = _state.value.copy(

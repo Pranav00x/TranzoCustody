@@ -1,7 +1,6 @@
 package com.tranzo.custody.ui.onboarding
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -56,11 +55,7 @@ fun SetPinScreen(
             onClick = onBack,
             modifier = Modifier.align(Alignment.Start)
         ) {
-            Icon(
-                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                contentDescription = "Back",
-                tint = Black
-            )
+            Icon(Icons.AutoMirrored.Filled.ArrowBack, "Back", tint = Black)
         }
 
         Spacer(modifier = Modifier.height(48.dp))
@@ -75,7 +70,7 @@ fun SetPinScreen(
         Spacer(modifier = Modifier.height(8.dp))
 
         Text(
-            text = if (state.isSettingPin) "Set a 6-digit PIN to secure your wallet"
+            text = if (state.isSettingPin) "Set a 6-digit PIN to secure your account"
             else "Re-enter your PIN to confirm",
             style = MaterialTheme.typography.bodyMedium,
             color = TextMuted

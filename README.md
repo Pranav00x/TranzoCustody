@@ -1,15 +1,16 @@
 # Tranzo — Own Your Money. Spend It Anywhere.
 
-Tranzo is a unified crypto finance platform combining a self-custody wallet, crypto-to-fiat spending card, and Dripper hardware wallet integration into one seamless Android app.
+Tranzo is a unified crypto finance platform combining a deposit-to-spend wallet, crypto-to-fiat spending card, and Dripper hardware wallet integration into one seamless Android app.
 
 ## Features
 
-- **Self-Custody Wallet** — Non-custodial, multi-chain (Ethereum, Bitcoin, Solana, Polygon, Arbitrum, Base)
+- **Deposit & Spend** — Deposit crypto, convert to spendable balance, tap to pay anywhere
 - **Crypto Card** — Virtual + physical VISA debit card with auto crypto-to-fiat conversion
-- **Dripper Integration** — Bluetooth LE / USB-C hardware wallet for offline key storage
+- **Two Balance System** — Wallet Balance (deposited crypto) + Spendable Balance (card spending)
+- **Dripper Integration** — Bluetooth LE / USB-C hardware wallet for secure transaction signing
 - **Send / Receive / Swap / Buy** — Full DeFi and fiat on-ramp support
 - **Activity Tracking** — Unified transaction history with search and filters
-- **Security First** — Android Keystore encryption, biometric auth, BIP-39 seed phrases
+- **Security First** — Android Keystore encryption, biometric auth, PIN protection
 
 ## Tech Stack
 
@@ -33,12 +34,12 @@ app/src/main/java/com/tranzo/custody/
 ├── di/             # Hilt dependency injection modules
 ├── domain/         # Models and repository interfaces
 ├── navigation/     # Compose Navigation graph
-├── security/       # KeyStore, biometric, seed phrase management
+├── security/       # KeyStore, biometric helpers
 └── ui/
     ├── theme/      # Colors, typography, Material 3 theme
     ├── components/ # Shared composables
-    ├── onboarding/ # Welcome, create/import wallet, PIN setup
-    ├── home/       # Wallet, send, receive, swap, buy
+    ├── onboarding/ # Welcome, sign up, PIN setup
+    ├── home/       # Wallet, send, receive, swap, buy, bridge
     ├── card/       # Card visual, spending tracker, settings
     ├── activity/   # Transaction history, detail view
     └── settings/   # Preferences, security, Dripper pairing

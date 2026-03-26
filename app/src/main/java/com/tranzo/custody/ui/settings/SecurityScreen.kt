@@ -2,7 +2,6 @@ package com.tranzo.custody.ui.settings
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -11,12 +10,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -34,9 +30,6 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.tranzo.custody.ui.theme.Black
 import com.tranzo.custody.ui.theme.DividerColor
-import com.tranzo.custody.ui.theme.Negative
-import com.tranzo.custody.ui.theme.NegativeLight
-import com.tranzo.custody.ui.theme.SurfaceSecondary
 import com.tranzo.custody.ui.theme.TextMuted
 import com.tranzo.custody.ui.theme.White
 
@@ -101,47 +94,40 @@ fun SecurityScreen(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text("Change PIN", style = MaterialTheme.typography.bodyLarge)
-            Icon(Icons.AutoMirrored.Filled.ArrowBack, null, tint = TextMuted) // placeholder
+            Icon(Icons.AutoMirrored.Filled.ArrowBack, null, tint = TextMuted)
         }
 
         Spacer(modifier = Modifier.height(32.dp))
 
-        Text("Recovery", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
+        Text("Account Security", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
         Spacer(modifier = Modifier.height(16.dp))
 
-        Box(
+        Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .background(NegativeLight, RoundedCornerShape(12.dp))
-                .padding(16.dp)
+                .padding(vertical = 16.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
         ) {
             Column {
-                Text(
-                    "View Recovery Phrase",
-                    style = MaterialTheme.typography.bodyLarge,
-                    fontWeight = FontWeight.SemiBold,
-                    color = Negative
-                )
-                Spacer(modifier = Modifier.height(4.dp))
-                Text(
-                    "Requires PIN + biometric verification. Never share this with anyone.",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = Negative.copy(alpha = 0.8f)
-                )
+                Text("Two-Factor Authentication", style = MaterialTheme.typography.bodyLarge)
+                Text("Add extra protection to your account", style = MaterialTheme.typography.bodySmall, color = TextMuted)
             }
         }
 
-        Spacer(modifier = Modifier.height(32.dp))
+        HorizontalDivider(color = DividerColor)
 
-        Button(
-            onClick = { },
+        Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(52.dp),
-            shape = RoundedCornerShape(999.dp),
-            colors = ButtonDefaults.buttonColors(containerColor = Black, contentColor = White)
+                .padding(vertical = 16.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            Text("View Seed Phrase", fontWeight = FontWeight.SemiBold)
+            Column {
+                Text("Active Sessions", style = MaterialTheme.typography.bodyLarge)
+                Text("Manage your login sessions", style = MaterialTheme.typography.bodySmall, color = TextMuted)
+            }
         }
 
         Spacer(modifier = Modifier.height(32.dp))
