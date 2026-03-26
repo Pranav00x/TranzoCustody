@@ -15,6 +15,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -26,11 +27,15 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.tranzo.custody.ui.theme.Black
+import com.tranzo.custody.ui.theme.BorderColor
 import com.tranzo.custody.ui.theme.TextMuted
 import com.tranzo.custody.ui.theme.White
 
 @Composable
-fun WelcomeScreen(onGetStarted: () -> Unit) {
+fun WelcomeScreen(
+    onGetStarted: () -> Unit,
+    onSignIn: () -> Unit
+) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -85,7 +90,21 @@ fun WelcomeScreen(onGetStarted: () -> Unit) {
             shape = RoundedCornerShape(999.dp),
             colors = ButtonDefaults.buttonColors(containerColor = Black, contentColor = White)
         ) {
-            Text("Get Started", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
+            Text("Create Account", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
+        }
+
+        Spacer(modifier = Modifier.height(12.dp))
+
+        OutlinedButton(
+            onClick = onSignIn,
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(56.dp),
+            shape = RoundedCornerShape(999.dp),
+            border = androidx.compose.foundation.BorderStroke(1.5.dp, Black),
+            colors = ButtonDefaults.outlinedButtonColors(contentColor = Black)
+        ) {
+            Text("Sign In", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
         }
 
         Spacer(modifier = Modifier.height(48.dp))

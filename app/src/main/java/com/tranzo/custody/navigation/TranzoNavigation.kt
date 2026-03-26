@@ -26,6 +26,7 @@ import com.tranzo.custody.ui.home.ReceiveScreen
 import com.tranzo.custody.ui.home.SendScreen
 import com.tranzo.custody.ui.home.SwapScreen
 import com.tranzo.custody.ui.onboarding.SetPinScreen
+import com.tranzo.custody.ui.onboarding.SignInScreen
 import com.tranzo.custody.ui.onboarding.SignUpScreen
 import com.tranzo.custody.ui.onboarding.WelcomeScreen
 import com.tranzo.custody.ui.settings.DripperScreen
@@ -67,13 +68,29 @@ fun TranzoNavigation(startDestination: String = Screen.Welcome.route) {
         ) {
             // Onboarding: Welcome → Sign Up → Set PIN → Home (flat, no nested graph)
             composable(Screen.Welcome.route) {
-                WelcomeScreen(onGetStarted = {
-                    navController.navigate(Screen.SignUp.route)
-                })
+                WelcomeScreen(
+                    onGetStarted = {
+                        navController.navigate(Screen.SignUp.route)
+                    },
+                    onSignIn = {
+                        navController.navigate(Screen.SignIn.route)
+                    }
+                )
             }
             composable(Screen.SignUp.route) {
                 SignUpScreen(
                     onContinue = { navController.navigate(Screen.SetPin.route) },
+                    onBack = { navController.popBackStack() }
+                )
+            }
+            composable(Screen.SignIn.route) {
+                SignInScreen(
+                    onSignInSuccess = {
+                        navController.navigate(Screen.Home.route) {
+                            popUpTo(Screen.Welcome.route) { inclusive = true }
+                            launchSingleTop = true
+                        }
+                    },
                     onBack = { navController.popBackStack() }
                 )
             }
@@ -116,7 +133,13 @@ fun TranzoNavigation(startDestination: String = Screen.Welcome.route) {
                 SettingsScreen(
                     onSecurityClick = { navController.navigate(Screen.Security.route) },
                     onDripperClick = { navController.navigate(Screen.DripperDevices.route) },
-                    onCardSettingsClick = { navController.navigate(Screen.CardSettings.route) }
+                    onCardSettingsClick = { navController.navigate(Screen.CardSettings.route) },
+                    onLogout = {
+                        navController.navigate(Screen.Welcome.route) {
+                            popUpTo(0) { inclusive = true }
+                            launchSingleTop = true
+                        }
+                    }
                 )
             }
 

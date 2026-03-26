@@ -3,6 +3,7 @@ package com.tranzo.custody.navigation
 sealed class Screen(val route: String) {
     data object Welcome : Screen("welcome")
     data object SignUp : Screen("sign_up")
+    data object SignIn : Screen("sign_in")
     data object SetPin : Screen("set_pin")
 
     data object Home : Screen("home")

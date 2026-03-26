@@ -2,6 +2,7 @@ package com.tranzo.custody.ui.settings
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.tranzo.custody.data.local.UserSessionManager
 import com.tranzo.custody.domain.model.KycStatus
 import com.tranzo.custody.domain.model.SpendMode
 import com.tranzo.custody.domain.repository.CardRepository
@@ -27,18 +28,33 @@ data class SettingsUiState(
 
 @HiltViewModel
 class SettingsViewModel @Inject constructor(
-    private val cardRepository: CardRepository
+    private val cardRepository: CardRepository,
+    private val sessionManager: UserSessionManager
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(SettingsUiState())
     val state: StateFlow<SettingsUiState> = _state.asStateFlow()
 
     init {
+        loadUserData()
         viewModelScope.launch {
             cardRepository.getCard().collect { card ->
                 _state.value = _state.value.copy(
                     spendMode = card.spendMode,
                     kycStatus = card.kycStatus
+                )
+            }
+        }
+    }
+
+    private fun loadUserData() {
+        viewModelScope.launch {
+            val name = sessionManager.getSavedName()
+            val email = sessionManager.getSavedEmail()
+            if (name.isNotEmpty() || email.isNotEmpty()) {
+                _state.value = _state.value.copy(
+                    userName = name.ifEmpty { "Tranzo User" },
+                    userEmail = email.ifEmpty { "user@tranzo.money" }
                 )
             }
         }
@@ -64,6 +80,13 @@ class SettingsViewModel @Inject constructor(
         _state.value = _state.value.copy(spendMode = mode)
         viewModelScope.launch {
             cardRepository.setSpendMode(mode)
+        }
+    }
+
+    fun logout(onComplete: () -> Unit) {
+        viewModelScope.launch {
+            sessionManager.clearSession()
+            onComplete()
         }
     }
 }

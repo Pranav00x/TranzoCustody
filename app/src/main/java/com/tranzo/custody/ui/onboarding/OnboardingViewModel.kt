@@ -1,13 +1,17 @@
 package com.tranzo.custody.ui.onboarding
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.tranzo.custody.data.local.UserSessionManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 data class OnboardingState(
+    // Sign Up fields
     val email: String = "",
     val fullName: String = "",
     val pin: String = "",
@@ -16,14 +20,24 @@ data class OnboardingState(
     val error: String? = null,
     val isLoading: Boolean = false,
     /** Set when confirm PIN matches; navigation runs once via LaunchedEffect */
-    val pinConfirmed: Boolean = false
+    val pinConfirmed: Boolean = false,
+
+    // Sign In fields
+    val signInEmail: String = "",
+    val signInPin: String = "",
+    val signInError: String? = null,
+    val signInSuccess: Boolean = false
 )
 
 @HiltViewModel
-class OnboardingViewModel @Inject constructor() : ViewModel() {
+class OnboardingViewModel @Inject constructor(
+    private val sessionManager: UserSessionManager
+) : ViewModel() {
 
     private val _state = MutableStateFlow(OnboardingState())
     val state: StateFlow<OnboardingState> = _state.asStateFlow()
+
+    // ─── Sign Up ─────────────────────────────────────────────
 
     fun setEmail(email: String) {
         _state.value = _state.value.copy(email = email, error = null)
@@ -63,6 +77,8 @@ class OnboardingViewModel @Inject constructor() : ViewModel() {
             if (newConfirm.length == 6) {
                 if (_state.value.pin == newConfirm) {
                     _state.value = _state.value.copy(pinConfirmed = true)
+                    // Save session when PIN is confirmed
+                    saveSession()
                 } else {
                     _state.value = _state.value.copy(
                         confirmPin = "",
@@ -87,4 +103,76 @@ class OnboardingViewModel @Inject constructor() : ViewModel() {
         }
     }
 
+    private fun saveSession() {
+        viewModelScope.launch {
+            sessionManager.saveSession(
+                name = _state.value.fullName.trim(),
+                email = _state.value.email.trim(),
+                pin = _state.value.pin
+            )
+        }
+    }
+
+    // ─── Sign In ─────────────────────────────────────────────
+
+    fun setSignInEmail(email: String) {
+        _state.value = _state.value.copy(signInEmail = email, signInError = null)
+    }
+
+    fun setSignInPin(pin: String) {
+        _state.value = _state.value.copy(signInPin = pin, signInError = null)
+    }
+
+    fun signIn(onSuccess: () -> Unit) {
+        viewModelScope.launch {
+            _state.value = _state.value.copy(isLoading = true, signInError = null)
+
+            val savedEmail = sessionManager.getSavedEmail()
+            val emailMatches = savedEmail.equals(_state.value.signInEmail.trim(), ignoreCase = true)
+            val pinMatches = sessionManager.verifyPin(_state.value.signInPin)
+
+            if (savedEmail.isEmpty()) {
+                _state.value = _state.value.copy(
+                    isLoading = false,
+                    signInError = "No account found. Please sign up first."
+                )
+                return@launch
+            }
+
+            if (!emailMatches) {
+                _state.value = _state.value.copy(
+                    isLoading = false,
+                    signInError = "Email does not match. Please try again."
+                )
+                return@launch
+            }
+
+            if (!pinMatches) {
+                _state.value = _state.value.copy(
+                    isLoading = false,
+                    signInError = "Incorrect PIN. Please try again."
+                )
+                return@launch
+            }
+
+            // Mark as logged in again (in case session was cleared)
+            sessionManager.saveSession(
+                name = sessionManager.getSavedName(),
+                email = savedEmail,
+                pin = _state.value.signInPin
+            )
+
+            _state.value = _state.value.copy(isLoading = false, signInSuccess = true)
+            onSuccess()
+        }
+    }
+
+    // ─── Logout ─────────────────────────────────────────────
+
+    fun logout(onComplete: () -> Unit) {
+        viewModelScope.launch {
+            sessionManager.clearSession()
+            onComplete()
+        }
+    }
 }

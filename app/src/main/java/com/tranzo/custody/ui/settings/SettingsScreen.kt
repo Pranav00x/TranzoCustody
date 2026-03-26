@@ -65,6 +65,7 @@ fun SettingsScreen(
     onSecurityClick: () -> Unit,
     onDripperClick: () -> Unit,
     onCardSettingsClick: () -> Unit,
+    onLogout: () -> Unit,
     viewModel: SettingsViewModel = hiltViewModel()
 ) {
     val state by viewModel.state.collectAsState()
@@ -221,7 +222,7 @@ fun SettingsScreen(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .clickable { }
+                .clickable { viewModel.logout { onLogout() } }
                 .padding(horizontal = 20.dp, vertical = 16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {

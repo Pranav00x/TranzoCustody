@@ -3,6 +3,7 @@ package com.tranzo.custody.di
 import android.content.Context
 import androidx.room.Room
 import com.tranzo.custody.data.local.TranzoDatabase
+import com.tranzo.custody.data.local.UserSessionManager
 import com.tranzo.custody.data.local.dao.TransactionDao
 import dagger.Module
 import dagger.Provides
@@ -28,5 +29,11 @@ object DatabaseModule {
     @Provides
     fun provideTransactionDao(database: TranzoDatabase): TransactionDao {
         return database.transactionDao()
+    }
+
+    @Provides
+    @Singleton
+    fun provideUserSessionManager(@ApplicationContext context: Context): UserSessionManager {
+        return UserSessionManager(context)
     }
 }
