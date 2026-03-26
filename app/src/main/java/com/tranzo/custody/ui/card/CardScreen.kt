@@ -249,26 +249,36 @@ fun CardScreen(
 
 @Composable
 private fun KycBanner(status: KycStatus) {
-    val (bgColor, iconColor, icon, text) = when (status) {
-        KycStatus.NOT_STARTED -> listOf(NegativeLight, Negative, Icons.Default.Warning, "KYC required to activate card")
-        KycStatus.PENDING -> listOf(Color(0xFFFEF3C7), Color(0xFFF59E0B), Icons.Default.Schedule, "KYC verification in progress")
-        KycStatus.REJECTED -> listOf(NegativeLight, Negative, Icons.Default.Warning, "KYC rejected — please resubmit")
+    val bgColor: Color
+    val iconColor: Color
+    val icon: ImageVector
+    val text: String
+
+    when (status) {
+        KycStatus.NOT_STARTED -> {
+            bgColor = NegativeLight; iconColor = Negative; icon = Icons.Default.Warning; text = "KYC required to activate card"
+        }
+        KycStatus.PENDING -> {
+            bgColor = Color(0xFFFEF3C7); iconColor = Color(0xFFF59E0B); icon = Icons.Default.Schedule; text = "KYC verification in progress"
+        }
+        KycStatus.REJECTED -> {
+            bgColor = NegativeLight; iconColor = Negative; icon = Icons.Default.Warning; text = "KYC rejected — please resubmit"
+        }
         else -> return
     }
 
-    @Suppress("UNCHECKED_CAST")
     Box(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 20.dp)
             .clip(RoundedCornerShape(12.dp))
-            .background(bgColor as Color)
+            .background(bgColor)
             .padding(14.dp)
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
-            Icon(icon as ImageVector, null, tint = iconColor as Color, modifier = Modifier.size(20.dp))
+            Icon(icon, null, tint = iconColor, modifier = Modifier.size(20.dp))
             Spacer(modifier = Modifier.width(10.dp))
-            Text(text as String, style = MaterialTheme.typography.bodySmall, fontWeight = FontWeight.SemiBold, color = iconColor)
+            Text(text, style = MaterialTheme.typography.bodySmall, fontWeight = FontWeight.SemiBold, color = iconColor)
         }
     }
 }

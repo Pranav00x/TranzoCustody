@@ -13,8 +13,12 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
@@ -35,10 +39,14 @@ fun SetPinScreen(
 ) {
     val state by viewModel.state.collectAsState()
     val currentPin = if (state.isSettingPin) state.pin else state.confirmPin
+    var navigated by remember { mutableStateOf(false) }
 
-    if (!state.isSettingPin && state.confirmPin.length == 6) {
-        if (viewModel.confirmPin()) {
-            onPinSet()
+    LaunchedEffect(state.confirmPin) {
+        if (!state.isSettingPin && state.confirmPin.length == 6 && !navigated) {
+            if (viewModel.confirmPin()) {
+                navigated = true
+                onPinSet()
+            }
         }
     }
 
