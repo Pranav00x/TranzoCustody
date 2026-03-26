@@ -81,7 +81,8 @@ fun TranzoNavigation(startDestination: String = Screen.Welcome.route) {
                 SetPinScreen(
                     onPinSet = {
                         navController.navigate(Screen.Home.route) {
-                            popUpTo(0) { inclusive = true }
+                            popUpTo(Screen.Welcome.route) { inclusive = true }
+                            launchSingleTop = true
                         }
                     },
                     onBack = { navController.popBackStack() }

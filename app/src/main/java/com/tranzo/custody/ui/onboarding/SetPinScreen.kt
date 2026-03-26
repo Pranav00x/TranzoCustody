@@ -13,6 +13,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -37,48 +38,13 @@ fun SetPinScreen(
     var confirmPin by remember { mutableStateOf("") }
     var isSettingPin by remember { mutableStateOf(true) }
     var error by remember { mutableStateOf<String?>(null) }
-    var done by remember { mutableStateOf(false) }
+    var pinConfirmed by remember { mutableStateOf(false) }
 
     val currentPin = if (isSettingPin) pin else confirmPin
 
-    fun onDigit(digit: Int) {
-        if (done) return
-        error = null
-        if (isSettingPin) {
-            if (pin.length < 6) {
-                pin += digit
-                if (pin.length == 6) {
-                    isSettingPin = false
-                }
-            }
-        } else {
-            if (confirmPin.length < 6) {
-                confirmPin += digit
-                if (confirmPin.length == 6) {
-                    if (pin == confirmPin) {
-                        done = true
-                        onPinSet()
-                    } else {
-                        confirmPin = ""
-                        error = "PINs don't match. Try again."
-                    }
-                }
-            }
-        }
-    }
-
-    fun onDelete() {
-        if (done) return
-        error = null
-        if (isSettingPin) {
-            if (pin.isNotEmpty()) pin = pin.dropLast(1)
-        } else {
-            if (confirmPin.isNotEmpty()) {
-                confirmPin = confirmPin.dropLast(1)
-            } else {
-                isSettingPin = true
-                pin = ""
-            }
+    LaunchedEffect(pinConfirmed) {
+        if (pinConfirmed) {
+            onPinSet()
         }
     }
 
@@ -133,8 +99,42 @@ fun SetPinScreen(
         Spacer(modifier = Modifier.weight(1f))
 
         PinKeypad(
-            onNumberClick = { onDigit(it) },
-            onDeleteClick = { onDelete() }
+            onNumberClick = { digit ->
+                if (pinConfirmed) return@PinKeypad
+                error = null
+                if (isSettingPin) {
+                    if (pin.length < 6) {
+                        pin += digit
+                        if (pin.length == 6) isSettingPin = false
+                    }
+                } else {
+                    if (confirmPin.length < 6) {
+                        confirmPin += digit
+                        if (confirmPin.length == 6) {
+                            if (pin == confirmPin) {
+                                pinConfirmed = true
+                            } else {
+                                confirmPin = ""
+                                error = "PINs don't match. Try again."
+                            }
+                        }
+                    }
+                }
+            },
+            onDeleteClick = {
+                if (pinConfirmed) return@PinKeypad
+                error = null
+                if (isSettingPin) {
+                    if (pin.isNotEmpty()) pin = pin.dropLast(1)
+                } else {
+                    if (confirmPin.isNotEmpty()) {
+                        confirmPin = confirmPin.dropLast(1)
+                    } else {
+                        isSettingPin = true
+                        pin = ""
+                    }
+                }
+            }
         )
 
         Spacer(modifier = Modifier.height(48.dp))
