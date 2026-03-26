@@ -52,7 +52,7 @@ class WalletRepositoryImpl @Inject constructor() : WalletRepository {
     }
 
     override suspend fun getBridgePreview(token: Token, amount: Double): BridgePreview {
-        val rate = token.fiatValue / token.balance
+        val rate = if (token.balance > 0) token.fiatValue / token.balance else 0.0
         val fiatAmount = amount * rate
         val networkFee = if (token.chain == Chain.ETHEREUM) 2.40 else 0.15
         val platformFee = fiatAmount * 0.005

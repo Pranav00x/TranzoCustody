@@ -216,7 +216,10 @@ fun CardScreen(
                                 Text("of ${formatCurrency(card.monthlyLimit)}", style = MaterialTheme.typography.bodyMedium, color = TextMuted)
                             }
                             Spacer(modifier = Modifier.height(12.dp))
-                            val progress = (card.monthlySpent / card.monthlyLimit).coerceIn(0.0, 1.0).toFloat()
+                            val progress = (if (card.monthlyLimit > 0) card.monthlySpent / card.monthlyLimit else 0.0)
+                                .coerceIn(0.0, 1.0)
+                                .toFloat()
+                                .takeIf { !it.isNaN() } ?: 0f
                             LinearProgressIndicator(
                                 progress = { progress },
                                 modifier = Modifier.fillMaxWidth().height(8.dp).clip(RoundedCornerShape(4.dp)),

@@ -1,6 +1,6 @@
 package com.tranzo.custody.ui.theme
 
-import android.app.Activity
+import androidx.activity.compose.LocalActivity
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
@@ -34,10 +34,11 @@ private val TranzoColorScheme = lightColorScheme(
 
 @Composable
 fun TranzoTheme(content: @Composable () -> Unit) {
+    val activity = LocalActivity.current
     val view = LocalView.current
-    if (!view.isInEditMode) {
+    if (!view.isInEditMode && activity != null) {
         SideEffect {
-            val window = (view.context as Activity).window
+            val window = activity.window
             window.statusBarColor = White.toArgb()
             window.navigationBarColor = White.toArgb()
             WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = true

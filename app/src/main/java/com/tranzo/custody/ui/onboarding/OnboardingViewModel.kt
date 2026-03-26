@@ -14,7 +14,9 @@ data class OnboardingState(
     val confirmPin: String = "",
     val isSettingPin: Boolean = true,
     val error: String? = null,
-    val isLoading: Boolean = false
+    val isLoading: Boolean = false,
+    /** Set when confirm PIN matches; navigation runs once via LaunchedEffect */
+    val pinConfirmed: Boolean = false
 )
 
 @HiltViewModel
@@ -58,6 +60,16 @@ class OnboardingViewModel @Inject constructor() : ViewModel() {
         } else {
             val newConfirm = _state.value.confirmPin + digit
             _state.value = _state.value.copy(confirmPin = newConfirm, error = null)
+            if (newConfirm.length == 6) {
+                if (_state.value.pin == newConfirm) {
+                    _state.value = _state.value.copy(pinConfirmed = true)
+                } else {
+                    _state.value = _state.value.copy(
+                        confirmPin = "",
+                        error = "PINs don't match. Try again."
+                    )
+                }
+            }
         }
     }
 
@@ -75,15 +87,4 @@ class OnboardingViewModel @Inject constructor() : ViewModel() {
         }
     }
 
-    fun confirmPin(): Boolean {
-        return if (_state.value.pin == _state.value.confirmPin) {
-            true
-        } else {
-            _state.value = _state.value.copy(
-                confirmPin = "",
-                error = "PINs don't match. Try again."
-            )
-            false
-        }
-    }
 }

@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -14,6 +15,8 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import androidx.navigation.navigation
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.tranzo.custody.ui.activity.ActivityScreen
 import com.tranzo.custody.ui.activity.TransactionDetailScreen
 import com.tranzo.custody.ui.card.CardScreen
@@ -65,25 +68,38 @@ fun TranzoNavigation(startDestination: String = Screen.Welcome.route) {
             enterTransition = { fadeIn(tween(300)) },
             exitTransition = { fadeOut(tween(300)) }
         ) {
-            // Onboarding: Welcome → Sign Up → Set PIN → Home
+            // Onboarding: Welcome → nested graph (Sign Up + Set PIN share OnboardingViewModel)
             composable(Screen.Welcome.route) {
-                WelcomeScreen(onGetStarted = { navController.navigate(Screen.SignUp.route) })
+                WelcomeScreen(onGetStarted = { navController.navigate(Screen.OnboardingGraph.route) })
             }
-            composable(Screen.SignUp.route) {
-                SignUpScreen(
-                    onContinue = { navController.navigate(Screen.SetPin.route) },
-                    onBack = { navController.popBackStack() }
-                )
-            }
-            composable(Screen.SetPin.route) {
-                SetPinScreen(
-                    onPinSet = {
-                        navController.navigate(Screen.Home.route) {
-                            popUpTo(Screen.Welcome.route) { inclusive = true }
-                        }
-                    },
-                    onBack = { navController.popBackStack() }
-                )
+            navigation(
+                route = Screen.OnboardingGraph.route,
+                startDestination = Screen.SignUp.route
+            ) {
+                composable(Screen.SignUp.route) { backStackEntry ->
+                    val parentEntry = remember(backStackEntry) {
+                        navController.getBackStackEntry(Screen.OnboardingGraph.route)
+                    }
+                    SignUpScreen(
+                        onContinue = { navController.navigate(Screen.SetPin.route) },
+                        onBack = { navController.popBackStack() },
+                        viewModel = hiltViewModel(parentEntry)
+                    )
+                }
+                composable(Screen.SetPin.route) { backStackEntry ->
+                    val parentEntry = remember(backStackEntry) {
+                        navController.getBackStackEntry(Screen.OnboardingGraph.route)
+                    }
+                    SetPinScreen(
+                        onPinSet = {
+                            navController.navigate(Screen.Home.route) {
+                                popUpTo(Screen.Welcome.route) { inclusive = true }
+                            }
+                        },
+                        onBack = { navController.popBackStack() },
+                        viewModel = hiltViewModel(parentEntry)
+                    )
+                }
             }
 
             // Main tabs

@@ -49,7 +49,7 @@ fun AssetListItem(
             contentAlignment = Alignment.Center
         ) {
             Text(
-                text = token.symbol.first().toString(),
+                text = token.symbol.firstOrNull()?.toString() ?: "?",
                 style = MaterialTheme.typography.titleMedium,
                 color = White,
                 fontWeight = FontWeight.Bold
