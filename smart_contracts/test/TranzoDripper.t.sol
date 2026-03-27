@@ -26,7 +26,8 @@ contract TranzoDripperTest is Test {
         sender = makeAddr("sender");
         recipient = makeAddr("recipient");
 
-        token.mint(sender, 1000 ether);
+        // Enough for streams that lock up to 3000 ether (see withdraw/cancel tests)
+        token.mint(sender, 10_000 ether);
     }
 
     function test_CreateStream() public {

@@ -28,6 +28,14 @@ import javax.inject.Singleton
 data class CreateWalletRequest(val owner: String, val salt: Long, val chainId: Int)
 data class CreateWalletResponse(val smartWalletAddr: String, val ownerAddr: String)
 
+/** GET /wallet/details/:userId — shape aligned with backend Prisma user record */
+data class BackendWalletResponse(
+    val id: String? = null,
+    val ownerAddr: String? = null,
+    val smartWalletAddr: String? = null,
+    val chainId: Int? = null,
+)
+
 interface WalletApiService {
     @GET("wallet/details/{userId}")
     suspend fun getWalletDetails(@Path("userId") userId: String): BackendWalletResponse
