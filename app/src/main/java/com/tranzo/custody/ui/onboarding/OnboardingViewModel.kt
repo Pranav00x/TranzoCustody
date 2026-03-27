@@ -160,14 +160,19 @@ class OnboardingViewModel @Inject constructor(
                     creds.address,
                     BigInteger.valueOf(SALT)
                 )
-                val res = walletBackendApi.registerWallet(
-                    CreateWalletRequest(
-                        owner = creds.address,
-                        salt = SALT,
-                        chainId = BuildConfig.DEFAULT_CHAIN_ID
+                // Counterfactual address is computed on-device; POST /wallet/create is optional for server-side user rows.
+                val smart = try {
+                    val res = walletBackendApi.registerWallet(
+                        CreateWalletRequest(
+                            owner = creds.address,
+                            salt = SALT,
+                            chainId = BuildConfig.DEFAULT_CHAIN_ID
+                        )
                     )
-                )
-                val smart = res.smartWalletAddr?.lowercase()?.takeIf { it.isNotBlank() } ?: predicted
+                    res.smartWalletAddr?.lowercase()?.takeIf { it.isNotBlank() } ?: predicted
+                } catch (_: Exception) {
+                    predicted
+                }
                 signingManager.persistCredentials(creds)
                 sessionManager.saveWalletSession(
                     ownerAddress = creds.address,
@@ -186,11 +191,11 @@ class OnboardingViewModel @Inject constructor(
                 val root = e.cause as? IOException ?: e as? IOException
                 val setupError = when {
                     root != null && root.message?.contains("Cleartext", ignoreCase = true) == true ->
-                        "HTTP to the dev server was blocked. Rebuild the app (cleartext is allowed for 10.0.2.2 / localhost) or use HTTPS."
+                        "HTTP to the dev server was blocked. Rebuild the app or use HTTPS."
                     root != null ->
-                        "Cannot reach wallet backend (${BuildConfig.WALLET_BACKEND_URL}). Start backend (e.g. backend: npm run dev). Emulator: 10.0.2.2 = your PC; physical phone: use PC LAN IP in WALLET_BACKEND_URL or adb reverse tcp:3000 tcp:3000 and http://127.0.0.1:3000/"
+                        "Could not save wallet on this device. Check storage and try again."
                     else -> e.message?.takeIf { it.isNotBlank() }
-                        ?: "Could not finish setup. Is the backend running?"
+                        ?: "Could not finish setup."
                 }
                 _state.value = _state.value.copy(isLoading = false, setupError = setupError)
             }
