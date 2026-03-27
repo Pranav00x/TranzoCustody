@@ -107,8 +107,8 @@ dependencies {
     implementation("com.squareup.okhttp3:okhttp:4.12.0")
     implementation("com.squareup.okhttp3:logging-interceptor:4.12.0")
 
-    // Web3j
-    implementation("org.web3j:web3j-android:4.11.0")
+    // Web3j (published as org.web3j:core; web3j-android is not on Maven Central)
+    implementation("org.web3j:core:4.11.0")
 
     // Biometric
     implementation("androidx.biometric:biometric:1.1.0")

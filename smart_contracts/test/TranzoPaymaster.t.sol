@@ -107,7 +107,7 @@ contract TranzoPaymasterTest is Test {
         assertEq(uint160(validationData), 1); // Authorizer failed = 1
     }
 
-    function _dummyUserOp() internal view returns (PackedUserOperation memory) {
+    function _dummyUserOp() internal returns (PackedUserOperation memory) {
         return PackedUserOperation({
             sender: makeAddr("sender"),
             nonce: 0,
