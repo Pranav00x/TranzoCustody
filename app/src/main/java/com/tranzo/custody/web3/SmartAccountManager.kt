@@ -30,7 +30,7 @@ class SmartAccountManager @Inject constructor(
         // For the sake of this prototype upgrade, we represent it as an ABI call.
         // For production, we would recreate the CREATE2 address locally.
         // For this fix, we simulate it with a proper address hash rather than calldata.
-        val hash = Hash.sha3(owner.toByteArray() + salt.toByteArray())
+        val hash = Hash.sha3(Numeric.hexStringToByteArray(owner) + Numeric.toBytesPadded(salt, 32))
         return Numeric.toHexStringWithPrefixZeroPadded(BigInteger(1, hash.sliceArray(0..19)), 40)
     }
 
