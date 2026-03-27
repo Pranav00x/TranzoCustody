@@ -12,8 +12,10 @@ import com.tranzo.custody.web3.SmartAccountManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.io.IOException
 import java.math.BigInteger
 import javax.inject.Inject
@@ -155,31 +157,32 @@ class OnboardingViewModel @Inject constructor(
         viewModelScope.launch {
             _state.value = _state.value.copy(isLoading = true, setupError = null, error = null)
             try {
-                val creds = mnemonicManager.deriveCredentials(mnemonic)
-                val predicted = smartAccountManager.computeCounterfactualAddress(
-                    creds.address,
-                    BigInteger.valueOf(SALT)
-                )
-                // Counterfactual address is computed on-device; POST /wallet/create is optional for server-side user rows.
-                val smart = try {
-                    val res = walletBackendApi.registerWallet(
-                        CreateWalletRequest(
-                            owner = creds.address,
-                            salt = SALT,
-                            chainId = BuildConfig.DEFAULT_CHAIN_ID
-                        )
+                withContext(Dispatchers.IO) {
+                    val creds = mnemonicManager.deriveCredentials(mnemonic)
+                    val predicted = smartAccountManager.computeCounterfactualAddress(
+                        creds.address,
+                        BigInteger.valueOf(SALT)
                     )
-                    res.smartWalletAddr?.lowercase()?.takeIf { it.isNotBlank() } ?: predicted
-                } catch (_: Exception) {
-                    predicted
+                    val smart = try {
+                        val res = walletBackendApi.registerWallet(
+                            CreateWalletRequest(
+                                owner = creds.address,
+                                salt = SALT,
+                                chainId = BuildConfig.DEFAULT_CHAIN_ID
+                            )
+                        )
+                        res.smartWalletAddr?.lowercase()?.takeIf { it.isNotBlank() } ?: predicted
+                    } catch (_: Exception) {
+                        predicted
+                    }
+                    signingManager.persistCredentials(creds)
+                    sessionManager.saveWalletSession(
+                        ownerAddress = creds.address,
+                        smartWalletAddress = smart,
+                        chainId = BuildConfig.DEFAULT_CHAIN_ID,
+                        pin = pin
+                    )
                 }
-                signingManager.persistCredentials(creds)
-                sessionManager.saveWalletSession(
-                    ownerAddress = creds.address,
-                    smartWalletAddress = smart,
-                    chainId = BuildConfig.DEFAULT_CHAIN_ID,
-                    pin = pin
-                )
                 _state.value = _state.value.copy(
                     isLoading = false,
                     walletSetupComplete = true,
@@ -188,14 +191,16 @@ class OnboardingViewModel @Inject constructor(
                     confirmPin = ""
                 )
             } catch (e: Exception) {
-                val root = e.cause as? IOException ?: e as? IOException
+                val chain = sequenceOf(e, e.cause).mapNotNull { it?.message }.joinToString("\n")
                 val setupError = when {
-                    root != null && root.message?.contains("Cleartext", ignoreCase = true) == true ->
+                    chain.contains("Cleartext", ignoreCase = true) ->
                         "HTTP to the dev server was blocked. Rebuild the app or use HTTPS."
-                    root != null ->
-                        "Could not save wallet on this device. Check storage and try again."
-                    else -> e.message?.takeIf { it.isNotBlank() }
-                        ?: "Could not finish setup."
+                    e is IOException || e.cause is IOException ->
+                        "Network issue: ${e.message ?: e.cause?.message ?: e.javaClass.simpleName}"
+                    e.message?.contains("Could not reach Polygon Amoy", ignoreCase = true) == true ->
+                        e.message!!
+                    e.message?.isNotBlank() == true -> e.message!!
+                    else -> "Could not finish setup: ${e.javaClass.simpleName}"
                 }
                 _state.value = _state.value.copy(isLoading = false, setupError = setupError)
             }

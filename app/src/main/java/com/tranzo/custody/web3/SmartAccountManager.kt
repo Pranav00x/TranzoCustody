@@ -1,21 +1,19 @@
-﻿package com.tranzo.custody.web3
+package com.tranzo.custody.web3
 
 import com.tranzo.custody.BuildConfig
-import com.tranzo.custody.security.KeyStoreManager
+import okhttp3.OkHttpClient
 import org.web3j.abi.FunctionEncoder
 import org.web3j.abi.FunctionReturnDecoder
 import org.web3j.abi.TypeReference
 import org.web3j.abi.datatypes.Address
 import org.web3j.abi.datatypes.Function
 import org.web3j.abi.datatypes.generated.Uint256
-import org.web3j.crypto.Credentials
-import org.web3j.crypto.ECKeyPair
-import org.web3j.crypto.Keys
 import org.web3j.protocol.Web3j
 import org.web3j.protocol.core.DefaultBlockParameterName
 import org.web3j.protocol.core.methods.request.Transaction
-import org.web3j.utils.Numeric
+import org.web3j.protocol.http.HttpService
 import java.math.BigInteger
+import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -26,19 +24,54 @@ class SmartAccountManager @Inject constructor(
     private val factoryAddress: String = BuildConfig.ACCOUNT_FACTORY_ADDRESS
     private val entryPoint = "0x0000000071727De22E5E9d8BAf0edAc6f37da032"
 
+    companion object {
+        private val amoyHttpClient: OkHttpClient = OkHttpClient.Builder()
+            .connectTimeout(25, TimeUnit.SECONDS)
+            .readTimeout(45, TimeUnit.SECONDS)
+            .build()
+
+        /** Tried in order so setup works if one RPC is rate-limited or down. */
+        private val AMOY_RPC_FALLBACKS = listOf(
+            "https://rpc-amoy.polygon.technology",
+            "https://rpc.ankr.com/polygon_amoy",
+            "https://polygon-amoy.drpc.org"
+        )
+    }
+
     fun getEntryPointAddress(): String = entryPoint
 
     /**
      * On-chain counterfactual address from TranzoAccountFactory.getAddress(owner, salt).
      */
     fun computeCounterfactualAddress(owner: String, salt: BigInteger): String {
+        var last: Throwable? = null
+        for (url in AMOY_RPC_FALLBACKS) {
+            val w3 = Web3j.build(HttpService(url, amoyHttpClient))
+            try {
+                return ethCallGetAddress(w3, owner, salt)
+            } catch (e: Throwable) {
+                last = e
+            } finally {
+                w3.shutdown()
+            }
+        }
+        val detail = last?.message?.takeIf { it.isNotBlank() } ?: last?.javaClass?.simpleName
+        throw IllegalStateException(
+            "Could not reach Polygon Amoy to compute your smart wallet. Check internet and try again.${
+                detail?.let { " ($it)" } ?: ""
+            }",
+            last
+        )
+    }
+
+    private fun ethCallGetAddress(w3: Web3j, owner: String, salt: BigInteger): String {
         val function = Function(
             "getAddress",
             listOf(Address(owner), Uint256(salt)),
             listOf(object : TypeReference<Address>() {})
         )
         val encoded = FunctionEncoder.encode(function)
-        val response = web3j.ethCall(
+        val response = w3.ethCall(
             Transaction.createEthCallTransaction(null, factoryAddress, encoded),
             DefaultBlockParameterName.LATEST
         ).send()
