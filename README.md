@@ -9,7 +9,7 @@ Tranzo Custody is a monorepo: **Android app** (Kotlin / Compose), **Node backend
 ## Table of contents
 
 1. [Repository layout](#1-repository-layout)
-2. [System architecture](#2-system-architecture)
+2. [System architecture](#2-system-architecture) — [How it works (flow)](#21-how-it-works-flow)
 3. [Android application](#3-android-application)
 4. [Backend service](#4-backend-service)
 5. [Smart contracts](#5-smart-contracts)
@@ -81,6 +81,76 @@ flowchart LR
 - **Smart account address:** `TranzoAccountFactory.getAddress(owner, salt)` via **JSON-RPC `eth_call`** on Polygon Amoy. The app tries multiple public Amoy RPCs with timeouts (`SmartAccountManager`).
 - **Optional wallet backend:** `POST /wallet/create` registers `ownerAddr` / `smartWalletAddr` in Postgres. If the call fails, onboarding can still complete using the **on-device** counterfactual address (`OnboardingViewModel`).
 - **Public Tranzo API:** Balances and prices over HTTPS (`TranzoApi` base URL `https://api.tranzo.money/`).
+
+### 2.1 How it works (flow)
+
+End-to-end view: **what the user does**, **what stays on the phone**, and **what hits the network**. (Same idea as a typical Claude-style “explain the system” diagram.)
+
+```mermaid
+flowchart TD
+  subgraph launch [Launch]
+    appOpen([User opens app]) --> hasSession{DataStore wallet_ready?}
+    hasSession -->|Yes| home[Home]
+    hasSession -->|No| welcome[Welcome]
+  end
+
+  subgraph onboarding [Onboarding non-custodial]
+    welcome --> branch{Create or import?}
+    branch -->|Create| phrase[Generate 12-word mnemonic on device]
+    branch -->|Import| typed[User enters phrase]
+    typed --> bipOk{BIP39 valid?}
+    bipOk -->|No| typed
+    bipOk -->|Yes| verify
+    phrase --> backup[User writes down phrase]
+    backup --> verify[Verify 3 word positions]
+    verify --> pinA[Set 6-digit PIN]
+    pinA --> pinB[Confirm PIN]
+  end
+
+  subgraph crypto [Keys and smart account on device]
+    pinB --> derive[Derive owner EOA BIP32 standard ETH path]
+    derive --> rpcCall["JSON-RPC eth_call factory getAddress owner salt"]
+    rpcCall --> scwAddr[Smart wallet counterfactual address]
+  end
+
+  subgraph optionalHttp [Optional server]
+    scwAddr --> reg["Try POST wallet create to Tranzo backend"]
+    reg --> persist[Always continue to local persist]
+  end
+
+  subgraph persistLocal [Persist locally only]
+    persist --> enc[Encrypt private key Keystore plus EncryptedSharedPreferences]
+    enc --> ds[Save DataStore owner smart chain PIN hash]
+    ds --> home
+  end
+
+  subgraph after [After setup]
+    home --> uiBalance[UI balances via api.tranzo.money HTTPS]
+    home --> onChain[User funds SCW by sending on-chain to that address]
+  end
+```
+
+```mermaid
+sequenceDiagram
+  participant User
+  participant App as AndroidApp
+  participant Rpc as AmoyRPC
+  participant Factory as AccountFactory
+  participant Be as WalletBackend_optional
+  participant Api as TranzoPublicAPI
+
+  User->>App: Create or import mnemonic verify PIN
+  App->>App: Derive owner key encrypt store session
+  App->>Rpc: eth_call getAddress
+  Rpc->>Factory: read contract
+  Factory-->>App: smart wallet address
+  App->>Be: POST wallet create
+  Note over App,Be: Failure is OK onboarding still completes
+  Be-->>App: user row or error ignored
+  User->>App: Open Home
+  App->>Api: GET balances for smart address
+  Api-->>App: portfolio data
+```
 
 ---
 
