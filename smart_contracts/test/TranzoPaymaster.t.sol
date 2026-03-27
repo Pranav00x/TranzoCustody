@@ -113,9 +113,9 @@ contract TranzoPaymasterTest is Test {
             nonce: 0,
             initCode: bytes(""),
             callData: bytes(""),
-            accountGasLimits: bytes32(abi.encodePacked(uint128(2000000), uint128(2000000))),
+            accountGasLimits: bytes32((uint256(2000000) << 128) | uint256(2000000)),
             preVerificationGas: 500000,
-            gasFees: bytes32(abi.encodePacked(uint128(10), uint128(10))),
+            gasFees: bytes32((uint256(10) << 128) | uint256(10)),
             paymasterAndData: bytes(""),
             signature: bytes("")
         });
