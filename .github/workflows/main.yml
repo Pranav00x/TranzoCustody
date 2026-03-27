@@ -56,3 +56,35 @@ jobs:
         run: chmod +x gradlew
       - name: Build with Gradle
         run: ./gradlew assembleDebug
+
+      - name: Upload debug APK to Telegram
+        if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop')
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: |
+          set -e
+          APK="app/build/outputs/apk/debug/app-debug.apk"
+          if [ ! -f "$APK" ]; then
+            echo "APK not found at $APK"
+            exit 1
+          fi
+          if [ -z "${TELEGRAM_BOT_TOKEN}" ] || [ -z "${TELEGRAM_CHAT_ID}" ]; then
+            echo "Add repository secrets TELEGRAM_BOT_TOKEN and TELEGRAM_CHAT_ID (Settings → Secrets and variables → Actions)."
+            exit 1
+          fi
+          REF_NAME="${GITHUB_REF_NAME:-unknown}"
+          SHA_SHORT="${GITHUB_SHA:0:7}"
+          CAPTION="$(printf 'Tranzo Custody (debug)\n%s @ %s\n%s/%s/actions/runs/%s' \
+            "$REF_NAME" "$SHA_SHORT" "${GITHUB_SERVER_URL}" "${GITHUB_REPOSITORY}" "${GITHUB_RUN_ID}")"
+          curl -sS -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendDocument" \
+            -F "chat_id=${TELEGRAM_CHAT_ID}" \
+            -F "document=@${APK};filename=tranzo-custody-${REF_NAME}-debug.apk" \
+            -F "caption=${CAPTION}" \
+            -o /tmp/tg-response.json
+          if ! python3 -c 'import json,sys; d=json.load(open("/tmp/tg-response.json")); sys.exit(0 if d.get("ok") else 1)'; then
+            echo "Telegram API error:"
+            cat /tmp/tg-response.json
+            exit 1
+          fi
+          echo "APK sent to Telegram."
