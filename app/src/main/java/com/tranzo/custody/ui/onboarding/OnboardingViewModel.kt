@@ -1,4 +1,4 @@
-﻿package com.tranzo.custody.ui.onboarding
+package com.tranzo.custody.ui.onboarding
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -14,6 +14,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import java.io.IOException
 import java.math.BigInteger
 import javax.inject.Inject
 
@@ -182,10 +183,16 @@ class OnboardingViewModel @Inject constructor(
                     confirmPin = ""
                 )
             } catch (e: Exception) {
-                _state.value = _state.value.copy(
-                    isLoading = false,
-                    setupError = e.message ?: "Could not finish setup. Is the backend running?"
-                )
+                val root = e.cause as? IOException ?: e as? IOException
+                val setupError = when {
+                    root != null && root.message?.contains("Cleartext", ignoreCase = true) == true ->
+                        "HTTP to the dev server was blocked. Rebuild the app (cleartext is allowed for 10.0.2.2 / localhost) or use HTTPS."
+                    root != null ->
+                        "Cannot reach wallet backend (${BuildConfig.WALLET_BACKEND_URL}). Start backend (e.g. backend: npm run dev). Emulator: 10.0.2.2 = your PC; physical phone: use PC LAN IP in WALLET_BACKEND_URL or adb reverse tcp:3000 tcp:3000 and http://127.0.0.1:3000/"
+                    else -> e.message?.takeIf { it.isNotBlank() }
+                        ?: "Could not finish setup. Is the backend running?"
+                }
+                _state.value = _state.value.copy(isLoading = false, setupError = setupError)
             }
         }
     }
