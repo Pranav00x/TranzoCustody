@@ -28,9 +28,9 @@ class UserOperationBuilder @Inject constructor() {
      * Note: This must match the EntryPoint's getUserOpHash logic.
      */
     fun getUserOpHash(op: PackedUserOperation, entryPoint: String, chainId: Long): ByteArray {
-        // This is a complex packing for v0.7. 
-        // For production, we'd use a robust library or the exact Keccak256 packing.
-        return Hash.sha3(op.sender.toByteArray()) // Simplified placeholder
+        // Simplified packing for demo, but includes nonce and chainId for uniqueness
+        val packed = op.sender.toByteArray() + op.nonce.toByteArray() + BigInteger.valueOf(chainId).toByteArray()
+        return Hash.sha3(packed)
     }
 
     fun signUserOp(op: PackedUserOperation, credentials: Credentials, entryPoint: String, chainId: Long): ByteArray {

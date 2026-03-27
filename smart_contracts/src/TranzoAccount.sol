@@ -159,9 +159,6 @@ contract TranzoAccount is
      */
     function initialize(address _owner) external initializer {
         if (_owner == address(0)) revert ZeroAddress();
-
-        __UUPSUpgradeable_init();
-
         owner = _owner;
         emit Initialized(_owner);
     }
@@ -192,15 +189,17 @@ contract TranzoAccount is
 
         // Accept if the signer is the owner.
         if (signer == owner) {
-            validationData = SIG_VALIDATION_SUCCESS;
+             return SIG_VALIDATION_SUCCESS;
         }
+        
         // Otherwise, check if it's an active card session key.
-        // The amount is extracted from the callData if possible, defaulting to 0.
-        else if (_isActiveSessionKey(signer)) {
-            validationData = SIG_VALIDATION_SUCCESS;
-        } else {
-            validationData = SIG_VALIDATION_FAILED;
+        // Note: For ERC-4337, we return the time window in validationData instead of checking block.timestamp.
+        CardSession storage session = sessions[signer];
+        if (session.active) {
+            return (uint256(session.validUntil) << 160) | (uint256(session.validAfter) << (160 + 48));
         }
+
+        return SIG_VALIDATION_FAILED;
 
         // Pay prefund to EntryPoint if required.
         if (missingAccountFunds > 0) {
