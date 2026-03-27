@@ -178,6 +178,7 @@ Windows: `gradlew.bat` instead of `./gradlew`.
 | `WALLET_BACKEND_URL` | `http://10.0.2.2:3000/` | **Emulator** → host loopback. **Physical device:** use PC LAN IP, or `adb reverse tcp:3000 tcp:3000` and `http://127.0.0.1:3000/` |
 | `ACCOUNT_FACTORY_ADDRESS` | `0x1b41BbeDAAeDAf82E9D4Bc25dB3DB6144eEbC4E6` | Factory on Amoy (must match deployed contract) |
 | `DEFAULT_CHAIN_ID` | `80002` | Polygon Amoy |
+| `AMOY_RPC_URL` | `""` (empty) | Optional **HTTPS** Amoy JSON-RPC (Alchemy, Infura, etc.). If empty, the app cycles public endpoints via `AmoyRpcConfig` with a normal `User-Agent`. |
 
 ### 3.4 Networking and security config
 
@@ -222,8 +223,9 @@ Routes are defined in `navigation/Screen.kt`.
 
 ### 3.8 Web3 / RPC
 
-- **Singleton `Web3j`** in `Web3Module` points at a public Amoy RPC (used e.g. for `getNonce`).
-- **`computeCounterfactualAddress`** uses **separate** short-lived `Web3j` clients over a **fallback list** (`rpc-amoy.polygon.technology`, Ankr, drpc) with OkHttp timeouts (see `SmartAccountManager`).
+- **`AmoyRpcConfig`** (`web3/AmoyRpcConfig.kt`): shared OkHttp client (30s/60s timeouts, `User-Agent: TranzoCustody/1.0 (Android)`) and ordered endpoint list. Custom **`BuildConfig.AMOY_RPC_URL`** is tried first when non-empty.
+- **Singleton `Web3j`** in `Web3Module` uses `AmoyRpcConfig.primaryUrl()` and the same client (e.g. `getNonce`).
+- **`computeCounterfactualAddress`** tries each endpoint with **2 attempts** per URL and a short delay between retries (`SmartAccountManager`).
 
 ### 3.9 ProGuard (`app/proguard-rules.pro`)
 
@@ -353,7 +355,7 @@ If secrets are missing, that step fails with instructions in the log.
 | Gradle: Java version | AGP needs JDK 17+ | `JAVA_HOME`, Android Studio embedded JBR |
 | SDK location not found | Missing `local.properties` | `sdk.dir` path to Android SDK |
 | Verify seed screen empty | Separate `OnboardingViewModel` per destination | Ensure nested graphs + `hiltViewModel(parentEntry)` (see §3.7) |
-| PIN setup: network / backend errors | RPC down, factory wrong, or HTTP blocked | Internet; factory address on Amoy; cleartext NSC; `SmartAccountManager` fallback RPC logs |
+| PIN setup: “Could not reach Polygon Amoy” | Public RPC blocked, rate limit, or no internet | Set **`AMOY_RPC_URL`** in `app/build.gradle.kts` to a private Amoy HTTPS RPC; try different network/VPN; confirm factory is deployed on Amoy |
 | Backend won’t start | Zod validation | `NODE_ENV`, `DATABASE_URL`, see `env.ts` |
 | `forge test` fails submodules | Missing libs | `git submodule update --init --recursive` |
 | CI Android Kotlin errors | API mismatches | Match web3j APIs (e.g. `deriveKeyPair` not `deriveKeyPath`); Retrofit interface params without `val` |

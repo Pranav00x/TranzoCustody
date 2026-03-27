@@ -1,7 +1,6 @@
 package com.tranzo.custody.web3
 
 import com.tranzo.custody.BuildConfig
-import okhttp3.OkHttpClient
 import org.web3j.abi.FunctionEncoder
 import org.web3j.abi.FunctionReturnDecoder
 import org.web3j.abi.TypeReference
@@ -13,7 +12,6 @@ import org.web3j.protocol.core.DefaultBlockParameterName
 import org.web3j.protocol.core.methods.request.Transaction
 import org.web3j.protocol.http.HttpService
 import java.math.BigInteger
-import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -25,39 +23,46 @@ class SmartAccountManager @Inject constructor(
     private val entryPoint = "0x0000000071727De22E5E9d8BAf0edAc6f37da032"
 
     companion object {
-        private val amoyHttpClient: OkHttpClient = OkHttpClient.Builder()
-            .connectTimeout(25, TimeUnit.SECONDS)
-            .readTimeout(45, TimeUnit.SECONDS)
-            .build()
-
-        /** Tried in order so setup works if one RPC is rate-limited or down. */
-        private val AMOY_RPC_FALLBACKS = listOf(
-            "https://rpc-amoy.polygon.technology",
-            "https://rpc.ankr.com/polygon_amoy",
-            "https://polygon-amoy.drpc.org"
-        )
+        private const val RETRIES_PER_URL = 2
     }
 
     fun getEntryPointAddress(): String = entryPoint
 
     /**
      * On-chain counterfactual address from TranzoAccountFactory.getAddress(owner, salt).
+     * Tries [AmoyRpcConfig.endpointUrls] with limited retries per URL.
      */
     fun computeCounterfactualAddress(owner: String, salt: BigInteger): String {
+        val http = AmoyRpcConfig.httpClient()
         var last: Throwable? = null
-        for (url in AMOY_RPC_FALLBACKS) {
-            val w3 = Web3j.build(HttpService(url, amoyHttpClient))
-            try {
-                return ethCallGetAddress(w3, owner, salt)
-            } catch (e: Throwable) {
-                last = e
-            } finally {
-                w3.shutdown()
+        for (url in AmoyRpcConfig.endpointUrls()) {
+            repeat(RETRIES_PER_URL) { attempt ->
+                val w3 = Web3j.build(HttpService(url, http))
+                try {
+                    return ethCallGetAddress(w3, owner, salt)
+                } catch (e: Throwable) {
+                    last = e
+                } finally {
+                    w3.shutdown()
+                }
+                if (attempt < RETRIES_PER_URL - 1) {
+                    try {
+                        Thread.sleep(350L)
+                    } catch (_: InterruptedException) {
+                        Thread.currentThread().interrupt()
+                    }
+                }
             }
         }
         val detail = last?.message?.takeIf { it.isNotBlank() } ?: last?.javaClass?.simpleName
+        val hint =
+            if (BuildConfig.AMOY_RPC_URL.isBlank()) {
+                " Try setting AMOY_RPC_URL in app/build.gradle.kts to an Alchemy/Infura Amoy HTTPS URL."
+            } else {
+                ""
+            }
         throw IllegalStateException(
-            "Could not reach Polygon Amoy to compute your smart wallet. Check internet and try again.${
+            "Could not reach Polygon Amoy to compute your smart wallet. Check internet or VPN.$hint${
                 detail?.let { " ($it)" } ?: ""
             }",
             last

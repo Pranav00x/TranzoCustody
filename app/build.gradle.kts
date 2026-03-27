@@ -27,6 +27,8 @@ android {
             "\"0x1b41BbeDAAeDAf82E9D4Bc25dB3DB6144eEbC4E6\""
         )
         buildConfigField("int", "DEFAULT_CHAIN_ID", "80002")
+        // If setup fails with "Could not reach Polygon Amoy", set a private Amoy HTTPS RPC (Alchemy, Infura, etc.)
+        buildConfigField("String", "AMOY_RPC_URL", "\"\"")
     }
 
     signingConfigs {
