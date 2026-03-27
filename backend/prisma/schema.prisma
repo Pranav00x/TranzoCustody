@@ -1,0 +1,107 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id              String        @id @default(cuid())
+  smartWalletAddr String        @unique
+  ownerAddr       String        @unique
+  chainId         Int
+  kycStatus       KycStatus     @default(NONE)
+  kycProvider     String?
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+  cards           Card[]
+  cardSessions    CardSession[]
+  sentStreams     Stream[]       @relation("sender")
+  gasUsageToday   Float         @default(0)
+  lastGasReset    DateTime      @default(now())
+}
+
+model Card {
+  id              String        @id @default(cuid())
+  userId          String
+  user            User          @relation(fields: [userId], references: [id])
+  provider        CardProvider
+  externalId      String        @unique
+  type            CardType
+  status          CardStatus    @default(ACTIVE)
+  last4           String?
+  dailyLimit      BigInt        @default(50000000)
+  createdAt       DateTime      @default(now())
+}
+
+model CardSession {
+  id              String        @id @default(cuid())
+  userId          String
+  user            User          @relation(fields: [userId], references: [id])
+  sessionKeyAddr  String
+  provider        CardProvider
+  dailyLimit      BigInt
+  perTxLimit      BigInt
+  validUntil      DateTime
+  active          Boolean       @default(true)
+  txHash          String?
+  createdAt       DateTime      @default(now())
+}
+
+model Stream {
+  id                String        @id @default(cuid())
+  onChainStreamId   Int?
+  senderId          String
+  sender            User          @relation("sender", fields: [senderId], references: [id])
+  recipientAddr     String
+  token             String
+  totalAmount       BigInt
+  withdrawn         BigInt        @default(0)
+  startTime         DateTime
+  endTime           DateTime
+  status            StreamStatus  @default(ACTIVE)
+  txHash            String?
+  createdAt         DateTime      @default(now())
+}
+
+model WebhookEvent {
+  id              String        @id @default(cuid())
+  provider        String
+  eventType       String
+  payload         Json
+  processed       Boolean       @default(false)
+  createdAt       DateTime      @default(now())
+}
+
+enum KycStatus {
+  NONE
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum CardProvider {
+  IMMERSVE
+  REAP
+}
+
+enum CardType {
+  VIRTUAL
+  PHYSICAL
+}
+
+enum CardStatus {
+  ACTIVE
+  FROZEN
+  CANCELLED
+  EXPIRED
+}
+
+enum StreamStatus {
+  ACTIVE
+  PAUSED
+  CANCELLED
+  COMPLETED
+}

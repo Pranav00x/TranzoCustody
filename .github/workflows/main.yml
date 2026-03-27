@@ -1,0 +1,58 @@
+name: Tranzo CI/CD
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  # 1. SMART CONTRACTS
+  smart-contracts:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - name: Install Foundry
+        uses: foundry-rs/foundry-toolchain@v1
+      - name: Run Forge Tests
+        working-directory: smart_contracts
+        run: forge test -vvv
+
+  # 2. BACKEND
+  backend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Install Dependencies
+        working-directory: backend
+        run: npm install --legacy-peer-deps
+      - name: Prisma Generate
+        working-directory: backend
+        run: npx prisma generate
+      - name: Build Backend
+        working-directory: backend
+        run: npm run build
+      - name: Build Docker Image
+        working-directory: backend
+        run: docker build -t tranzo-backend:latest .
+
+  # 3. ANDROID APP
+  android:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: gradle
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+      - name: Build with Gradle
+        run: ./gradlew assembleDebug
