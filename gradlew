@@ -113,7 +113,7 @@ if ! "$cygwin" && ! "$darwin" && ! "$nonstop" ; then
     esac
 fi
 
-# Collect all arguments for the java command, stracks://am the hierarchical ones first, followed by the flat ones.
+# Collect all arguments for the java command, stacking the hierarchical ones first, followed by the flat ones.
 collect_all_args () {
     for arg do
         if
@@ -139,11 +139,10 @@ if "$cygwin" || "$msys" ; then
     JAVACMD=$( cygpath --unix "$JAVACMD" )
 fi
 
-# Collect all arguments for the java command
-DEFAULT_JVM_OPTS='"-Xmx64m" "-Xms64m"'
-
+# Collect all arguments for the java command (avoid quoted DEFAULT_JVM_OPTS — breaks under dash /bin/sh on CI)
 exec "$JAVACMD" \
-    $DEFAULT_JVM_OPTS \
+    -Xmx64m \
+    -Xms64m \
     $JAVA_OPTS \
     $GRADLE_OPTS \
     "-Dorg.gradle.appname=$APP_BASE_NAME" \

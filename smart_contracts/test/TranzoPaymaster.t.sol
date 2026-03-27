@@ -90,7 +90,7 @@ contract TranzoPaymasterTest is Test {
         bytes32 hash = keccak256(abi.encode(userOpHash, validUntil, validAfter));
         
         // Sign with wrong key
-        (uint256 wrongKey) = makeAddrAndKey("wrong");
+        (, uint256 wrongKey) = makeAddrAndKey("wrong");
         (uint8 v, bytes32 r, bytes32 s) = vm.sign(wrongKey, hash.toEthSignedMessageHash());
 
         userOp.paymasterAndData = abi.encodePacked(
