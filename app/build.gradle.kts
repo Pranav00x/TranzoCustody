@@ -64,6 +64,12 @@ android {
         compose = true
         buildConfig = true
     }
+
+    packaging {
+        resources {
+            pickFirsts += "META-INF/DISCLAIMER"
+        }
+    }
 }
 
 dependencies {

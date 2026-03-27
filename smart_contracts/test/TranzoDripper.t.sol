@@ -97,8 +97,8 @@ contract TranzoDripperTest is Test {
         dripper.cancelStream(streamId);
         vm.stopPrank();
 
-        // Sender should get 1500 back, recipient gets 1500
-        assertEq(token.balanceOf(sender), 1500 ether);
+        // After locking 3000, sender had 7000; cancel returns 1500 unvested to sender, 1500 vested to recipient
+        assertEq(token.balanceOf(sender), 8500 ether);
         assertEq(token.balanceOf(recipient), 1500 ether);
         
         // Stream cancelled
