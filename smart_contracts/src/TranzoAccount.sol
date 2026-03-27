@@ -187,26 +187,25 @@ contract TranzoAccount is
         bytes32 ethSignedHash = userOpHash.toEthSignedMessageHash();
         address signer = ethSignedHash.recover(userOp.signature);
 
-        // Accept if the signer is the owner.
+        // Determine validation data based on signer.
         if (signer == owner) {
-             return SIG_VALIDATION_SUCCESS;
+            validationData = SIG_VALIDATION_SUCCESS;
+        } else {
+            CardSession storage session = sessions[signer];
+            if (session.active) {
+                validationData = (uint256(session.validUntil) << 160) | (uint256(session.validAfter) << (160 + 48));
+            } else {
+                validationData = SIG_VALIDATION_FAILED;
+            }
         }
-        
-        // Otherwise, check if it's an active card session key.
-        // Note: For ERC-4337, we return the time window in validationData instead of checking block.timestamp.
-        CardSession storage session = sessions[signer];
-        if (session.active) {
-            return (uint256(session.validUntil) << 160) | (uint256(session.validAfter) << (160 + 48));
-        }
-
-        return SIG_VALIDATION_FAILED;
 
         // Pay prefund to EntryPoint if required.
         if (missingAccountFunds > 0) {
             (bool success, ) = payable(address(ENTRY_POINT)).call{value: missingAccountFunds}("");
-            // Ignore failure — EntryPoint will revert if funds are insufficient.
-            (success);
+            (success); // Ignore failure — EntryPoint will revert if funds are insufficient.
         }
+
+        return validationData;
     }
 
     // ─── Execution ───────────────────────────────────────────────────────────
