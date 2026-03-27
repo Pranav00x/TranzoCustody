@@ -1,4 +1,4 @@
-﻿package com.tranzo.custody.data.remote
+package com.tranzo.custody.data.remote
 
 import com.google.gson.annotations.SerializedName
 import retrofit2.http.Body
@@ -41,7 +41,7 @@ interface WalletBackendApi {
     suspend fun registerWallet(@Body request: CreateWalletRequest): CreateWalletResponse
 
     @GET("wallet/details/{owner}")
-    suspend fun getWalletDetails(@Path("owner") val owner: String): BackendWalletResponse
+    suspend fun getWalletDetails(@Path("owner") owner: String): BackendWalletResponse
 
     @POST("wallet/send-userop")
     suspend fun sendUserOperation(@Body body: SendUserOpRequest): SendUserOpResponse

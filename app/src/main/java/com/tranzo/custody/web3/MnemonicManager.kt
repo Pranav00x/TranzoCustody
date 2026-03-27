@@ -1,4 +1,4 @@
-﻿package com.tranzo.custody.web3
+package com.tranzo.custody.web3
 
 import org.web3j.crypto.Bip32ECKeyPair
 import org.web3j.crypto.Credentials
@@ -42,7 +42,7 @@ class MnemonicManager @Inject constructor() {
         val m = normalizeMnemonic(mnemonic)
         val seed = MnemonicUtils.generateSeed(m, "")
         val master = Bip32ECKeyPair.generateKeyPair(seed)
-        val child = Bip32ECKeyPair.deriveKeyPath(master, ethDerivationPath)
+        val child = Bip32ECKeyPair.deriveKeyPair(master, ethDerivationPath)
         return Credentials.create(child)
     }
 }
