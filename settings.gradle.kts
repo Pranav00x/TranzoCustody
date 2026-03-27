@@ -17,6 +17,10 @@ dependencyResolutionManagement {
     repositories {
         google()
         mavenCentral()
+        // web3j → tech.pegasys:jc-kzg-4844 (not on Maven Central)
+        maven {
+            url = uri("https://artifacts.consensys.net/public/maven/maven/")
+        }
     }
 }
 
