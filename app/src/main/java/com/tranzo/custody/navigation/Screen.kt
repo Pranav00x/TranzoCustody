@@ -1,7 +1,14 @@
-﻿package com.tranzo.custody.navigation
+package com.tranzo.custody.navigation
 
 sealed class Screen(val route: String) {
     data object Welcome : Screen("welcome")
+
+    /** Nested graph: shared [com.tranzo.custody.ui.onboarding.OnboardingViewModel] for create → verify → PIN. */
+    data object OnboardingCreateGraph : Screen("onboarding_create")
+
+    /** Nested graph: shared OnboardingViewModel for import → PIN. */
+    data object OnboardingImportGraph : Screen("onboarding_import")
+
     data object CreateWallet : Screen("create_wallet")
     data object VerifySeed : Screen("verify_seed")
     data object ImportWallet : Screen("import_wallet")

@@ -1,4 +1,4 @@
-﻿package com.tranzo.custody.navigation
+package com.tranzo.custody.navigation
 
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
@@ -7,13 +7,16 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import androidx.navigation.navigation
 import com.tranzo.custody.ui.activity.ActivityScreen
 import com.tranzo.custody.ui.activity.TransactionDetailScreen
 import com.tranzo.custody.ui.card.CardScreen
@@ -69,38 +72,79 @@ fun TranzoNavigation(startDestination: String = Screen.Welcome.route) {
         ) {
             composable(Screen.Welcome.route) {
                 WelcomeScreen(
-                    onCreateWallet = { navController.navigate(Screen.CreateWallet.route) },
-                    onImportWallet = { navController.navigate(Screen.ImportWallet.route) }
+                    onCreateWallet = { navController.navigate(Screen.OnboardingCreateGraph.route) },
+                    onImportWallet = { navController.navigate(Screen.OnboardingImportGraph.route) }
                 )
             }
-            composable(Screen.CreateWallet.route) {
-                CreateWalletScreen(
-                    onContinue = { navController.navigate(Screen.VerifySeed.route) },
-                    onBack = { navController.popBackStack() }
-                )
+            navigation(
+                route = Screen.OnboardingCreateGraph.route,
+                startDestination = Screen.CreateWallet.route
+            ) {
+                composable(Screen.CreateWallet.route) { entry ->
+                    val parent = remember(entry) {
+                        navController.getBackStackEntry(Screen.OnboardingCreateGraph.route)
+                    }
+                    CreateWalletScreen(
+                        onContinue = { navController.navigate(Screen.VerifySeed.route) },
+                        onBack = { navController.popBackStack() },
+                        viewModel = hiltViewModel(parent)
+                    )
+                }
+                composable(Screen.VerifySeed.route) { entry ->
+                    val parent = remember(entry) {
+                        navController.getBackStackEntry(Screen.OnboardingCreateGraph.route)
+                    }
+                    VerifySeedScreen(
+                        onVerified = { navController.navigate(Screen.SetPin.route) },
+                        onBack = { navController.popBackStack() },
+                        viewModel = hiltViewModel(parent)
+                    )
+                }
+                composable(Screen.SetPin.route) { entry ->
+                    val parent = remember(entry) {
+                        navController.getBackStackEntry(Screen.OnboardingCreateGraph.route)
+                    }
+                    SetPinScreen(
+                        onPinSet = {
+                            navController.navigate(Screen.Home.route) {
+                                popUpTo(Screen.Welcome.route) { inclusive = true }
+                                launchSingleTop = true
+                            }
+                        },
+                        onBack = { navController.popBackStack() },
+                        viewModel = hiltViewModel(parent)
+                    )
+                }
             }
-            composable(Screen.VerifySeed.route) {
-                VerifySeedScreen(
-                    onVerified = { navController.navigate(Screen.SetPin.route) },
-                    onBack = { navController.popBackStack() }
-                )
-            }
-            composable(Screen.ImportWallet.route) {
-                ImportWalletScreen(
-                    onContinue = { navController.navigate(Screen.SetPin.route) },
-                    onBack = { navController.popBackStack() }
-                )
-            }
-            composable(Screen.SetPin.route) {
-                SetPinScreen(
-                    onPinSet = {
-                        navController.navigate(Screen.Home.route) {
-                            popUpTo(Screen.Welcome.route) { inclusive = true }
-                            launchSingleTop = true
-                        }
-                    },
-                    onBack = { navController.popBackStack() }
-                )
+            navigation(
+                route = Screen.OnboardingImportGraph.route,
+                startDestination = Screen.ImportWallet.route
+            ) {
+                composable(Screen.ImportWallet.route) { entry ->
+                    val parent = remember(entry) {
+                        navController.getBackStackEntry(Screen.OnboardingImportGraph.route)
+                    }
+                    ImportWalletScreen(
+                        onContinue = { navController.navigate(Screen.SetPin.route) },
+                        onBack = { navController.popBackStack() },
+                        viewModel = hiltViewModel(parent)
+                    )
+                }
+                composable(Screen.SetPin.route) { entry ->
+                    val parent = remember(entry) {
+                        navController.getBackStackEntry(Screen.OnboardingImportGraph.route)
+                    }
+                    SetPinScreen(
+                        onPinSet = {
+                            navController.navigate(Screen.Home.route) {
+                                popUpTo(Screen.Welcome.route) { inclusive = true }
+                                launchSingleTop = true
+                            }
+                        },
+                        onBack = { navController.popBackStack() },
+                        viewModel = hiltViewModel(parent)
+                    )
+                }
             }
 
             composable(Screen.Home.route) {
