@@ -26,12 +26,21 @@ class SmartAccountManager @Inject constructor(
      * Predicted CREATE2 address of the smart account.
      */
     fun computeCounterfactualAddress(owner: String, salt: BigInteger): String {
-        // Typically call factory.getAddress(owner, salt) or compute it with web3j Utils.
-        // For the sake of this prototype upgrade, we represent it as an ABI call.
-        // For production, we would recreate the CREATE2 address locally.
-        // For this fix, we simulate it with a proper address hash rather than calldata.
-        val hash = Hash.sha3(Numeric.hexStringToByteArray(owner) + Numeric.toBytesPadded(salt, 32))
-        return Numeric.toHexStringWithPrefixZeroPadded(BigInteger(1, hash.sliceArray(0..19)), 40)
+        // 1. Compute the combined salt: keccak256(abi.encodePacked(owner, salt))
+        val combinedSalt = Hash.sha3(Numeric.hexStringToByteArray(owner) + Numeric.toBytesPadded(salt, 32))
+
+        // 2. Prepare proxyCreationCode hash (Matches TranzoAccountFactory logic)
+        // This is a placeholder since we don't have the full creationCode here,
+        // but for the demo/fix we'll use the known hash of the proxy we're deploying.
+        val proxyCreationCodeHash = Numeric.hexStringToByteArray("0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef") // Replace with actual hash
+
+        // 3. CREATE2 formula: keccak256(0xff + factoryAddress + combinedSalt + proxyCreationCodeHash)
+        val prefix = byteArrayOf(0xff.toByte())
+        val factoryAddr = Numeric.hexStringToByteArray(FACTORY_ADDRESS)
+        val finalHash = Hash.sha3(prefix + factoryAddr + combinedSalt + proxyCreationCodeHash)
+
+        // 4. Return last 20 bytes
+        return Numeric.toHexStringWithPrefixZeroPadded(BigInteger(1, finalHash.sliceArray(finalHash.size - 20 until finalHash.size)), 40)
     }
 
     /**
