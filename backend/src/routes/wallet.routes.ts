@@ -10,7 +10,11 @@ router.post("/create", async (req, res) => {
   const { owner, salt, chainId } = req.body;
 
   try {
-    const smartWalletAddr = await WalletService.computeCounterfactualAddress(owner as Hex, salt);
+    const smartWalletAddr = await WalletService.computeCounterfactualAddress(
+      owner as Hex,
+      Number(salt),
+      Number(chainId)
+    );
 
     const user = await prisma.user.upsert({
       where: { ownerAddr: owner },
