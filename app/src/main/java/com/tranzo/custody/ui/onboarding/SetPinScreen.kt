@@ -1,4 +1,4 @@
-package com.tranzo.custody.ui.onboarding
+﻿package com.tranzo.custody.ui.onboarding
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
@@ -8,14 +8,19 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
@@ -35,13 +40,35 @@ fun SetPinScreen(
     viewModel: OnboardingViewModel = hiltViewModel()
 ) {
     val state by viewModel.state.collectAsState()
+    var showError by remember { mutableStateOf(false) }
 
     val currentPin = if (state.isSettingPin) state.pin else state.confirmPin
 
-    LaunchedEffect(state.pinConfirmed) {
-        if (state.pinConfirmed) {
-            onPinSet()
-        }
+    LaunchedEffect(state.walletSetupComplete) {
+        if (state.walletSetupComplete) onPinSet()
+    }
+
+    LaunchedEffect(state.setupError) {
+        showError = state.setupError != null
+    }
+
+    if (showError && state.setupError != null) {
+        AlertDialog(
+            onDismissRequest = {
+                showError = false
+                viewModel.consumeSetupError()
+                viewModel.resetAfterFailedSetup()
+            },
+            title = { Text("Could not create wallet") },
+            text = { Text(state.setupError!!) },
+            confirmButton = {
+                TextButton(onClick = {
+                    showError = false
+                    viewModel.consumeSetupError()
+                    viewModel.resetAfterFailedSetup()
+                }) { Text("OK") }
+            }
+        )
     }
 
     Column(
@@ -72,8 +99,8 @@ fun SetPinScreen(
         Spacer(modifier = Modifier.height(8.dp))
 
         Text(
-            text = if (state.isSettingPin) "Set a 6-digit PIN to secure your account"
-            else "Re-enter your PIN to confirm",
+            text = if (state.isSettingPin) "Encrypts your keys on this device"
+                else "Re-enter your PIN to confirm",
             style = MaterialTheme.typography.bodyMedium,
             color = TextMuted
         )
@@ -92,6 +119,11 @@ fun SetPinScreen(
             )
         }
 
+        if (state.isLoading) {
+            Spacer(modifier = Modifier.height(16.dp))
+            Text("Securing wallet…", style = MaterialTheme.typography.bodyMedium, color = TextMuted)
+        }
+
         Spacer(modifier = Modifier.weight(1f))
 
         PinKeypad(
@@ -102,3 +134,4 @@ fun SetPinScreen(
         Spacer(modifier = Modifier.height(48.dp))
     }
 }
+

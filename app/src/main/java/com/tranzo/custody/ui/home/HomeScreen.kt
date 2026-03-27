@@ -89,12 +89,23 @@ fun HomeScreen(
                     IconButton(onClick = { }) {
                         Icon(Icons.Default.QrCode, "QR Code", tint = Black, modifier = Modifier.size(24.dp))
                     }
-                    Text(
-                        text = "Tranzo",
-                        style = MaterialTheme.typography.headlineMedium,
-                        fontWeight = FontWeight.ExtraBold,
-                        color = Black
-                    )
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Text(
+                            text = "Tranzo",
+                            style = MaterialTheme.typography.headlineMedium,
+                            fontWeight = FontWeight.ExtraBold,
+                            color = Black
+                        )
+                        if (state.smartWalletAddress.isNotEmpty()) {
+                            Spacer(modifier = Modifier.height(4.dp))
+                            Text(
+                                text = state.smartWalletAddress,
+                                style = MaterialTheme.typography.labelSmall,
+                                color = TextMuted,
+                                maxLines = 1
+                            )
+                        }
+                    }
                     IconButton(onClick = { }) {
                         Icon(Icons.Default.Notifications, "Notifications", tint = Black, modifier = Modifier.size(24.dp))
                     }

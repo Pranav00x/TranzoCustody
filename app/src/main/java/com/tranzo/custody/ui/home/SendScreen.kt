@@ -40,8 +40,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.tranzo.custody.domain.model.Chain
 import com.tranzo.custody.ui.theme.Black
 import com.tranzo.custody.ui.theme.BorderColor
+import com.tranzo.custody.ui.theme.Negative
 import com.tranzo.custody.ui.theme.SurfaceSecondary
 import com.tranzo.custody.ui.theme.TextMuted
 import com.tranzo.custody.ui.theme.White
@@ -49,14 +51,14 @@ import com.tranzo.custody.ui.theme.White
 @Composable
 fun SendScreen(
     onBack: () -> Unit,
-    viewModel: HomeViewModel = hiltViewModel()
+    viewModel: SendViewModel = hiltViewModel()
 ) {
     val state by viewModel.state.collectAsState()
     var toAddress by remember { mutableStateOf("") }
     var amount by remember { mutableStateOf("") }
     var selectedTokenIndex by remember { mutableStateOf(0) }
 
-    val tokens = state.portfolio?.tokens ?: emptyList()
+    val tokens = state.portfolioTokens
     val selectedToken = tokens.getOrNull(selectedTokenIndex)
 
     Column(
@@ -67,9 +69,7 @@ fun SendScreen(
     ) {
         Spacer(modifier = Modifier.height(16.dp))
 
-        Row(
-            verticalAlignment = Alignment.CenterVertically
-        ) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
             IconButton(onClick = onBack) {
                 Icon(Icons.AutoMirrored.Filled.ArrowBack, "Back", tint = Black)
             }
@@ -83,16 +83,10 @@ fun SendScreen(
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        Text(
-            text = "Select Asset",
-            style = MaterialTheme.typography.labelLarge,
-            color = TextMuted
-        )
+        Text("Select asset", style = MaterialTheme.typography.labelLarge, color = TextMuted)
         Spacer(modifier = Modifier.height(8.dp))
 
-        Row(
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             tokens.take(4).forEachIndexed { index, token ->
                 Box(
                     modifier = Modifier
@@ -132,11 +126,7 @@ fun SendScreen(
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        Text(
-            text = "Recipient Address",
-            style = MaterialTheme.typography.labelLarge,
-            color = TextMuted
-        )
+        Text("Recipient", style = MaterialTheme.typography.labelLarge, color = TextMuted)
         Spacer(modifier = Modifier.height(8.dp))
 
         OutlinedTextField(
@@ -149,10 +139,10 @@ fun SendScreen(
                 unfocusedBorderColor = BorderColor,
                 cursorColor = Black
             ),
-            placeholder = { Text("Enter address or scan QR", color = TextMuted) },
+            placeholder = { Text("0x?", color = TextMuted) },
             trailingIcon = {
                 IconButton(onClick = { }) {
-                    Icon(Icons.Default.QrCodeScanner, "Scan QR", tint = Black)
+                    Icon(Icons.Default.QrCodeScanner, "Scan", tint = Black)
                 }
             },
             singleLine = true
@@ -160,11 +150,7 @@ fun SendScreen(
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        Text(
-            text = "Amount",
-            style = MaterialTheme.typography.labelLarge,
-            color = TextMuted
-        )
+        Text("Amount", style = MaterialTheme.typography.labelLarge, color = TextMuted)
         Spacer(modifier = Modifier.height(8.dp))
 
         OutlinedTextField(
@@ -191,18 +177,35 @@ fun SendScreen(
             )
         }
 
+        state.sendError?.let {
+            Spacer(modifier = Modifier.height(12.dp))
+            Text(it, color = Negative, style = MaterialTheme.typography.bodySmall)
+        }
+        state.sendMessage?.let {
+            Spacer(modifier = Modifier.height(12.dp))
+            Text(it, color = Black, style = MaterialTheme.typography.bodySmall)
+        }
+
         Spacer(modifier = Modifier.weight(1f))
 
         Button(
-            onClick = { onBack() },
+            onClick = {
+                val t = selectedToken ?: return@Button
+                val amt = amount.toDoubleOrNull() ?: return@Button
+                viewModel.send(Chain.POLYGON, toAddress, amt, t) { }
+            },
             modifier = Modifier
                 .fillMaxWidth()
                 .height(56.dp),
             shape = RoundedCornerShape(999.dp),
             colors = ButtonDefaults.buttonColors(containerColor = Black, contentColor = White),
-            enabled = toAddress.isNotBlank() && amount.isNotBlank()
+            enabled = toAddress.isNotBlank() && amount.isNotBlank() && !state.isSending && selectedToken != null
         ) {
-            Text("Review Transaction", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
+            Text(
+                if (state.isSending) "Sending?" else "Submit (testnet)",
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.SemiBold
+            )
         }
 
         Spacer(modifier = Modifier.height(32.dp))

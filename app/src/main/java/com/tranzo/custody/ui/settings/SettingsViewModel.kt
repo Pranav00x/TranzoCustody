@@ -1,4 +1,4 @@
-package com.tranzo.custody.ui.settings
+﻿package com.tranzo.custody.ui.settings
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -6,6 +6,7 @@ import com.tranzo.custody.data.local.UserSessionManager
 import com.tranzo.custody.domain.model.KycStatus
 import com.tranzo.custody.domain.model.SpendMode
 import com.tranzo.custody.domain.repository.CardRepository
+import com.tranzo.custody.web3.SigningManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -14,29 +15,31 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 data class SettingsUiState(
-    val userName: String = "Tranzo User",
-    val userEmail: String = "user@tranzo.money",
+    val ownerAddressShort: String = "",
+    val smartWalletAddressShort: String = "",
     val biometricEnabled: Boolean = true,
     val defaultCurrency: String = "USD",
-    val defaultChain: String = "Ethereum",
+    val defaultChain: String = "Polygon Amoy",
     val pushNotificationsEnabled: Boolean = true,
     val autoLockMinutes: Int = 5,
     val appVersion: String = "1.0.0",
     val spendMode: SpendMode = SpendMode.SPENDABLE_ONLY,
-    val kycStatus: KycStatus = KycStatus.VERIFIED
+    val kycStatus: KycStatus = KycStatus.NOT_STARTED,
+    val seedBackedUp: Boolean = false
 )
 
 @HiltViewModel
 class SettingsViewModel @Inject constructor(
     private val cardRepository: CardRepository,
-    private val sessionManager: UserSessionManager
+    private val sessionManager: UserSessionManager,
+    private val signingManager: SigningManager
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(SettingsUiState())
     val state: StateFlow<SettingsUiState> = _state.asStateFlow()
 
     init {
-        loadUserData()
+        loadWalletInfo()
         viewModelScope.launch {
             cardRepository.getCard().collect { card ->
                 _state.value = _state.value.copy(
@@ -45,19 +48,27 @@ class SettingsViewModel @Inject constructor(
                 )
             }
         }
-    }
-
-    private fun loadUserData() {
         viewModelScope.launch {
-            val name = sessionManager.getSavedName()
-            val email = sessionManager.getSavedEmail()
-            if (name.isNotEmpty() || email.isNotEmpty()) {
-                _state.value = _state.value.copy(
-                    userName = name.ifEmpty { "Tranzo User" },
-                    userEmail = email.ifEmpty { "user@tranzo.money" }
-                )
+            sessionManager.seedBackedUp.collect { backed ->
+                _state.value = _state.value.copy(seedBackedUp = backed)
             }
         }
+    }
+
+    private fun loadWalletInfo() {
+        viewModelScope.launch {
+            val owner = sessionManager.getOwnerAddress()
+            val smart = sessionManager.getSmartWalletAddress()
+            _state.value = _state.value.copy(
+                ownerAddressShort = shorten(owner),
+                smartWalletAddressShort = shorten(smart)
+            )
+        }
+    }
+
+    private fun shorten(addr: String): String {
+        if (addr.length < 12) return addr
+        return addr.take(6) + "…" + addr.takeLast(4)
     }
 
     fun toggleBiometric(enabled: Boolean) {
@@ -85,6 +96,7 @@ class SettingsViewModel @Inject constructor(
 
     fun logout(onComplete: () -> Unit) {
         viewModelScope.launch {
+            signingManager.clearWalletKeys()
             sessionManager.clearSession()
             onComplete()
         }

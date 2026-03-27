@@ -1,4 +1,4 @@
-package com.tranzo.custody
+﻿package com.tranzo.custody
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -36,7 +36,7 @@ class MainActivity : ComponentActivity() {
                 var startDestination by remember { mutableStateOf<String?>(null) }
 
                 LaunchedEffect(Unit) {
-                    startDestination = if (sessionManager.isUserLoggedIn()) {
+                    startDestination = if (sessionManager.hasWallet()) {
                         Screen.Home.route
                     } else {
                         Screen.Welcome.route
@@ -50,7 +50,6 @@ class MainActivity : ComponentActivity() {
                     if (startDestination != null) {
                         TranzoNavigation(startDestination = startDestination!!)
                     } else {
-                        // Brief splash while checking session
                         Box(
                             modifier = Modifier.fillMaxSize(),
                             contentAlignment = Alignment.Center
@@ -61,3 +60,4 @@ class MainActivity : ComponentActivity() {
         }
     }
 }
+

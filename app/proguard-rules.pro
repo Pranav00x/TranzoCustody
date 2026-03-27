@@ -1,4 +1,4 @@
-# Retrofit
+﻿# Retrofit
 -keepattributes Signature
 -keepattributes Exceptions
 -keepclassmembers,allowshrinking,allowobfuscation interface * {
@@ -15,6 +15,14 @@
 -dontwarn sun.misc.**
 -keep class com.google.gson.** { *; }
 -keep class com.tranzo.custody.data.remote.dto.** { *; }
+
+# Wallet backend API (Retrofit/Gson models not under dto)
+-keep class com.tranzo.custody.data.remote.WalletBackendApi { *; }
+-keep class com.tranzo.custody.data.remote.CreateWalletRequest { *; }
+-keep class com.tranzo.custody.data.remote.CreateWalletResponse { *; }
+-keep class com.tranzo.custody.data.remote.BackendWalletResponse { *; }
+-keep class com.tranzo.custody.data.remote.SendUserOpRequest { *; }
+-keep class com.tranzo.custody.data.remote.SendUserOpResponse { *; }
 
 # Room
 -keep class * extends androidx.room.RoomDatabase

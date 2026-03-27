@@ -1,88 +1,131 @@
-package com.tranzo.custody.ui.onboarding
+﻿package com.tranzo.custody.ui.onboarding
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.tranzo.custody.BuildConfig
 import com.tranzo.custody.data.local.UserSessionManager
+import com.tranzo.custody.data.remote.CreateWalletRequest
+import com.tranzo.custody.data.remote.WalletBackendApi
+import com.tranzo.custody.web3.MnemonicManager
+import com.tranzo.custody.web3.SigningManager
+import com.tranzo.custody.web3.SmartAccountManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import java.math.BigInteger
 import javax.inject.Inject
 
+enum class OnboardingMode { CREATE, IMPORT }
+
+data class SeedChallenge(val wordIndex: Int, val choices: List<String>)
+
 data class OnboardingState(
-    // Sign Up fields
-    val email: String = "",
-    val fullName: String = "",
+    val mode: OnboardingMode = OnboardingMode.CREATE,
+    val mnemonic: String = "",
+    val importMnemonicInput: String = "",
+    val challenges: List<SeedChallenge> = emptyList(),
+    val verificationPicks: Map<Int, String> = emptyMap(),
     val pin: String = "",
     val confirmPin: String = "",
     val isSettingPin: Boolean = true,
     val error: String? = null,
     val isLoading: Boolean = false,
-    /** Set when confirm PIN matches; navigation runs once via LaunchedEffect */
-    val pinConfirmed: Boolean = false,
-
-    // Sign In fields
-    val signInEmail: String = "",
-    val signInPin: String = "",
-    val signInError: String? = null,
-    val signInSuccess: Boolean = false
+    val walletSetupComplete: Boolean = false,
+    val setupError: String? = null
 )
 
 @HiltViewModel
 class OnboardingViewModel @Inject constructor(
-    private val sessionManager: UserSessionManager
+    private val sessionManager: UserSessionManager,
+    private val mnemonicManager: MnemonicManager,
+    private val signingManager: SigningManager,
+    private val smartAccountManager: SmartAccountManager,
+    private val walletBackendApi: WalletBackendApi
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(OnboardingState())
     val state: StateFlow<OnboardingState> = _state.asStateFlow()
 
-    // ─── Sign Up ─────────────────────────────────────────────
-
-    fun setEmail(email: String) {
-        _state.value = _state.value.copy(email = email, error = null)
+    companion object {
+        private const val SALT = 1L
     }
 
-    fun setFullName(name: String) {
-        _state.value = _state.value.copy(fullName = name, error = null)
+    fun setMode(mode: OnboardingMode) {
+        _state.value = _state.value.copy(mode = mode, error = null)
     }
 
-    fun validateSignUp(): Boolean {
-        val email = _state.value.email.trim()
-        val name = _state.value.fullName.trim()
-        if (name.length < 2) {
-            _state.value = _state.value.copy(error = "Please enter your name")
+    fun generateNewMnemonic() {
+        val m = mnemonicManager.generateMnemonic()
+        _state.value = _state.value.copy(mnemonic = m, error = null)
+    }
+
+    fun setImportMnemonic(text: String) {
+        _state.value = _state.value.copy(importMnemonicInput = text, error = null)
+    }
+
+    fun validateImportMnemonic(): Boolean {
+        val t = _state.value.importMnemonicInput
+        if (!mnemonicManager.validateMnemonic(t)) {
+            _state.value = _state.value.copy(error = "Invalid recovery phrase. Check the words and try again.")
             return false
         }
-        if (!email.contains("@") || !email.contains(".")) {
-            _state.value = _state.value.copy(error = "Please enter a valid email")
-            return false
-        }
+        _state.value = _state.value.copy(
+            mnemonic = mnemonicManager.normalizeMnemonic(t),
+            error = null
+        )
         return true
     }
 
-    fun onPinDigit(digit: Int) {
-        val current = if (_state.value.isSettingPin) _state.value.pin else _state.value.confirmPin
-        if (current.length >= 6) return
+    fun buildVerificationChallenges() {
+        val phrase = _state.value.mnemonic
+        if (phrase.isBlank()) return
+        val words = phrase.split(" ")
+        if (words.size != 12) return
+        val pickIndices = (0 until 12).shuffled().take(3)
+        val challenges = pickIndices.map { idx ->
+            val correct = words[idx]
+            val wrongPool = words.filterIndexed { i, w -> i != idx && w != correct }.shuffled().take(3)
+            val choices = (wrongPool + correct).shuffled()
+            SeedChallenge(idx, choices)
+        }
+        _state.value = _state.value.copy(challenges = challenges, verificationPicks = emptyMap(), error = null)
+    }
 
-        if (_state.value.isSettingPin) {
-            val newPin = _state.value.pin + digit
-            _state.value = _state.value.copy(pin = newPin, error = null)
-            if (newPin.length == 6) {
-                _state.value = _state.value.copy(isSettingPin = false)
-            }
+    fun setVerificationPick(wordIndex: Int, word: String) {
+        val picks = _state.value.verificationPicks.toMutableMap()
+        picks[wordIndex] = word
+        _state.value = _state.value.copy(verificationPicks = picks, error = null)
+    }
+
+    fun verificationSatisfied(): Boolean {
+        val words = _state.value.mnemonic.split(" ")
+        if (words.size != 12) return false
+        return _state.value.challenges.all { ch ->
+            _state.value.verificationPicks[ch.wordIndex] == words[ch.wordIndex]
+        }
+    }
+
+    fun onPinDigit(digit: Int) {
+        val s = _state.value
+        if (s.isLoading) return
+        if (s.isSettingPin) {
+            if (s.pin.length >= 6) return
+            val newPin = s.pin + digit
+            val next = s.copy(pin = newPin, error = null)
+            _state.value = if (newPin.length == 6) next.copy(isSettingPin = false) else next
         } else {
-            val newConfirm = _state.value.confirmPin + digit
-            _state.value = _state.value.copy(confirmPin = newConfirm, error = null)
-            if (newConfirm.length == 6) {
-                if (_state.value.pin == newConfirm) {
-                    _state.value = _state.value.copy(pinConfirmed = true)
-                    // Save session when PIN is confirmed
-                    saveSession()
+            if (s.confirmPin.length >= 6) return
+            val newC = s.confirmPin + digit
+            _state.value = s.copy(confirmPin = newC, error = null)
+            if (newC.length == 6) {
+                if (s.pin == newC) {
+                    finalizeWalletSetup(s.pin)
                 } else {
-                    _state.value = _state.value.copy(
+                    _state.value = s.copy(
                         confirmPin = "",
-                        error = "PINs don't match. Try again."
+                        error = "PINs do not match. Try again."
                     )
                 }
             }
@@ -90,89 +133,97 @@ class OnboardingViewModel @Inject constructor(
     }
 
     fun onPinDelete() {
-        if (_state.value.isSettingPin) {
-            if (_state.value.pin.isNotEmpty()) {
-                _state.value = _state.value.copy(pin = _state.value.pin.dropLast(1))
-            }
+        val s = _state.value
+        if (s.isSettingPin) {
+            if (s.pin.isNotEmpty()) _state.value = s.copy(pin = s.pin.dropLast(1))
         } else {
-            if (_state.value.confirmPin.isNotEmpty()) {
-                _state.value = _state.value.copy(confirmPin = _state.value.confirmPin.dropLast(1))
+            if (s.confirmPin.isNotEmpty()) {
+                _state.value = s.copy(confirmPin = s.confirmPin.dropLast(1))
             } else {
-                _state.value = _state.value.copy(isSettingPin = true, pin = "")
+                _state.value = s.copy(isSettingPin = true, pin = "")
             }
         }
     }
 
-    private fun saveSession() {
+    private fun finalizeWalletSetup(pin: String) {
+        val mnemonic = _state.value.mnemonic
+        if (mnemonic.isBlank()) {
+            _state.value = _state.value.copy(setupError = "Missing recovery phrase")
+            return
+        }
         viewModelScope.launch {
-            sessionManager.saveSession(
-                name = _state.value.fullName.trim(),
-                email = _state.value.email.trim(),
-                pin = _state.value.pin
-            )
+            _state.value = _state.value.copy(isLoading = true, setupError = null, error = null)
+            try {
+                val creds = mnemonicManager.deriveCredentials(mnemonic)
+                val predicted = smartAccountManager.computeCounterfactualAddress(
+                    creds.address,
+                    BigInteger.valueOf(SALT)
+                )
+                val res = walletBackendApi.registerWallet(
+                    CreateWalletRequest(
+                        owner = creds.address,
+                        salt = SALT,
+                        chainId = BuildConfig.DEFAULT_CHAIN_ID
+                    )
+                )
+                val smart = res.smartWalletAddr?.lowercase()?.takeIf { it.isNotBlank() } ?: predicted
+                signingManager.persistCredentials(creds)
+                sessionManager.saveWalletSession(
+                    ownerAddress = creds.address,
+                    smartWalletAddress = smart,
+                    chainId = BuildConfig.DEFAULT_CHAIN_ID,
+                    pin = pin
+                )
+                _state.value = _state.value.copy(
+                    isLoading = false,
+                    walletSetupComplete = true,
+                    mnemonic = "",
+                    pin = "",
+                    confirmPin = ""
+                )
+            } catch (e: Exception) {
+                _state.value = _state.value.copy(
+                    isLoading = false,
+                    setupError = e.message ?: "Could not finish setup. Is the backend running?"
+                )
+            }
         }
     }
 
-    // ─── Sign In ─────────────────────────────────────────────
-
-    fun setSignInEmail(email: String) {
-        _state.value = _state.value.copy(signInEmail = email, signInError = null)
-    }
-
-    fun setSignInPin(pin: String) {
-        _state.value = _state.value.copy(signInPin = pin, signInError = null)
-    }
-
-    fun signIn(onSuccess: () -> Unit) {
-        viewModelScope.launch {
-            _state.value = _state.value.copy(isLoading = true, signInError = null)
-
-            val savedEmail = sessionManager.getSavedEmail()
-            val emailMatches = savedEmail.equals(_state.value.signInEmail.trim(), ignoreCase = true)
-            val pinMatches = sessionManager.verifyPin(_state.value.signInPin)
-
-            if (savedEmail.isEmpty()) {
-                _state.value = _state.value.copy(
-                    isLoading = false,
-                    signInError = "No account found. Please sign up first."
-                )
-                return@launch
-            }
-
-            if (!emailMatches) {
-                _state.value = _state.value.copy(
-                    isLoading = false,
-                    signInError = "Email does not match. Please try again."
-                )
-                return@launch
-            }
-
-            if (!pinMatches) {
-                _state.value = _state.value.copy(
-                    isLoading = false,
-                    signInError = "Incorrect PIN. Please try again."
-                )
-                return@launch
-            }
-
-            // Mark as logged in again (in case session was cleared)
-            sessionManager.saveSession(
-                name = sessionManager.getSavedName(),
-                email = savedEmail,
-                pin = _state.value.signInPin
-            )
-
-            _state.value = _state.value.copy(isLoading = false, signInSuccess = true)
-            onSuccess()
+    
+    fun submitVerification(onSuccess: () -> Unit) {
+        if (!verificationSatisfied()) {
+            _state.value = _state.value.copy(error = "One or more words are incorrect.")
+            return
         }
+        _state.value = _state.value.copy(error = null)
+        onSuccess()
     }
 
-    // ─── Logout ─────────────────────────────────────────────
+    fun consumeSetupError() {
+        _state.value = _state.value.copy(setupError = null)
+    }
 
-    fun logout(onComplete: () -> Unit) {
+    fun resetAfterFailedSetup() {
+        _state.value = _state.value.copy(
+            isLoading = false,
+            pin = "",
+            confirmPin = "",
+            isSettingPin = true,
+            setupError = null
+        )
+    }
+
+    suspend fun markSeedBackedUp() {
+        sessionManager.markSeedBackedUp()
+    }
+
+    fun resetWallet(onComplete: () -> Unit) {
         viewModelScope.launch {
+            signingManager.clearWalletKeys()
             sessionManager.clearSession()
             onComplete()
         }
     }
 }
+

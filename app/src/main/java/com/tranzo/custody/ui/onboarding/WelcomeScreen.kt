@@ -1,4 +1,4 @@
-package com.tranzo.custody.ui.onboarding
+﻿package com.tranzo.custody.ui.onboarding
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -27,14 +27,13 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.tranzo.custody.ui.theme.Black
-import com.tranzo.custody.ui.theme.BorderColor
 import com.tranzo.custody.ui.theme.TextMuted
 import com.tranzo.custody.ui.theme.White
 
 @Composable
 fun WelcomeScreen(
-    onGetStarted: () -> Unit,
-    onSignIn: () -> Unit
+    onCreateWallet: () -> Unit,
+    onImportWallet: () -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -73,7 +72,7 @@ fun WelcomeScreen(
         Spacer(modifier = Modifier.height(12.dp))
 
         Text(
-            text = "Own Your Money.\nSpend It Anywhere.",
+            text = "Non-custodial smart wallet.\nYour keys. Your crypto.",
             style = MaterialTheme.typography.bodyLarge,
             color = TextMuted,
             textAlign = TextAlign.Center,
@@ -83,20 +82,20 @@ fun WelcomeScreen(
         Spacer(modifier = Modifier.weight(1f))
 
         Button(
-            onClick = onGetStarted,
+            onClick = onCreateWallet,
             modifier = Modifier
                 .fillMaxWidth()
                 .height(56.dp),
             shape = RoundedCornerShape(999.dp),
             colors = ButtonDefaults.buttonColors(containerColor = Black, contentColor = White)
         ) {
-            Text("Create Account", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
+            Text("Create new wallet", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
         }
 
         Spacer(modifier = Modifier.height(12.dp))
 
         OutlinedButton(
-            onClick = onSignIn,
+            onClick = onImportWallet,
             modifier = Modifier
                 .fillMaxWidth()
                 .height(56.dp),
@@ -104,7 +103,7 @@ fun WelcomeScreen(
             border = androidx.compose.foundation.BorderStroke(1.5.dp, Black),
             colors = ButtonDefaults.outlinedButtonColors(contentColor = Black)
         ) {
-            Text("Sign In", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
+            Text("I already have a recovery phrase", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
         }
 
         Spacer(modifier = Modifier.height(48.dp))

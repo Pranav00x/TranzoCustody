@@ -1,4 +1,4 @@
-package com.tranzo.custody.navigation
+﻿package com.tranzo.custody.navigation
 
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
@@ -25,9 +25,10 @@ import com.tranzo.custody.ui.home.HomeScreen
 import com.tranzo.custody.ui.home.ReceiveScreen
 import com.tranzo.custody.ui.home.SendScreen
 import com.tranzo.custody.ui.home.SwapScreen
+import com.tranzo.custody.ui.onboarding.CreateWalletScreen
+import com.tranzo.custody.ui.onboarding.ImportWalletScreen
 import com.tranzo.custody.ui.onboarding.SetPinScreen
-import com.tranzo.custody.ui.onboarding.SignInScreen
-import com.tranzo.custody.ui.onboarding.SignUpScreen
+import com.tranzo.custody.ui.onboarding.VerifySeedScreen
 import com.tranzo.custody.ui.onboarding.WelcomeScreen
 import com.tranzo.custody.ui.settings.DripperScreen
 import com.tranzo.custody.ui.settings.SecurityScreen
@@ -66,31 +67,27 @@ fun TranzoNavigation(startDestination: String = Screen.Welcome.route) {
             enterTransition = { fadeIn(tween(300)) },
             exitTransition = { fadeOut(tween(300)) }
         ) {
-            // Onboarding: Welcome → Sign Up → Set PIN → Home (flat, no nested graph)
             composable(Screen.Welcome.route) {
                 WelcomeScreen(
-                    onGetStarted = {
-                        navController.navigate(Screen.SignUp.route)
-                    },
-                    onSignIn = {
-                        navController.navigate(Screen.SignIn.route)
-                    }
+                    onCreateWallet = { navController.navigate(Screen.CreateWallet.route) },
+                    onImportWallet = { navController.navigate(Screen.ImportWallet.route) }
                 )
             }
-            composable(Screen.SignUp.route) {
-                SignUpScreen(
-                    onContinue = { navController.navigate(Screen.SetPin.route) },
+            composable(Screen.CreateWallet.route) {
+                CreateWalletScreen(
+                    onContinue = { navController.navigate(Screen.VerifySeed.route) },
                     onBack = { navController.popBackStack() }
                 )
             }
-            composable(Screen.SignIn.route) {
-                SignInScreen(
-                    onSignInSuccess = {
-                        navController.navigate(Screen.Home.route) {
-                            popUpTo(Screen.Welcome.route) { inclusive = true }
-                            launchSingleTop = true
-                        }
-                    },
+            composable(Screen.VerifySeed.route) {
+                VerifySeedScreen(
+                    onVerified = { navController.navigate(Screen.SetPin.route) },
+                    onBack = { navController.popBackStack() }
+                )
+            }
+            composable(Screen.ImportWallet.route) {
+                ImportWalletScreen(
+                    onContinue = { navController.navigate(Screen.SetPin.route) },
                     onBack = { navController.popBackStack() }
                 )
             }
@@ -106,7 +103,6 @@ fun TranzoNavigation(startDestination: String = Screen.Welcome.route) {
                 )
             }
 
-            // Main tabs
             composable(Screen.Home.route) {
                 HomeScreen(
                     onSendClick = { navController.navigate(Screen.Send.route) },
@@ -143,7 +139,6 @@ fun TranzoNavigation(startDestination: String = Screen.Welcome.route) {
                 )
             }
 
-            // Sub screens
             composable(Screen.Send.route) {
                 SendScreen(onBack = { navController.popBackStack() })
             }

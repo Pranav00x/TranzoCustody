@@ -1,98 +1,115 @@
-package com.tranzo.custody.data.repository
+﻿package com.tranzo.custody.data.repository
 
-import android.content.Context
+import com.tranzo.custody.BuildConfig
 import com.tranzo.custody.data.local.UserSessionManager
-import com.tranzo.custody.domain.model.*
+import com.tranzo.custody.data.remote.SendUserOpRequest
+import com.tranzo.custody.data.remote.TranzoApi
+import com.tranzo.custody.data.remote.WalletBackendApi
+import com.tranzo.custody.domain.model.BridgePreview
+import com.tranzo.custody.domain.model.Chain
+import com.tranzo.custody.domain.model.SpendableBalance
+import com.tranzo.custody.domain.model.Token
+import com.tranzo.custody.domain.model.Wallet
+import com.tranzo.custody.domain.model.WalletPortfolio
 import com.tranzo.custody.domain.repository.WalletRepository
-import com.tranzo.custody.web3.SmartAccountManager
 import com.tranzo.custody.web3.SigningManager
-import com.tranzo.custody.web3.UserOperationBuilder
-import dagger.hilt.android.qualifiers.ApplicationContext
+import com.tranzo.custody.web3.SmartAccountManager
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.first
 import org.web3j.protocol.Web3j
-import org.web3j.protocol.http.HttpService
+import org.web3j.protocol.core.DefaultBlockParameterName
 import org.web3j.utils.Convert
-import retrofit2.Retrofit
-import retrofit2.converter.gson.GsonConverterFactory
-import retrofit2.http.Body
-import retrofit2.http.GET
-import retrofit2.http.POST
-import retrofit2.http.Path
+import java.math.BigDecimal
 import java.math.BigInteger
 import javax.inject.Inject
 import javax.inject.Singleton
 
-data class CreateWalletRequest(val owner: String, val salt: Long, val chainId: Int)
-data class CreateWalletResponse(val smartWalletAddr: String, val ownerAddr: String)
-
-/** GET /wallet/details/:userId — shape aligned with backend Prisma user record */
-data class BackendWalletResponse(
-    val id: String? = null,
-    val ownerAddr: String? = null,
-    val smartWalletAddr: String? = null,
-    val chainId: Int? = null,
-)
-
-interface WalletApiService {
-    @GET("wallet/details/{userId}")
-    suspend fun getWalletDetails(@Path("userId") userId: String): BackendWalletResponse
-
-    @POST("wallet/create")
-    suspend fun registerWallet(@Body request: CreateWalletRequest): CreateWalletResponse
-}
-
 @Singleton
 class WalletRepositoryImpl @Inject constructor(
-    @ApplicationContext private val context: Context,
-    private val smartAccountManager: SmartAccountManager,
+    private val sessionManager: UserSessionManager,
     private val signingManager: SigningManager,
-    private val opBuilder: UserOperationBuilder
+    private val smartAccountManager: SmartAccountManager,
+    private val walletBackendApi: WalletBackendApi,
+    private val tranzoApi: TranzoApi,
+    private val web3j: Web3j
 ) : WalletRepository {
 
-    private val sessionManager = UserSessionManager(context)
-    private val apiService = Retrofit.Builder()
-        .baseUrl("http://10.0.2.2:3000/")
-        .addConverterFactory(GsonConverterFactory.create())
-        .build()
-        .create(WalletApiService::class.java)
+    companion object {
+        private const val DEFAULT_SALT = 1L
+    }
 
     private val _spendable = MutableStateFlow(SpendableBalance(0.0, "USD", 0L))
-    private val _portfolio = MutableStateFlow(WalletPortfolio(0.0, 0.0, 0.0, 0.0, emptyList(), emptyList()))
-
-    private var cachedWalletAddress: String? = null
+    private val _portfolio = MutableStateFlow(
+        WalletPortfolio(0.0, 0.0, 0.0, 0.0, emptyList(), emptyList())
+    )
 
     override fun getPortfolio(): Flow<WalletPortfolio> = _portfolio.asStateFlow()
     override fun getTokens(): Flow<List<Token>> = MutableStateFlow(_portfolio.value.tokens).asStateFlow()
     override fun getSpendableBalance(): Flow<SpendableBalance> = _spendable.asStateFlow()
 
     override suspend fun getWalletAddress(chain: Chain): String {
-        cachedWalletAddress?.let { return it }
-
-        val owner = "0x..." // Fetch from Android Keystore decrypted storage
-        val salt = 1L // Can be constant or incrementing
-
+        val saved = sessionManager.getSmartWalletAddress()
+        if (saved.isNotEmpty()) return saved
+        val creds = signingManager.loadCredentials() ?: return ""
         return try {
-            // Predict local, verify with backend
-            val counterfactual = smartAccountManager.computeCounterfactualAddress(owner, BigInteger.valueOf(salt))
-            val response = apiService.registerWallet(CreateWalletRequest(owner, salt, 137))
-            cachedWalletAddress = response.smartWalletAddr
-            response.smartWalletAddr
-        } catch (e: Exception) {
-            e.printStackTrace()
+            smartAccountManager.computeCounterfactualAddress(creds.address, BigInteger.valueOf(DEFAULT_SALT))
+        } catch (_: Exception) {
             ""
         }
     }
 
     override suspend fun refreshBalances() {
-        val userId = getUserId()
+        val addr = sessionManager.getSmartWalletAddress()
+        if (addr.isEmpty()) return
+        val chainId = sessionManager.getChainId()
+        val chain = chainFromId(chainId)
         try {
-            val response = apiService.getWalletDetails(userId)
-            // ... Balance mapping logic from response
-        } catch (e: Exception) {
-            e.printStackTrace()
+            val dto = tranzoApi.getBalances(addr, chain.toApiSlug())
+            val tokens = dto.balances.map { b ->
+                val bal = b.balance.toDoubleOrNull() ?: 0.0
+                Token(
+                    symbol = b.symbol,
+                    name = b.symbol,
+                    chain = chain,
+                    balance = bal,
+                    fiatValue = bal,
+                    priceChange24h = 0.0,
+                    decimals = b.decimals,
+                    iconColor = 0xFF8247E5
+                )
+            }
+            val totalFiat = tokens.sumOf { it.fiatValue }
+            _portfolio.value = WalletPortfolio(
+                walletBalanceFiat = totalFiat,
+                spendableBalanceFiat = _portfolio.value.spendableBalanceFiat,
+                dailyChangePercent = 0.0,
+                dailyChangeAmount = 0.0,
+                tokens = tokens,
+                wallets = listOf(Wallet(addr, chain, totalFiat, true))
+            )
+        } catch (_: Exception) {
+            val wei = web3j.ethGetBalance(addr, DefaultBlockParameterName.LATEST).send().balance
+            val native = Convert.fromWei(BigDecimal(wei), Convert.Unit.ETHER).toDouble()
+            val symbol = if (chainId == 80002 || chainId == 137) "MATIC" else "ETH"
+            val token = Token(
+                symbol = symbol,
+                name = symbol,
+                chain = chain,
+                balance = native,
+                fiatValue = native,
+                priceChange24h = 0.0,
+                decimals = 18,
+                iconColor = 0xFF8247E5
+            )
+            _portfolio.value = WalletPortfolio(
+                walletBalanceFiat = native,
+                spendableBalanceFiat = 0.0,
+                dailyChangePercent = 0.0,
+                dailyChangeAmount = 0.0,
+                tokens = listOf(token),
+                wallets = listOf(Wallet(addr, chain, native, true))
+            )
         }
     }
 
@@ -102,8 +119,23 @@ class WalletRepositoryImpl @Inject constructor(
         amount: Double,
         token: Token
     ): Result<String> {
-        // Implement UserOp submission flow
-        return Result.failure(Exception("ERC-4337 submission enabled. Signing UserOperation..."))
+        signingManager.loadCredentials()
+            ?: return Result.failure(IllegalStateException("Wallet locked or not initialized"))
+        val chainId = sessionManager.getChainId().takeIf { it > 0 } ?: BuildConfig.DEFAULT_CHAIN_ID
+        return try {
+            val stub = mapOf(
+                "sender" to sessionManager.getSmartWalletAddress(),
+                "nonce" to "0",
+                "callData" to "0x",
+                "signature" to "0x"
+            )
+            val res = walletBackendApi.sendUserOperation(SendUserOpRequest(chainId, stub))
+            val h = res.hash
+            if (!h.isNullOrBlank()) Result.success(h)
+            else Result.failure(Exception(res.error ?: "Bundler rejected UserOperation"))
+        } catch (e: Exception) {
+            Result.failure(Exception("Send via smart account requires a deployed account and valid UserOp. ${e.message}", e))
+        }
     }
 
     override suspend fun getBridgePreview(token: Token, amount: Double): BridgePreview {
@@ -111,8 +143,23 @@ class WalletRepositoryImpl @Inject constructor(
     }
 
     override suspend fun executeTopUp(token: Token, amount: Double): Result<Double> {
-        return Result.failure(Exception("Top-up requires direct card processor integration."))
+        return Result.failure(Exception("Top-up requires card or exchange integration."))
     }
 
-    private suspend fun getUserId(): String = sessionManager.userEmail.first()
+    private fun chainFromId(chainId: Int): Chain = when (chainId) {
+        137, 80002 -> Chain.POLYGON
+        8453, 84532 -> Chain.BASE
+        1 -> Chain.ETHEREUM
+        42161 -> Chain.ARBITRUM
+        else -> Chain.POLYGON
+    }
+
+    private fun Chain.toApiSlug(): String = when (this) {
+        Chain.POLYGON -> "polygon"
+        Chain.BASE -> "base"
+        Chain.ETHEREUM -> "ethereum"
+        Chain.ARBITRUM -> "arbitrum"
+        else -> "polygon"
+    }
 }
+

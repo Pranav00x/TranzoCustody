@@ -18,6 +18,14 @@ android {
         versionName = "1.0.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        buildConfigField("String", "WALLET_BACKEND_URL", "\"http://10.0.2.2:3000/\"")
+        buildConfigField(
+            "String",
+            "ACCOUNT_FACTORY_ADDRESS",
+            "\"0x1b41BbeDAAeDAf82E9D4Bc25dB3DB6144eEbC4E6\""
+        )
+        buildConfigField("int", "DEFAULT_CHAIN_ID", "80002")
     }
 
     signingConfigs {
@@ -106,6 +114,9 @@ dependencies {
 
     // DataStore
     implementation("androidx.datastore:datastore-preferences:1.1.1")
+
+    implementation("androidx.security:security-crypto:1.1.0-alpha06")
+    implementation("com.google.zxing:core:3.5.3")
 
     // Retrofit + OkHttp
     implementation("com.squareup.retrofit2:retrofit:2.11.0")

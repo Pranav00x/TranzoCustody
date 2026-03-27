@@ -1,4 +1,4 @@
-package com.tranzo.custody.ui.settings
+﻿package com.tranzo.custody.ui.settings
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -86,28 +86,29 @@ fun SettingsScreen(
             modifier = Modifier.padding(horizontal = 20.dp, vertical = 16.dp)
         )
 
-        // Profile + KYC
-        Row(
+        Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 20.dp, vertical = 16.dp),
-            verticalAlignment = Alignment.CenterVertically
+                .padding(horizontal = 20.dp, vertical = 8.dp)
+                .clip(RoundedCornerShape(16.dp))
+                .border(1.dp, BorderColor, RoundedCornerShape(16.dp))
+                .padding(16.dp)
         ) {
-            Box(
-                modifier = Modifier
-                    .size(56.dp)
-                    .clip(CircleShape)
-                    .background(SurfaceSecondary),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(Icons.Default.Person, null, tint = Black, modifier = Modifier.size(28.dp))
+            Column {
+                Text("Your wallet", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold)
+                Spacer(modifier = Modifier.height(6.dp))
+                Text("Smart account", style = MaterialTheme.typography.labelSmall, color = TextMuted)
+                Text(state.smartWalletAddressShort, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Medium)
+                Spacer(modifier = Modifier.height(8.dp))
+                Text("Owner key (EOA)", style = MaterialTheme.typography.labelSmall, color = TextMuted)
+                Text(state.ownerAddressShort, style = MaterialTheme.typography.bodySmall, color = TextMuted)
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    text = if (state.seedBackedUp) "Recovery phrase marked as backed up" else "Back up your recovery phrase from Security",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = if (state.seedBackedUp) Positive else Color(0xFFF59E0B)
+                )
             }
-            Spacer(modifier = Modifier.width(16.dp))
-            Column(modifier = Modifier.weight(1f)) {
-                Text(state.userName, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold, color = Black)
-                Text(state.userEmail, style = MaterialTheme.typography.bodySmall, color = TextMuted)
-            }
-            KycBadge(status = state.kycStatus)
         }
 
         Spacer(modifier = Modifier.height(8.dp))
@@ -228,7 +229,7 @@ fun SettingsScreen(
         ) {
             Icon(Icons.AutoMirrored.Filled.ExitToApp, null, tint = Negative, modifier = Modifier.size(24.dp))
             Spacer(modifier = Modifier.width(16.dp))
-            Text("Log Out", style = MaterialTheme.typography.bodyLarge, color = Negative, fontWeight = FontWeight.SemiBold)
+            Text("Reset wallet", style = MaterialTheme.typography.bodyLarge, color = Negative, fontWeight = FontWeight.SemiBold)
         }
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -329,3 +330,4 @@ private fun SettingsItem(icon: ImageVector, title: String, subtitle: String? = n
         Icon(Icons.Default.ChevronRight, null, tint = TextMuted, modifier = Modifier.size(20.dp))
     }
 }
+

@@ -1,6 +1,8 @@
-package com.tranzo.custody.di
+﻿package com.tranzo.custody.di
 
+import com.tranzo.custody.BuildConfig
 import com.tranzo.custody.data.remote.TranzoApi
+import com.tranzo.custody.data.remote.WalletBackendApi
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -44,5 +46,23 @@ object NetworkModule {
     @Singleton
     fun provideTranzoApi(retrofit: Retrofit): TranzoApi {
         return retrofit.create(TranzoApi::class.java)
+    }
+
+    @Provides
+    @Singleton
+    @WalletBackendRetrofit
+    fun provideWalletBackendRetrofit(okHttpClient: OkHttpClient): Retrofit {
+        val base = BuildConfig.WALLET_BACKEND_URL.trimEnd('/') + "/"
+        return Retrofit.Builder()
+            .baseUrl(base)
+            .client(okHttpClient)
+            .addConverterFactory(GsonConverterFactory.create())
+            .build()
+    }
+
+    @Provides
+    @Singleton
+    fun provideWalletBackendApi(@WalletBackendRetrofit retrofit: Retrofit): WalletBackendApi {
+        return retrofit.create(WalletBackendApi::class.java)
     }
 }
