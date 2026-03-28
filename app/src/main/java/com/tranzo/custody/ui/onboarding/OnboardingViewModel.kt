@@ -4,8 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.tranzo.custody.BuildConfig
 import com.tranzo.custody.data.local.UserSessionManager
-import com.tranzo.custody.data.remote.CreateWalletRequest
-import com.tranzo.custody.data.remote.WalletBackendApi
+import com.tranzo.custody.data.repository.AuthRepository
 import com.tranzo.custody.web3.MnemonicManager
 import com.tranzo.custody.web3.SigningManager
 import com.tranzo.custody.web3.SmartAccountManager
@@ -45,7 +44,7 @@ class OnboardingViewModel @Inject constructor(
     private val mnemonicManager: MnemonicManager,
     private val signingManager: SigningManager,
     private val smartAccountManager: SmartAccountManager,
-    private val walletBackendApi: WalletBackendApi
+    private val authRepository: AuthRepository
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(OnboardingState())
@@ -163,18 +162,19 @@ class OnboardingViewModel @Inject constructor(
                         creds.address,
                         BigInteger.valueOf(SALT)
                     )
+
+                    // Authenticate via SIWE — backend creates user + returns JWT tokens
                     val smart = try {
-                        val res = walletBackendApi.registerWallet(
-                            CreateWalletRequest(
-                                owner = creds.address,
-                                salt = SALT,
-                                chainId = BuildConfig.DEFAULT_CHAIN_ID
-                            )
+                        val authUser = authRepository.signIn(
+                            credentials = creds,
+                            chainId = BuildConfig.DEFAULT_CHAIN_ID
                         )
-                        res.smartWalletAddr?.lowercase()?.takeIf { it.isNotBlank() } ?: predicted
+                        authUser.smartWalletAddr.lowercase().takeIf { it.isNotBlank() } ?: predicted
                     } catch (_: Exception) {
+                        // Auth failed — continue with locally computed address
                         predicted
                     }
+
                     signingManager.persistCredentials(creds)
                     sessionManager.saveWalletSession(
                         ownerAddress = creds.address,

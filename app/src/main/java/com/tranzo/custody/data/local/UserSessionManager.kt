@@ -25,6 +25,9 @@ class UserSessionManager(private val context: Context) {
         private val KEY_SEED_BACKED_UP = booleanPreferencesKey("seed_backed_up")
         private val KEY_PIN_SALT = stringPreferencesKey("pin_salt_b64")
         private val KEY_PIN_HASH = stringPreferencesKey("pin_hash")
+        private val KEY_ACCESS_TOKEN = stringPreferencesKey("access_token")
+        private val KEY_REFRESH_TOKEN = stringPreferencesKey("refresh_token")
+        private val KEY_USER_ID = stringPreferencesKey("user_id")
     }
 
     val seedBackedUp: Flow<Boolean> = context.dataStore.data.map { it[KEY_SEED_BACKED_UP] ?: false }
@@ -72,6 +75,43 @@ class UserSessionManager(private val context: Context) {
         val expected = prefs[KEY_PIN_HASH] ?: return false
         return hashPin(pin, salt) == expected
     }
+
+    // ── Auth Token Management ──
+
+    suspend fun saveAuthTokens(accessToken: String, refreshToken: String, userId: String) {
+        context.dataStore.edit { prefs ->
+            prefs[KEY_ACCESS_TOKEN] = accessToken
+            prefs[KEY_REFRESH_TOKEN] = refreshToken
+            prefs[KEY_USER_ID] = userId
+        }
+    }
+
+    suspend fun getAccessToken(): String? =
+        context.dataStore.data.first()[KEY_ACCESS_TOKEN]
+
+    suspend fun getRefreshToken(): String? =
+        context.dataStore.data.first()[KEY_REFRESH_TOKEN]
+
+    suspend fun getUserId(): String? =
+        context.dataStore.data.first()[KEY_USER_ID]
+
+    suspend fun updateTokens(accessToken: String, refreshToken: String) {
+        context.dataStore.edit { prefs ->
+            prefs[KEY_ACCESS_TOKEN] = accessToken
+            prefs[KEY_REFRESH_TOKEN] = refreshToken
+        }
+    }
+
+    suspend fun clearAuthTokens() {
+        context.dataStore.edit { prefs ->
+            prefs.remove(KEY_ACCESS_TOKEN)
+            prefs.remove(KEY_REFRESH_TOKEN)
+            prefs.remove(KEY_USER_ID)
+        }
+    }
+
+    suspend fun isAuthenticated(): Boolean =
+        getAccessToken() != null
 
     suspend fun clearSession() {
         context.dataStore.edit { it.clear() }

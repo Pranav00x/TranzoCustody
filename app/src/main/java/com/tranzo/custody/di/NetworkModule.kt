@@ -1,8 +1,9 @@
-﻿package com.tranzo.custody.di
+package com.tranzo.custody.di
 
+import com.google.gson.Gson
+import com.google.gson.GsonBuilder
 import com.tranzo.custody.BuildConfig
-import com.tranzo.custody.data.remote.TranzoApi
-import com.tranzo.custody.data.remote.WalletBackendApi
+import com.tranzo.custody.data.remote.*
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -20,11 +21,24 @@ object NetworkModule {
 
     @Provides
     @Singleton
-    fun provideOkHttpClient(): OkHttpClient {
+    fun provideGson(): Gson = GsonBuilder().create()
+
+    @Provides
+    @Singleton
+    fun provideTokenRefresher(impl: TokenRefresherImpl): TokenRefresher = impl
+
+    @Provides
+    @Singleton
+    fun provideOkHttpClient(authInterceptor: AuthInterceptor): OkHttpClient {
         val logging = HttpLoggingInterceptor().apply {
-            level = HttpLoggingInterceptor.Level.BODY
+            level = if (BuildConfig.DEBUG) {
+                HttpLoggingInterceptor.Level.BODY
+            } else {
+                HttpLoggingInterceptor.Level.NONE
+            }
         }
         return OkHttpClient.Builder()
+            .addInterceptor(authInterceptor)
             .addInterceptor(logging)
             .connectTimeout(30, TimeUnit.SECONDS)
             .readTimeout(30, TimeUnit.SECONDS)
@@ -32,13 +46,15 @@ object NetworkModule {
             .build()
     }
 
+    // ── Public API (api.tranzo.money) ──
+
     @Provides
     @Singleton
-    fun provideRetrofit(okHttpClient: OkHttpClient): Retrofit {
+    fun provideRetrofit(okHttpClient: OkHttpClient, gson: Gson): Retrofit {
         return Retrofit.Builder()
             .baseUrl("https://api.tranzo.money/")
             .client(okHttpClient)
-            .addConverterFactory(GsonConverterFactory.create())
+            .addConverterFactory(GsonConverterFactory.create(gson))
             .build()
     }
 
@@ -48,15 +64,17 @@ object NetworkModule {
         return retrofit.create(TranzoApi::class.java)
     }
 
+    // ── Wallet Backend (self-hosted) ──
+
     @Provides
     @Singleton
     @WalletBackendRetrofit
-    fun provideWalletBackendRetrofit(okHttpClient: OkHttpClient): Retrofit {
+    fun provideWalletBackendRetrofit(okHttpClient: OkHttpClient, gson: Gson): Retrofit {
         val base = BuildConfig.WALLET_BACKEND_URL.trimEnd('/') + "/"
         return Retrofit.Builder()
             .baseUrl(base)
             .client(okHttpClient)
-            .addConverterFactory(GsonConverterFactory.create())
+            .addConverterFactory(GsonConverterFactory.create(gson))
             .build()
     }
 
@@ -64,5 +82,23 @@ object NetworkModule {
     @Singleton
     fun provideWalletBackendApi(@WalletBackendRetrofit retrofit: Retrofit): WalletBackendApi {
         return retrofit.create(WalletBackendApi::class.java)
+    }
+
+    @Provides
+    @Singleton
+    fun provideAuthApi(@WalletBackendRetrofit retrofit: Retrofit): AuthApi {
+        return retrofit.create(AuthApi::class.java)
+    }
+
+    @Provides
+    @Singleton
+    fun provideCardApi(@WalletBackendRetrofit retrofit: Retrofit): CardApi {
+        return retrofit.create(CardApi::class.java)
+    }
+
+    @Provides
+    @Singleton
+    fun provideStreamApi(@WalletBackendRetrofit retrofit: Retrofit): StreamApi {
+        return retrofit.create(StreamApi::class.java)
     }
 }

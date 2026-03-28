@@ -3,6 +3,7 @@
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.tranzo.custody.data.local.UserSessionManager
+import com.tranzo.custody.data.repository.AuthRepository
 import com.tranzo.custody.domain.model.KycStatus
 import com.tranzo.custody.domain.model.SpendMode
 import com.tranzo.custody.domain.repository.CardRepository
@@ -32,7 +33,8 @@ data class SettingsUiState(
 class SettingsViewModel @Inject constructor(
     private val cardRepository: CardRepository,
     private val sessionManager: UserSessionManager,
-    private val signingManager: SigningManager
+    private val signingManager: SigningManager,
+    private val authRepository: AuthRepository
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(SettingsUiState())
@@ -96,6 +98,8 @@ class SettingsViewModel @Inject constructor(
 
     fun logout(onComplete: () -> Unit) {
         viewModelScope.launch {
+            // Revoke tokens on backend + clear local auth state
+            try { authRepository.logout() } catch (_: Exception) {}
             signingManager.clearWalletKeys()
             sessionManager.clearSession()
             onComplete()

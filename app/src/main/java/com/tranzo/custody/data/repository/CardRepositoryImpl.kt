@@ -1,5 +1,9 @@
 package com.tranzo.custody.data.repository
 
+import com.tranzo.custody.data.remote.CardApi
+import com.tranzo.custody.data.remote.CardDto
+import com.tranzo.custody.data.remote.CreateCardRequest
+import com.tranzo.custody.data.remote.UpdateLimitRequest
 import com.tranzo.custody.domain.model.CardTransaction
 import com.tranzo.custody.domain.model.CryptoCard
 import com.tranzo.custody.domain.model.KycStatus
@@ -13,45 +17,29 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class CardRepositoryImpl @Inject constructor() : CardRepository {
+class CardRepositoryImpl @Inject constructor(
+    private val cardApi: CardApi
+) : CardRepository {
 
-    private val _card = MutableStateFlow(
-        CryptoCard(
-            id = "card_001",
-            lastFourDigits = "5546",
-            expiryDate = "09/28",
-            cardholderName = "TRANZO USER",
-            isFrozen = false,
-            isVirtual = false,
-            spendableBalance = 420.50,
-            monthlySpent = 1240.80,
-            monthlyLimit = 2000.0,
-            dailyLimit = 500.0,
-            onlineTransactionsEnabled = true,
-            atmWithdrawalsEnabled = true,
-            kycStatus = KycStatus.VERIFIED,
-            spendMode = SpendMode.SPENDABLE_ONLY
-        )
-    )
-
-    private val _transactions = MutableStateFlow(
-        listOf(
-            CardTransaction("ct_1", "Amazon", "A", 89.99, "USD", System.currentTimeMillis() - 3600000, TransactionStatus.CONFIRMED, "Card Balance"),
-            CardTransaction("ct_2", "Starbucks", "S", 6.45, "USD", System.currentTimeMillis() - 7200000, TransactionStatus.CONFIRMED, "Card Balance"),
-            CardTransaction("ct_3", "Shell Gas", "S", 52.30, "USD", System.currentTimeMillis() - 86400000, TransactionStatus.CONFIRMED, "Card Balance"),
-            CardTransaction("ct_4", "Spotify", "S", 9.99, "USD", System.currentTimeMillis() - 172800000, TransactionStatus.CONFIRMED, "Card Balance"),
-            CardTransaction("ct_5", "Uber Eats", "U", 24.50, "USD", System.currentTimeMillis() - 259200000, TransactionStatus.CONFIRMED, "Auto-converted ETH"),
-            CardTransaction("ct_6", "Netflix", "N", 15.99, "USD", System.currentTimeMillis() - 345600000, TransactionStatus.CONFIRMED, "Card Balance"),
-            CardTransaction("ct_7", "Apple Store", "A", 149.00, "USD", System.currentTimeMillis() - 432000000, TransactionStatus.CONFIRMED, "Card Balance")
-        )
-    )
+    private val _card = MutableStateFlow(emptyCard())
+    private val _transactions = MutableStateFlow<List<CardTransaction>>(emptyList())
 
     override fun getCard(): Flow<CryptoCard> = _card.asStateFlow()
-
     override fun getCardTransactions(): Flow<List<CardTransaction>> = _transactions.asStateFlow()
 
     override suspend fun freezeCard(freeze: Boolean) {
-        _card.value = _card.value.copy(isFrozen = freeze)
+        val card = _card.value
+        try {
+            val updated = if (freeze) {
+                cardApi.freezeCard(card.id)
+            } else {
+                cardApi.unfreezeCard(card.id)
+            }
+            _card.value = updated.toDomain()
+        } catch (e: Exception) {
+            // Optimistic update fallback
+            _card.value = card.copy(isFrozen = freeze)
+        }
     }
 
     override suspend fun setMonthlyLimit(limit: Double) {
@@ -59,7 +47,15 @@ class CardRepositoryImpl @Inject constructor() : CardRepository {
     }
 
     override suspend fun setDailyLimit(limit: Double) {
-        _card.value = _card.value.copy(dailyLimit = limit)
+        val card = _card.value
+        try {
+            // Convert dollar amount to USDC (6 decimals)
+            val limitUsdc = (limit * 1_000_000).toLong().toString()
+            val updated = cardApi.updateLimit(card.id, UpdateLimitRequest(limitUsdc))
+            _card.value = updated.toDomain()
+        } catch (e: Exception) {
+            _card.value = card.copy(dailyLimit = limit)
+        }
     }
 
     override suspend fun toggleOnlineTransactions(enabled: Boolean) {
@@ -79,4 +75,62 @@ class CardRepositoryImpl @Inject constructor() : CardRepository {
             spendableBalance = _card.value.spendableBalance + amount
         )
     }
+
+    /**
+     * Fetch cards from backend and update local state.
+     * Called after authentication.
+     */
+    suspend fun refreshCards() {
+        try {
+            val cards = cardApi.listCards()
+            if (cards.isNotEmpty()) {
+                _card.value = cards.first().toDomain()
+            }
+        } catch (_: Exception) {
+            // Keep current state on failure
+        }
+    }
+
+    /**
+     * Create a new virtual card via the backend.
+     */
+    suspend fun createCard(): CryptoCard {
+        val dto = cardApi.createCard(CreateCardRequest())
+        val card = dto.toDomain()
+        _card.value = card
+        return card
+    }
+
+    private fun CardDto.toDomain(): CryptoCard {
+        val limitUsd = dailyLimit.toLongOrNull()?.let { it / 1_000_000.0 } ?: 500.0
+        return CryptoCard(
+            id = id,
+            lastFourDigits = last4 ?: "****",
+            expiryDate = "",
+            cardholderName = "TRANZO USER",
+            isFrozen = status == "FROZEN",
+            isVirtual = type == "VIRTUAL",
+            spendableBalance = 0.0,
+            monthlySpent = 0.0,
+            monthlyLimit = 2000.0,
+            dailyLimit = limitUsd,
+            onlineTransactionsEnabled = status == "ACTIVE",
+            atmWithdrawalsEnabled = status == "ACTIVE",
+            kycStatus = KycStatus.NOT_STARTED,
+            spendMode = SpendMode.SPENDABLE_ONLY
+        )
+    }
+
+    private fun emptyCard() = CryptoCard(
+        id = "",
+        lastFourDigits = "----",
+        expiryDate = "--/--",
+        cardholderName = "TRANZO USER",
+        isFrozen = false,
+        isVirtual = true,
+        spendableBalance = 0.0,
+        monthlySpent = 0.0,
+        monthlyLimit = 2000.0,
+        dailyLimit = 500.0
+    )
 }
