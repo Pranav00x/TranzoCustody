@@ -1,10 +1,15 @@
 import { Router } from "express";
 import { PaymasterService } from "../services/paymaster.service.js";
+import { requireAuth } from "../middleware/auth.middleware.js";
 import { Hex } from "viem";
 
 const router = Router();
 
-router.post("/sign", async (req, res) => {
+/**
+ * POST /paymaster/sign — Sign a paymaster approval for a UserOp.
+ * Protected: requires authenticated user.
+ */
+router.post("/sign", requireAuth, async (req, res) => {
   const { userOpHash, validUntil, validAfter, mode } = req.body;
 
   try {

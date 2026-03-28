@@ -8,19 +8,46 @@ datasource db {
 }
 
 model User {
-  id              String        @id @default(cuid())
-  smartWalletAddr String        @unique
-  ownerAddr       String        @unique
+  id              String         @id @default(cuid())
+  smartWalletAddr String         @unique
+  ownerAddr       String         @unique
   chainId         Int
-  kycStatus       KycStatus     @default(NONE)
+  kycStatus       KycStatus      @default(NONE)
   kycProvider     String?
-  createdAt       DateTime      @default(now())
-  updatedAt       DateTime      @updatedAt
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
   cards           Card[]
   cardSessions    CardSession[]
-  sentStreams     Stream[]       @relation("sender")
-  gasUsageToday   Float         @default(0)
-  lastGasReset    DateTime      @default(now())
+  sentStreams     Stream[]        @relation("sender")
+  refreshTokens  RefreshToken[]
+  gasUsageToday   Float          @default(0)
+  lastGasReset    DateTime       @default(now())
+}
+
+/// Stores SIWE nonces — short-lived, deleted after use or expiry.
+model Nonce {
+  id        String   @id @default(cuid())
+  value     String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@index([expiresAt])
+}
+
+/// Rotating refresh tokens — one active per device/session.
+model RefreshToken {
+  id        String   @id @default(cuid())
+  token     String   @unique
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  family    String
+  expiresAt DateTime
+  revoked   Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([family])
+  @@index([expiresAt])
 }
 
 model Card {

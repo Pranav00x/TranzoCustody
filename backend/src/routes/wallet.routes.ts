@@ -1,18 +1,25 @@
 import { Router } from "express";
 import { WalletService } from "../services/wallet.service.js";
 import { BundlerService } from "../services/bundler.service.js";
+import { requireAuth } from "../middleware/auth.middleware.js";
 import prisma from "../services/prisma.service.js";
 import { Hex } from "viem";
 
 const router = Router();
 
-router.post("/create", async (req, res) => {
-  const { owner, salt, chainId } = req.body;
+/**
+ * POST /wallet/create — Register or update a smart wallet.
+ * Protected: requires authenticated user.
+ * The owner address is taken from the JWT (not request body) to prevent spoofing.
+ */
+router.post("/create", requireAuth, async (req, res) => {
+  const { salt, chainId } = req.body;
+  const owner = req.user!.owner as Hex;
 
   try {
     const smartWalletAddr = await WalletService.computeCounterfactualAddress(
-      owner as Hex,
-      Number(salt),
+      owner,
+      Number(salt ?? 1),
       Number(chainId)
     );
 
@@ -35,24 +42,35 @@ router.post("/create", async (req, res) => {
   }
 });
 
-router.post("/send-userop", async (req, res) => {
-    const { chainId, userOp } = req.body;
-    try {
-        const hash = await BundlerService.sendUserOperation(chainId, userOp);
-        res.json({ hash });
-    } catch (err: any) {
-        res.status(500).json({ error: err.message });
-    }
+/**
+ * POST /wallet/send-userop — Submit a UserOperation to the bundler.
+ * Protected: requires authenticated user.
+ */
+router.post("/send-userop", requireAuth, async (req, res) => {
+  const { chainId, userOp } = req.body;
+  try {
+    const hash = await BundlerService.sendUserOperation(chainId, userOp);
+    res.json({ hash });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
 });
 
-router.get("/receipt/:chainId/:hash", async (req, res) => {
-    const { chainId, hash } = req.params;
-    try {
-        const receipt = await BundlerService.getUserOperationReceipt(Number(chainId), hash as Hex);
-        res.json(receipt);
-    } catch (err: any) {
-        res.status(500).json({ error: err.message });
-    }
+/**
+ * GET /wallet/receipt/:chainId/:hash — Fetch a UserOp receipt.
+ * Protected: requires authenticated user.
+ */
+router.get("/receipt/:chainId/:hash", requireAuth, async (req, res) => {
+  const { chainId, hash } = req.params;
+  try {
+    const receipt = await BundlerService.getUserOperationReceipt(
+      Number(chainId),
+      hash as Hex
+    );
+    res.json(receipt);
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
 });
 
 export default router;
