@@ -34,9 +34,9 @@ android {
             "ACCOUNT_FACTORY_ADDRESS",
             "\"0x3A2e916613D4c5255e6258Baced901794B0d7D62\""
         )
-        buildConfigField("int", "DEFAULT_CHAIN_ID", "137")
-        // Reads POLYGON_RPC_URL from local.properties (gitignored). Falls back to empty → public RPCs.
-        buildConfigField("String", "AMOY_RPC_URL", "\"${localProps.getProperty("POLYGON_RPC_URL", "")}\"")
+        buildConfigField("int", "DEFAULT_CHAIN_ID", "8453")
+        // Reads BASE_RPC_URL from local.properties (gitignored). Falls back to empty → public RPCs.
+        buildConfigField("String", "AMOY_RPC_URL", "\"${localProps.getProperty("BASE_RPC_URL", "")}\"")
     }
 
     signingConfigs {
@@ -137,6 +137,11 @@ dependencies {
 
     // Web3j (published as org.web3j:core; web3j-android is not on Maven Central)
     implementation("org.web3j:core:4.11.0")
+
+    // Google Sign-In + Drive (for encrypted wallet backup)
+    implementation("com.google.android.gms:play-services-auth:21.3.0")
+    implementation("com.google.api-client:google-api-client-android:2.7.0")
+    implementation("com.google.apis:google-api-services-drive:v3-rev20241027-2.0.0")
 
     // Biometric
     implementation("androidx.biometric:biometric:1.1.0")

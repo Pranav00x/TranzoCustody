@@ -16,3 +16,12 @@ local.properties
 # Keep tranzo-debug.keystore for consistent signing
 !tranzo-debug.keystore
 google-services.json
+
+# Foundry build artifacts
+smart_contracts/out/
+smart_contracts/cache/
+smart_contracts/broadcast/
+
+# Backend
+backend/node_modules/
+backend/.env

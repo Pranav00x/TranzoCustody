@@ -1,4 +1,3 @@
-import { SiweMessage } from "siwe";
 import jwt from "jsonwebtoken";
 import crypto from "crypto";
 import { ENV } from "../config/env.js";
@@ -6,7 +5,13 @@ import prisma from "./prisma.service.js";
 
 const ACCESS_TOKEN_EXPIRY = "15m";
 const REFRESH_TOKEN_EXPIRY_DAYS = 30;
-const NONCE_EXPIRY_MINUTES = 10;
+const RESET_TOKEN_EXPIRY_MINUTES = 15;
+
+// bcrypt-like hashing using Node's built-in scrypt (no extra deps)
+const SCRYPT_KEYLEN = 64;
+const SCRYPT_COST = 16384;
+const SCRYPT_BLOCK_SIZE = 8;
+const SCRYPT_PARALLELIZATION = 1;
 
 export interface AccessTokenPayload {
   sub: string; // userId
@@ -15,78 +20,167 @@ export interface AccessTokenPayload {
 }
 
 export class AuthService {
-  // ──────────────────────────── Nonce ────────────────────────────
+  // ──────────────────────── Password Hashing ──────────────────────
 
-  /** Generate a random nonce, store it in DB with a short TTL. */
-  static async generateNonce(): Promise<string> {
-    const value = crypto.randomBytes(16).toString("hex");
-    const expiresAt = new Date(Date.now() + NONCE_EXPIRY_MINUTES * 60_000);
-
-    await prisma.nonce.create({ data: { value, expiresAt } });
-    return value;
-  }
-
-  /** Consume a nonce — returns true if valid, deletes it either way. */
-  static async consumeNonce(value: string): Promise<boolean> {
-    const nonce = await prisma.nonce.findUnique({ where: { value } });
-    if (!nonce) return false;
-
-    // Always delete after lookup (single-use)
-    await prisma.nonce.delete({ where: { id: nonce.id } });
-
-    return nonce.expiresAt > new Date();
-  }
-
-  /** Cleanup expired nonces (call periodically or via cron). */
-  static async purgeExpiredNonces(): Promise<number> {
-    const { count } = await prisma.nonce.deleteMany({
-      where: { expiresAt: { lt: new Date() } },
+  static async hashPassword(password: string): Promise<string> {
+    const salt = crypto.randomBytes(16).toString("hex");
+    return new Promise((resolve, reject) => {
+      crypto.scrypt(
+        password,
+        salt,
+        SCRYPT_KEYLEN,
+        { N: SCRYPT_COST, r: SCRYPT_BLOCK_SIZE, p: SCRYPT_PARALLELIZATION },
+        (err, derivedKey) => {
+          if (err) reject(err);
+          else resolve(`${salt}:${derivedKey.toString("hex")}`);
+        }
+      );
     });
-    return count;
   }
 
-  // ──────────────────────────── SIWE ────────────────────────────
+  static async verifyPassword(
+    password: string,
+    hash: string
+  ): Promise<boolean> {
+    const [salt, key] = hash.split(":");
+    return new Promise((resolve, reject) => {
+      crypto.scrypt(
+        password,
+        salt,
+        SCRYPT_KEYLEN,
+        { N: SCRYPT_COST, r: SCRYPT_BLOCK_SIZE, p: SCRYPT_PARALLELIZATION },
+        (err, derivedKey) => {
+          if (err) reject(err);
+          else
+            resolve(
+              crypto.timingSafeEqual(
+                Buffer.from(key, "hex"),
+                derivedKey
+              )
+            );
+        }
+      );
+    });
+  }
 
-  /**
-   * Verify a SIWE signed message.
-   * Returns the parsed SIWE fields (address, chainId, nonce, etc.)
-   */
-  static async verifySiweMessage(
-    message: string,
-    signature: string
-  ): Promise<SiweMessage> {
-    const siweMessage = new SiweMessage(message);
-    const { data: fields } = await siweMessage.verify({ signature });
+  // ──────────────────────── Signup / Login ─────────────────────────
 
-    // Validate the nonce was issued by us and hasn't expired
-    const nonceValid = await this.consumeNonce(fields.nonce);
-    if (!nonceValid) {
-      throw new Error("Invalid or expired nonce");
+  static async signup(
+    email: string,
+    password: string,
+    ownerAddr: string,
+    smartWalletAddr: string,
+    chainId: number
+  ) {
+    const existing = await prisma.user.findUnique({ where: { email } });
+    if (existing) {
+      throw new Error("Unable to create account");
     }
 
-    return fields;
+    const passwordHash = await this.hashPassword(password);
+
+    const user = await prisma.user.create({
+      data: {
+        email: email.toLowerCase().trim(),
+        passwordHash,
+        ownerAddr: ownerAddr.toLowerCase(),
+        smartWalletAddr: smartWalletAddr.toLowerCase(),
+        chainId,
+      },
+    });
+
+    return user;
+  }
+
+  static async login(email: string, password: string) {
+    const user = await prisma.user.findUnique({
+      where: { email: email.toLowerCase().trim() },
+    });
+    if (!user) {
+      throw new Error("Invalid email or password");
+    }
+
+    const valid = await this.verifyPassword(password, user.passwordHash);
+    if (!valid) {
+      throw new Error("Invalid email or password");
+    }
+
+    return user;
+  }
+
+  // ──────────────────── Password Reset Tokens ─────────────────────
+
+  static async generatePasswordResetToken(email: string): Promise<string> {
+    const user = await prisma.user.findUnique({
+      where: { email: email.toLowerCase().trim() },
+    });
+    // Always return a token-shaped string to prevent email enumeration
+    if (!user) return crypto.randomBytes(32).toString("hex");
+
+    const token = crypto.randomBytes(32).toString("hex");
+    const tokenHash = crypto.createHash("sha256").update(token).digest("hex");
+    const expiresAt = new Date(
+      Date.now() + RESET_TOKEN_EXPIRY_MINUTES * 60_000
+    );
+
+    await prisma.passwordResetToken.create({
+      data: {
+        tokenHash,
+        userId: user.id,
+        type: "PASSWORD_RESET",
+        expiresAt,
+      },
+    });
+
+    return token;
+  }
+
+  static async resetPassword(
+    token: string,
+    newPassword: string
+  ): Promise<void> {
+    const tokenHash = crypto.createHash("sha256").update(token).digest("hex");
+    const record = await prisma.passwordResetToken.findUnique({
+      where: { tokenHash },
+    });
+
+    if (!record || record.used || record.expiresAt < new Date()) {
+      throw new Error("Invalid or expired reset token");
+    }
+
+    const passwordHash = await this.hashPassword(newPassword);
+
+    await prisma.$transaction([
+      prisma.user.update({
+        where: { id: record.userId },
+        data: { passwordHash },
+      }),
+      prisma.passwordResetToken.update({
+        where: { id: record.id },
+        data: { used: true },
+      }),
+      // Revoke all sessions on password reset
+      prisma.refreshToken.updateMany({
+        where: { userId: record.userId, revoked: false },
+        data: { revoked: true },
+      }),
+    ]);
   }
 
   // ──────────────────────────── JWT ─────────────────────────────
 
-  /** Sign an access token (short-lived). */
   static signAccessToken(payload: AccessTokenPayload): string {
     return jwt.sign(payload, ENV.JWT_SECRET, {
       expiresIn: ACCESS_TOKEN_EXPIRY,
     });
   }
 
-  /** Verify and decode an access token. */
   static verifyAccessToken(token: string): AccessTokenPayload {
     return jwt.verify(token, ENV.JWT_SECRET) as AccessTokenPayload;
   }
 
   // ────────────────────── Refresh Tokens ────────────────────────
 
-  /**
-   * Create a new refresh token family (first login / new device).
-   * A "family" groups tokens so we can revoke an entire chain if reuse is detected.
-   */
   static async createRefreshToken(userId: string): Promise<string> {
     const token = crypto.randomBytes(32).toString("hex");
     const family = crypto.randomUUID();
@@ -101,10 +195,6 @@ export class AuthService {
     return token;
   }
 
-  /**
-   * Rotate a refresh token: revoke the old one, issue a new one in the same family.
-   * If the incoming token was already revoked → token reuse detected → revoke entire family.
-   */
   static async rotateRefreshToken(
     oldToken: string
   ): Promise<{ accessToken: string; refreshToken: string }> {
@@ -117,7 +207,6 @@ export class AuthService {
       throw new Error("Refresh token not found");
     }
 
-    // Reuse detection: if already revoked, someone stole the token chain
     if (existing.revoked) {
       await prisma.refreshToken.updateMany({
         where: { family: existing.family },
@@ -130,13 +219,11 @@ export class AuthService {
       throw new Error("Refresh token expired");
     }
 
-    // Revoke old token
     await prisma.refreshToken.update({
       where: { id: existing.id },
       data: { revoked: true },
     });
 
-    // Issue new token in same family
     const newToken = crypto.randomBytes(32).toString("hex");
     const expiresAt = new Date(
       Date.now() + REFRESH_TOKEN_EXPIRY_DAYS * 24 * 60 * 60_000
@@ -151,7 +238,6 @@ export class AuthService {
       },
     });
 
-    // Issue new access token
     const accessToken = this.signAccessToken({
       sub: existing.userId,
       wallet: existing.user.smartWalletAddr,
@@ -161,7 +247,6 @@ export class AuthService {
     return { accessToken, refreshToken: newToken };
   }
 
-  /** Revoke all refresh tokens for a user (logout everywhere). */
   static async revokeAllTokens(userId: string): Promise<void> {
     await prisma.refreshToken.updateMany({
       where: { userId, revoked: false },
@@ -169,7 +254,6 @@ export class AuthService {
     });
   }
 
-  /** Revoke a single token family (logout one device). */
   static async revokeFamily(family: string): Promise<void> {
     await prisma.refreshToken.updateMany({
       where: { family },
@@ -177,7 +261,6 @@ export class AuthService {
     });
   }
 
-  /** Cleanup expired refresh tokens. */
   static async purgeExpiredRefreshTokens(): Promise<number> {
     const { count } = await prisma.refreshToken.deleteMany({
       where: { expiresAt: { lt: new Date() } },

@@ -10,77 +10,98 @@ const router = Router();
 
 // ────────────────────────── Validation ──────────────────────────
 
-const verifySchema = z.object({
-  message: z.string().min(1),
-  signature: z.string().regex(/^0x[a-fA-F0-9]+$/),
+const signupSchema = z.object({
+  email: z.string().email(),
+  password: z.string().min(8, "Password must be at least 8 characters"),
+  ownerAddr: z.string().regex(/^0x[a-fA-F0-9]{40}$/),
+  chainId: z.number().int().positive(),
+});
+
+const loginSchema = z.object({
+  email: z.string().email(),
+  password: z.string().min(1),
 });
 
 const refreshSchema = z.object({
   refreshToken: z.string().min(1),
 });
 
-// ─────────────────────── GET /auth/nonce ─────────────────────────
-
-/**
- * Returns a fresh nonce for SIWE message construction.
- * The nonce is single-use and expires in 10 minutes.
- */
-router.get("/nonce", async (_req, res) => {
-  try {
-    const nonce = await AuthService.generateNonce();
-    res.json({ nonce });
-  } catch (err: any) {
-    res.status(500).json({ error: err.message });
-  }
+const forgotPasswordSchema = z.object({
+  email: z.string().email(),
 });
 
-// ─────────────────────── POST /auth/verify ──────────────────────
+const resetPasswordSchema = z.object({
+  token: z.string().min(1),
+  newPassword: z.string().min(8, "Password must be at least 8 characters"),
+});
 
-/**
- * Verify a SIWE signed message.
- * - Validates the signature against the Ethereum address
- * - Consumes the nonce (single-use)
- * - Finds or creates the user
- * - Returns access + refresh tokens
- */
-router.post("/verify", async (req, res) => {
-  const parsed = verifySchema.safeParse(req.body);
+// ─────────────────────── POST /auth/signup ───────────────────────
+
+router.post("/signup", async (req, res) => {
+  const parsed = signupSchema.safeParse(req.body);
   if (!parsed.success) {
-    res.status(400).json({ error: "Invalid request body", details: parsed.error.flatten() });
+    res
+      .status(400)
+      .json({ error: "Invalid request body", details: parsed.error.flatten() });
     return;
   }
 
-  const { message, signature } = parsed.data;
+  const { email, password, ownerAddr, chainId } = parsed.data;
 
   try {
-    // 1. Verify SIWE signature + consume nonce
-    const siweFields = await AuthService.verifySiweMessage(message, signature);
-    const ownerAddr = siweFields.address.toLowerCase();
-    const chainId = siweFields.chainId;
+    // Compute counterfactual smart wallet address
+    const smartWalletAddr = await WalletService.computeCounterfactualAddress(
+      ownerAddr.toLowerCase() as Hex,
+      1,
+      chainId
+    );
 
-    // 2. Find or create user
-    let user = await prisma.user.findUnique({
-      where: { ownerAddr },
+    const user = await AuthService.signup(
+      email,
+      password,
+      ownerAddr,
+      smartWalletAddr,
+      chainId
+    );
+
+    // Issue tokens
+    const accessToken = AuthService.signAccessToken({
+      sub: user.id,
+      wallet: user.smartWalletAddr,
+      owner: user.ownerAddr,
     });
+    const refreshToken = await AuthService.createRefreshToken(user.id);
 
-    if (!user) {
-      // Compute counterfactual smart wallet address
-      const smartWalletAddr = await WalletService.computeCounterfactualAddress(
-        ownerAddr as Hex,
-        1, // default salt
-        chainId
-      );
+    res.status(201).json({
+      accessToken,
+      refreshToken,
+      user: {
+        id: user.id,
+        email: user.email,
+        smartWalletAddr: user.smartWalletAddr,
+        ownerAddr: user.ownerAddr,
+        chainId: user.chainId,
+      },
+    });
+  } catch (err: any) {
+    res.status(400).json({ error: err.message });
+  }
+});
 
-      user = await prisma.user.create({
-        data: {
-          ownerAddr,
-          smartWalletAddr,
-          chainId,
-        },
-      });
-    }
+// ─────────────────────── POST /auth/login ────────────────────────
 
-    // 3. Issue tokens
+router.post("/login", async (req, res) => {
+  const parsed = loginSchema.safeParse(req.body);
+  if (!parsed.success) {
+    res.status(400).json({ error: "Invalid request body" });
+    return;
+  }
+
+  const { email, password } = parsed.data;
+
+  try {
+    const user = await AuthService.login(email, password);
+
     const accessToken = AuthService.signAccessToken({
       sub: user.id,
       wallet: user.smartWalletAddr,
@@ -93,6 +114,7 @@ router.post("/verify", async (req, res) => {
       refreshToken,
       user: {
         id: user.id,
+        email: user.email,
         smartWalletAddr: user.smartWalletAddr,
         ownerAddr: user.ownerAddr,
         chainId: user.chainId,
@@ -103,12 +125,52 @@ router.post("/verify", async (req, res) => {
   }
 });
 
+// ────────────────── POST /auth/forgot-password ──────────────────
+
+router.post("/forgot-password", async (req, res) => {
+  const parsed = forgotPasswordSchema.safeParse(req.body);
+  if (!parsed.success) {
+    res.status(400).json({ error: "Invalid email" });
+    return;
+  }
+
+  try {
+    const token = await AuthService.generatePasswordResetToken(
+      parsed.data.email
+    );
+
+    // TODO: Send email with reset link containing `token`
+    // For now, return token directly (dev only — remove in production)
+    res.json({
+      message: "If an account exists, a reset link has been sent.",
+      // Remove this in production:
+      _devToken: token,
+    });
+  } catch (err: any) {
+    // Always return success to prevent email enumeration
+    res.json({ message: "If an account exists, a reset link has been sent." });
+  }
+});
+
+// ─────────────────── POST /auth/reset-password ──────────────────
+
+router.post("/reset-password", async (req, res) => {
+  const parsed = resetPasswordSchema.safeParse(req.body);
+  if (!parsed.success) {
+    res.status(400).json({ error: "Invalid request body" });
+    return;
+  }
+
+  try {
+    await AuthService.resetPassword(parsed.data.token, parsed.data.newPassword);
+    res.json({ message: "Password has been reset. Please log in again." });
+  } catch (err: any) {
+    res.status(400).json({ error: err.message });
+  }
+});
+
 // ─────────────────────── POST /auth/refresh ─────────────────────
 
-/**
- * Rotate a refresh token → new access + refresh token pair.
- * Implements token reuse detection (revokes entire family if reuse found).
- */
 router.post("/refresh", async (req, res) => {
   const parsed = refreshSchema.safeParse(req.body);
   if (!parsed.success) {
@@ -117,7 +179,9 @@ router.post("/refresh", async (req, res) => {
   }
 
   try {
-    const tokens = await AuthService.rotateRefreshToken(parsed.data.refreshToken);
+    const tokens = await AuthService.rotateRefreshToken(
+      parsed.data.refreshToken
+    );
     res.json(tokens);
   } catch (err: any) {
     res.status(401).json({ error: err.message });
@@ -126,10 +190,6 @@ router.post("/refresh", async (req, res) => {
 
 // ─────────────────────── POST /auth/logout ──────────────────────
 
-/**
- * Revoke all refresh tokens for the authenticated user (logout everywhere).
- * Requires a valid access token.
- */
 router.post("/logout", requireAuth, async (req, res) => {
   try {
     await AuthService.revokeAllTokens(req.user!.sub);

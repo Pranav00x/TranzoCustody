@@ -2,21 +2,23 @@ package com.tranzo.custody.data.remote
 
 import com.google.gson.annotations.SerializedName
 import retrofit2.http.Body
-import retrofit2.http.GET
 import retrofit2.http.POST
 
 // ── Request / Response DTOs ──
 
-data class NonceResponse(
-    @SerializedName("nonce") val nonce: String
+data class SignupRequest(
+    @SerializedName("email") val email: String,
+    @SerializedName("password") val password: String,
+    @SerializedName("ownerAddr") val ownerAddr: String,
+    @SerializedName("chainId") val chainId: Int
 )
 
-data class VerifyRequest(
-    @SerializedName("message") val message: String,
-    @SerializedName("signature") val signature: String
+data class LoginRequest(
+    @SerializedName("email") val email: String,
+    @SerializedName("password") val password: String
 )
 
-data class VerifyResponse(
+data class AuthResponse(
     @SerializedName("accessToken") val accessToken: String,
     @SerializedName("refreshToken") val refreshToken: String,
     @SerializedName("user") val user: AuthUser
@@ -24,9 +26,23 @@ data class VerifyResponse(
 
 data class AuthUser(
     @SerializedName("id") val id: String,
+    @SerializedName("email") val email: String,
     @SerializedName("smartWalletAddr") val smartWalletAddr: String,
     @SerializedName("ownerAddr") val ownerAddr: String,
     @SerializedName("chainId") val chainId: Int
+)
+
+data class ForgotPasswordRequest(
+    @SerializedName("email") val email: String
+)
+
+data class ResetPasswordRequest(
+    @SerializedName("token") val token: String,
+    @SerializedName("newPassword") val newPassword: String
+)
+
+data class MessageResponse(
+    @SerializedName("message") val message: String
 )
 
 data class RefreshRequest(
@@ -45,11 +61,17 @@ data class LogoutResponse(
 // ── Retrofit Interface ──
 
 interface AuthApi {
-    @GET("auth/nonce")
-    suspend fun getNonce(): NonceResponse
+    @POST("auth/signup")
+    suspend fun signup(@Body request: SignupRequest): AuthResponse
 
-    @POST("auth/verify")
-    suspend fun verify(@Body request: VerifyRequest): VerifyResponse
+    @POST("auth/login")
+    suspend fun login(@Body request: LoginRequest): AuthResponse
+
+    @POST("auth/forgot-password")
+    suspend fun forgotPassword(@Body request: ForgotPasswordRequest): MessageResponse
+
+    @POST("auth/reset-password")
+    suspend fun resetPassword(@Body request: ResetPasswordRequest): MessageResponse
 
     @POST("auth/refresh")
     suspend fun refresh(@Body request: RefreshRequest): RefreshResponse

@@ -23,14 +23,9 @@ router.post("/create", requireAuth, async (req, res) => {
       Number(chainId)
     );
 
-    const user = await prisma.user.upsert({
+    const user = await prisma.user.update({
       where: { ownerAddr: owner },
-      create: {
-        ownerAddr: owner,
-        smartWalletAddr,
-        chainId,
-      },
-      update: {
+      data: {
         smartWalletAddr,
         chainId,
       },

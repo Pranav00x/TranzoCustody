@@ -25,6 +25,8 @@ data class SeedChallenge(val wordIndex: Int, val choices: List<String>)
 
 data class OnboardingState(
     val mode: OnboardingMode = OnboardingMode.CREATE,
+    val email: String = "",
+    val password: String = "",
     val mnemonic: String = "",
     val importMnemonicInput: String = "",
     val challenges: List<SeedChallenge> = emptyList(),
@@ -54,6 +56,32 @@ class OnboardingViewModel @Inject constructor(
         private const val SALT = 1L
     }
 
+    // ──────────────────── Email / Password ────────────────────
+
+    fun setEmail(email: String) {
+        _state.value = _state.value.copy(email = email, error = null)
+    }
+
+    fun setPassword(password: String) {
+        _state.value = _state.value.copy(password = password, error = null)
+    }
+
+    fun validateEmailPassword(): Boolean {
+        val s = _state.value
+        if (s.email.isBlank() || !s.email.contains("@")) {
+            _state.value = s.copy(error = "Enter a valid email address")
+            return false
+        }
+        if (s.password.length < 8) {
+            _state.value = s.copy(error = "Password must be at least 8 characters")
+            return false
+        }
+        _state.value = s.copy(error = null)
+        return true
+    }
+
+    // ──────────────────── Wallet Mode ─────────────────────────
+
     fun setMode(mode: OnboardingMode) {
         _state.value = _state.value.copy(mode = mode, error = null)
     }
@@ -79,6 +107,8 @@ class OnboardingViewModel @Inject constructor(
         )
         return true
     }
+
+    // ──────────────── Seed Verification ───────────────────────
 
     fun buildVerificationChallenges() {
         val phrase = _state.value.mnemonic
@@ -108,6 +138,8 @@ class OnboardingViewModel @Inject constructor(
             _state.value.verificationPicks[ch.wordIndex] == words[ch.wordIndex]
         }
     }
+
+    // ──────────────────── PIN Entry ───────────────────────────
 
     fun onPinDigit(digit: Int) {
         val s = _state.value
@@ -147,10 +179,18 @@ class OnboardingViewModel @Inject constructor(
         }
     }
 
+    // ──────────────────── Finalize ────────────────────────────
+
     private fun finalizeWalletSetup(pin: String) {
         val mnemonic = _state.value.mnemonic
+        val email = _state.value.email
+        val password = _state.value.password
         if (mnemonic.isBlank()) {
             _state.value = _state.value.copy(setupError = "Missing recovery phrase")
+            return
+        }
+        if (email.isBlank() || password.isBlank()) {
+            _state.value = _state.value.copy(setupError = "Missing email or password")
             return
         }
         viewModelScope.launch {
@@ -163,15 +203,17 @@ class OnboardingViewModel @Inject constructor(
                         BigInteger.valueOf(SALT)
                     )
 
-                    // Authenticate via SIWE — backend creates user + returns JWT tokens
+                    // Register with email/password — backend creates user + returns JWT tokens
                     val smart = try {
-                        val authUser = authRepository.signIn(
-                            credentials = creds,
+                        val authUser = authRepository.signup(
+                            email = email,
+                            password = password,
+                            ownerAddr = creds.address,
                             chainId = BuildConfig.DEFAULT_CHAIN_ID
                         )
                         authUser.smartWalletAddr.lowercase().takeIf { it.isNotBlank() } ?: predicted
                     } catch (_: Exception) {
-                        // Auth failed — continue with locally computed address
+                        // Signup failed — continue with locally computed address
                         predicted
                     }
 
@@ -187,6 +229,7 @@ class OnboardingViewModel @Inject constructor(
                     isLoading = false,
                     walletSetupComplete = true,
                     mnemonic = "",
+                    password = "",
                     pin = "",
                     confirmPin = ""
                 )
@@ -197,7 +240,7 @@ class OnboardingViewModel @Inject constructor(
                         "HTTP to the dev server was blocked. Rebuild the app or use HTTPS."
                     e is IOException || e.cause is IOException ->
                         "Network issue: ${e.message ?: e.cause?.message ?: e.javaClass.simpleName}"
-                    e.message?.contains("Could not reach Polygon Amoy", ignoreCase = true) == true ->
+                    e.message?.contains("Could not reach Base", ignoreCase = true) == true ->
                         e.message!!
                     e.message?.isNotBlank() == true -> e.message!!
                     else -> "Could not finish setup: ${e.javaClass.simpleName}"
@@ -207,7 +250,6 @@ class OnboardingViewModel @Inject constructor(
         }
     }
 
-    
     fun submitVerification(onSuccess: () -> Unit) {
         if (!verificationSatisfied()) {
             _state.value = _state.value.copy(error = "One or more words are incorrect.")
@@ -243,4 +285,3 @@ class OnboardingViewModel @Inject constructor(
         }
     }
 }
-

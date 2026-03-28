@@ -51,11 +51,11 @@ const developmentEnvSchema = z.object({
 
   REDIS_URL: z.string().default("redis://127.0.0.1:6379"),
 
-  POLYGON_RPC_URL: z
+  POLYGON_RPC_URL: z.string().url().optional(),
+  BASE_RPC_URL: z
     .string()
     .url()
-    .default("https://polygon-bor-rpc.publicnode.com"),
-  BASE_RPC_URL: z.string().url().optional(),
+    .default("https://base-rpc.publicnode.com"),
   POLYGON_AMOY_RPC_URL: z.string().url().optional(),
   BASE_SEPOLIA_RPC_URL: z.string().url().optional(),
 

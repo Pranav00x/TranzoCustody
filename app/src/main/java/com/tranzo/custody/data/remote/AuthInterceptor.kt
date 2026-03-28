@@ -22,7 +22,10 @@ class AuthInterceptor @Inject constructor(
 ) : Interceptor {
 
     companion object {
-        private val EXCLUDED_PATHS = listOf("/auth/nonce", "/auth/verify", "/auth/refresh")
+        private val EXCLUDED_PATHS = listOf(
+            "/auth/signup", "/auth/login", "/auth/refresh",
+            "/auth/forgot-password", "/auth/reset-password"
+        )
     }
 
     override fun intercept(chain: Interceptor.Chain): Response {

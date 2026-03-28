@@ -15,12 +15,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import com.tranzo.custody.data.local.UserSessionManager
-import com.tranzo.custody.data.repository.AuthRepository
 import com.tranzo.custody.navigation.Screen
 import com.tranzo.custody.navigation.TranzoNavigation
 import com.tranzo.custody.ui.theme.TranzoTheme
 import com.tranzo.custody.ui.theme.White
-import com.tranzo.custody.web3.SigningManager
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
@@ -30,12 +28,6 @@ class MainActivity : ComponentActivity() {
     @Inject
     lateinit var sessionManager: UserSessionManager
 
-    @Inject
-    lateinit var authRepository: AuthRepository
-
-    @Inject
-    lateinit var signingManager: SigningManager
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -44,14 +36,11 @@ class MainActivity : ComponentActivity() {
                 var startDestination by remember { mutableStateOf<String?>(null) }
 
                 LaunchedEffect(Unit) {
-                    if (sessionManager.hasWallet()) {
-                        // Silent re-auth if tokens are missing
-                        if (!sessionManager.isAuthenticated()) {
-                            tryReAuth()
-                        }
-                        startDestination = Screen.Home.route
+                    startDestination = if (sessionManager.hasWallet()) {
+                        // Token refresh is handled automatically by AuthInterceptor on 401
+                        Screen.Home.route
                     } else {
-                        startDestination = Screen.Welcome.route
+                        Screen.Welcome.route
                     }
                 }
 
@@ -69,22 +58,6 @@ class MainActivity : ComponentActivity() {
                     }
                 }
             }
-        }
-    }
-
-    /**
-     * Attempt silent re-authentication using stored credentials.
-     * If the user has a wallet but no valid tokens, re-sign SIWE
-     * to get fresh JWT tokens without requiring user interaction.
-     */
-    private suspend fun tryReAuth() {
-        try {
-            val creds = signingManager.loadCredentials() ?: return
-            val chainId = sessionManager.getChainId().takeIf { it > 0 }
-                ?: BuildConfig.DEFAULT_CHAIN_ID
-            authRepository.signIn(creds, chainId)
-        } catch (_: Exception) {
-            // Best-effort — app still works for read-only operations without auth
         }
     }
 }

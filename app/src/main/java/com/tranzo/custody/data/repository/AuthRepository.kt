@@ -3,56 +3,86 @@ package com.tranzo.custody.data.repository
 import com.tranzo.custody.data.local.UserSessionManager
 import com.tranzo.custody.data.remote.AuthApi
 import com.tranzo.custody.data.remote.AuthUser
-import com.tranzo.custody.data.remote.VerifyRequest
-import com.tranzo.custody.web3.SiweManager
-import org.web3j.crypto.Credentials
+import com.tranzo.custody.data.remote.ForgotPasswordRequest
+import com.tranzo.custody.data.remote.LoginRequest
+import com.tranzo.custody.data.remote.ResetPasswordRequest
+import com.tranzo.custody.data.remote.SignupRequest
 import javax.inject.Inject
 import javax.inject.Singleton
 
 /**
- * Orchestrates the full SIWE authentication flow:
- *   1. Request nonce from backend
- *   2. Build + sign SIWE message on device
- *   3. Submit to backend, receive JWT tokens
- *   4. Persist tokens locally
+ * Orchestrates email/password authentication:
+ *   1. Signup — create account with email + password + wallet address
+ *   2. Login — authenticate with email + password
+ *   3. Password recovery — forgot/reset password
  */
 @Singleton
 class AuthRepository @Inject constructor(
     private val authApi: AuthApi,
-    private val siweManager: SiweManager,
     private val sessionManager: UserSessionManager
 ) {
 
     /**
-     * Full sign-in flow. Call after wallet creation/import.
-     * Returns the authenticated user data from the backend.
+     * Sign up with email/password. Call after wallet creation.
+     * The ownerAddr is derived locally from the mnemonic.
      */
-    suspend fun signIn(credentials: Credentials, chainId: Int): AuthUser {
-        // 1. Get nonce
-        val nonceResponse = authApi.getNonce()
-
-        // 2. Build SIWE message
-        val address = credentials.address
-        val message = siweManager.buildMessage(
-            address = address,
-            chainId = chainId,
-            nonce = nonceResponse.nonce
+    suspend fun signup(
+        email: String,
+        password: String,
+        ownerAddr: String,
+        chainId: Int
+    ): AuthUser {
+        val response = authApi.signup(
+            SignupRequest(
+                email = email,
+                password = password,
+                ownerAddr = ownerAddr,
+                chainId = chainId
+            )
         )
 
-        // 3. Sign message
-        val signature = siweManager.signMessage(message, credentials)
-
-        // 4. Verify with backend
-        val verifyResponse = authApi.verify(VerifyRequest(message = message, signature = signature))
-
-        // 5. Persist tokens
         sessionManager.saveAuthTokens(
-            accessToken = verifyResponse.accessToken,
-            refreshToken = verifyResponse.refreshToken,
-            userId = verifyResponse.user.id
+            accessToken = response.accessToken,
+            refreshToken = response.refreshToken,
+            userId = response.user.id
         )
 
-        return verifyResponse.user
+        return response.user
+    }
+
+    /**
+     * Log in with email/password. Returns user data.
+     */
+    suspend fun login(email: String, password: String): AuthUser {
+        val response = authApi.login(
+            LoginRequest(email = email, password = password)
+        )
+
+        sessionManager.saveAuthTokens(
+            accessToken = response.accessToken,
+            refreshToken = response.refreshToken,
+            userId = response.user.id
+        )
+
+        return response.user
+    }
+
+    /**
+     * Request a password reset email.
+     */
+    suspend fun forgotPassword(email: String): String {
+        val response = authApi.forgotPassword(ForgotPasswordRequest(email = email))
+        return response.message
+    }
+
+    /**
+     * Reset password with a token from the reset email.
+     */
+    suspend fun resetPassword(token: String, newPassword: String): String {
+        val response = authApi.resetPassword(
+            ResetPasswordRequest(token = token, newPassword = newPassword)
+        )
+        return response.message
     }
 
     /**

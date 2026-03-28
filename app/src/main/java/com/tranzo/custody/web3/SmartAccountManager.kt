@@ -57,12 +57,12 @@ class SmartAccountManager @Inject constructor(
         val detail = last?.message?.takeIf { it.isNotBlank() } ?: last?.javaClass?.simpleName
         val hint =
             if (BuildConfig.AMOY_RPC_URL.isBlank()) {
-                " Try setting POLYGON_RPC_URL in local.properties to an Alchemy/Infura Polygon HTTPS URL."
+                " Try setting BASE_RPC_URL in local.properties to an Alchemy/Infura Base HTTPS URL."
             } else {
                 ""
             }
         throw IllegalStateException(
-            "Could not reach Polygon to compute your smart wallet. Check internet or VPN.$hint${
+            "Could not reach Base to compute your smart wallet. Check internet or VPN.$hint${
                 detail?.let { " ($it)" } ?: ""
             }",
             last
