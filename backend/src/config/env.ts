@@ -51,18 +51,18 @@ const developmentEnvSchema = z.object({
 
   REDIS_URL: z.string().default("redis://127.0.0.1:6379"),
 
-  POLYGON_RPC_URL: z.string().url().optional(),
-  BASE_RPC_URL: z.string().url().optional(),
-  POLYGON_AMOY_RPC_URL: z
+  POLYGON_RPC_URL: z
     .string()
     .url()
-    .default("https://rpc-amoy.polygon.technology"),
+    .default("https://polygon-bor-rpc.publicnode.com"),
+  BASE_RPC_URL: z.string().url().optional(),
+  POLYGON_AMOY_RPC_URL: z.string().url().optional(),
   BASE_SEPOLIA_RPC_URL: z.string().url().optional(),
 
   PIMLICO_API_KEY: z.string().default("dev-placeholder"),
 
   FACTORY_ADDRESS: ethAddress.default(
-    "0x1b41BbeDAAeDAf82E9D4Bc25dB3DB6144eEbC4E6"
+    "0x3A2e916613D4c5255e6258Baced901794B0d7D62"
   ),
   PAYMASTER_ADDRESS: ethAddress.default(
     "0x0000000000000000000000000000000000000000"

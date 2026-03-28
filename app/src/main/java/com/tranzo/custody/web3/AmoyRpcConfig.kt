@@ -5,18 +5,17 @@ import okhttp3.OkHttpClient
 import java.util.concurrent.TimeUnit
 
 /**
- * Polygon Amoy (80002) JSON-RPC endpoints. Public RPCs are often rate-limited or block bare OkHttp;
- * we set a browser-like User-Agent and try several URLs. Override [BuildConfig.AMOY_RPC_URL] with
- * Alchemy/Infura/etc. if your network blocks public endpoints.
+ * Polygon (137) JSON-RPC endpoints. Public RPCs are often rate-limited or block bare OkHttp;
+ * we set a normal User-Agent and try several URLs. Override via POLYGON_RPC_URL in
+ * local.properties if your network blocks public endpoints.
  */
 object AmoyRpcConfig {
 
     private val defaultEndpoints = listOf(
-        "https://polygon-amoy-bor-rpc.publicnode.com",
-        "https://rpc-amoy.polygon.technology",
-        "https://polygon-amoy.drpc.org",
-        "https://rpc.ankr.com/polygon_amoy",
-        "https://80002.rpc.thirdweb.com"
+        "https://polygon-bor-rpc.publicnode.com",
+        "https://polygon.drpc.org",
+        "https://rpc.ankr.com/polygon",
+        "https://137.rpc.thirdweb.com"
     )
 
     private val client: OkHttpClient by lazy {

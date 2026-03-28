@@ -32,11 +32,11 @@ android {
         buildConfigField(
             "String",
             "ACCOUNT_FACTORY_ADDRESS",
-            "\"0x1b41BbeDAAeDAf82E9D4Bc25dB3DB6144eEbC4E6\""
+            "\"0x3A2e916613D4c5255e6258Baced901794B0d7D62\""
         )
-        buildConfigField("int", "DEFAULT_CHAIN_ID", "80002")
-        // Reads AMOY_RPC_URL from local.properties (gitignored). Falls back to empty → public RPCs.
-        buildConfigField("String", "AMOY_RPC_URL", "\"${localProps.getProperty("AMOY_RPC_URL", "")}\"")
+        buildConfigField("int", "DEFAULT_CHAIN_ID", "137")
+        // Reads POLYGON_RPC_URL from local.properties (gitignored). Falls back to empty → public RPCs.
+        buildConfigField("String", "AMOY_RPC_URL", "\"${localProps.getProperty("POLYGON_RPC_URL", "")}\"")
     }
 
     signingConfigs {
