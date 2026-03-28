@@ -14,6 +14,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import com.tranzo.custody.data.backup.DriveBackupManager
 import com.tranzo.custody.data.local.UserSessionManager
 import com.tranzo.custody.navigation.Screen
 import com.tranzo.custody.navigation.TranzoNavigation
@@ -28,6 +29,9 @@ class MainActivity : ComponentActivity() {
     @Inject
     lateinit var sessionManager: UserSessionManager
 
+    @Inject
+    lateinit var driveBackupManager: DriveBackupManager
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -37,7 +41,6 @@ class MainActivity : ComponentActivity() {
 
                 LaunchedEffect(Unit) {
                     startDestination = if (sessionManager.hasWallet()) {
-                        // Token refresh is handled automatically by AuthInterceptor on 401
                         Screen.Home.route
                     } else {
                         Screen.Welcome.route
@@ -49,7 +52,11 @@ class MainActivity : ComponentActivity() {
                     color = White
                 ) {
                     if (startDestination != null) {
-                        TranzoNavigation(startDestination = startDestination!!)
+                        TranzoNavigation(
+                            startDestination = startDestination!!,
+                            driveBackupManager = driveBackupManager,
+                            sessionManager = sessionManager
+                        )
                     } else {
                         Box(
                             modifier = Modifier.fillMaxSize(),

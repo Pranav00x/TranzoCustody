@@ -17,6 +17,7 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -33,7 +34,8 @@ import com.tranzo.custody.ui.theme.White
 @Composable
 fun WelcomeScreen(
     onCreateWallet: () -> Unit,
-    onImportWallet: () -> Unit
+    onImportWallet: () -> Unit,
+    onLogin: () -> Unit = {}
 ) {
     Column(
         modifier = Modifier
@@ -106,6 +108,20 @@ fun WelcomeScreen(
             Text("I already have a recovery phrase", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
         }
 
-        Spacer(modifier = Modifier.height(48.dp))
+        Spacer(modifier = Modifier.height(20.dp))
+
+        TextButton(
+            onClick = onLogin,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text(
+                "Already have an account? Log in",
+                style = MaterialTheme.typography.bodyMedium,
+                fontWeight = FontWeight.Medium,
+                color = TextMuted
+            )
+        }
+
+        Spacer(modifier = Modifier.height(32.dp))
     }
 }

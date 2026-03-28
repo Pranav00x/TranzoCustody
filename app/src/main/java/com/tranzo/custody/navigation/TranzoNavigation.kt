@@ -17,6 +17,8 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import androidx.navigation.navigation
+import com.tranzo.custody.data.backup.DriveBackupManager
+import com.tranzo.custody.data.local.UserSessionManager
 import com.tranzo.custody.ui.activity.ActivityScreen
 import com.tranzo.custody.ui.activity.TransactionDetailScreen
 import com.tranzo.custody.ui.card.CardScreen
@@ -28,8 +30,11 @@ import com.tranzo.custody.ui.home.HomeScreen
 import com.tranzo.custody.ui.home.ReceiveScreen
 import com.tranzo.custody.ui.home.SendScreen
 import com.tranzo.custody.ui.home.SwapScreen
+import com.tranzo.custody.ui.onboarding.BackupPromptScreen
 import com.tranzo.custody.ui.onboarding.CreateWalletScreen
+import com.tranzo.custody.ui.onboarding.EmailPasswordScreen
 import com.tranzo.custody.ui.onboarding.ImportWalletScreen
+import com.tranzo.custody.ui.onboarding.LoginScreen
 import com.tranzo.custody.ui.onboarding.SetPinScreen
 import com.tranzo.custody.ui.onboarding.VerifySeedScreen
 import com.tranzo.custody.ui.onboarding.WelcomeScreen
@@ -40,7 +45,11 @@ import com.tranzo.custody.ui.settings.SettingsScreen
 private val mainTabs = setOf("home", "card", "activity", "settings")
 
 @Composable
-fun TranzoNavigation(startDestination: String = Screen.Welcome.route) {
+fun TranzoNavigation(
+    startDestination: String = Screen.Welcome.route,
+    driveBackupManager: DriveBackupManager? = null,
+    sessionManager: UserSessionManager? = null
+) {
     val navController = rememberNavController()
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
@@ -73,13 +82,41 @@ fun TranzoNavigation(startDestination: String = Screen.Welcome.route) {
             composable(Screen.Welcome.route) {
                 WelcomeScreen(
                     onCreateWallet = { navController.navigate(Screen.OnboardingCreateGraph.route) },
-                    onImportWallet = { navController.navigate(Screen.OnboardingImportGraph.route) }
+                    onImportWallet = { navController.navigate(Screen.OnboardingImportGraph.route) },
+                    onLogin = { navController.navigate(Screen.Login.route) }
                 )
             }
+
+            // ── Login ──
+            composable(Screen.Login.route) {
+                LoginScreen(
+                    onLoginSuccess = {
+                        navController.navigate(Screen.Home.route) {
+                            popUpTo(Screen.Welcome.route) { inclusive = true }
+                            launchSingleTop = true
+                        }
+                    },
+                    onBack = { navController.popBackStack() },
+                    viewModel = hiltViewModel(),
+                    driveBackupManager = driveBackupManager ?: return@composable
+                )
+            }
+
+            // ── Create Wallet Flow: Email → Create → Verify → PIN → Backup ──
             navigation(
                 route = Screen.OnboardingCreateGraph.route,
-                startDestination = Screen.CreateWallet.route
+                startDestination = Screen.EmailPassword.route
             ) {
+                composable(Screen.EmailPassword.route) { entry ->
+                    val parent = remember(entry) {
+                        navController.getBackStackEntry(Screen.OnboardingCreateGraph.route)
+                    }
+                    EmailPasswordScreen(
+                        onContinue = { navController.navigate(Screen.CreateWallet.route) },
+                        onBack = { navController.popBackStack() },
+                        viewModel = hiltViewModel(parent)
+                    )
+                }
                 composable(Screen.CreateWallet.route) { entry ->
                     val parent = remember(entry) {
                         navController.getBackStackEntry(Screen.OnboardingCreateGraph.route)
@@ -106,20 +143,47 @@ fun TranzoNavigation(startDestination: String = Screen.Welcome.route) {
                     }
                     SetPinScreen(
                         onPinSet = {
-                            navController.navigate(Screen.Home.route) {
-                                popUpTo(Screen.Welcome.route) { inclusive = true }
-                                launchSingleTop = true
-                            }
+                            navController.navigate(Screen.BackupPrompt.route)
                         },
                         onBack = { navController.popBackStack() },
                         viewModel = hiltViewModel(parent)
                     )
                 }
+                composable(Screen.BackupPrompt.route) { entry ->
+                    val parent = remember(entry) {
+                        navController.getBackStackEntry(Screen.OnboardingCreateGraph.route)
+                    }
+                    if (driveBackupManager != null && sessionManager != null) {
+                        BackupPromptScreen(
+                            onComplete = {
+                                navController.navigate(Screen.Home.route) {
+                                    popUpTo(Screen.Welcome.route) { inclusive = true }
+                                    launchSingleTop = true
+                                }
+                            },
+                            viewModel = hiltViewModel(parent),
+                            driveBackupManager = driveBackupManager,
+                            sessionManager = sessionManager
+                        )
+                    }
+                }
             }
+
+            // ── Import Wallet Flow: Email → Import → PIN → Backup ──
             navigation(
                 route = Screen.OnboardingImportGraph.route,
-                startDestination = Screen.ImportWallet.route
+                startDestination = Screen.EmailPassword.route
             ) {
+                composable(Screen.EmailPassword.route) { entry ->
+                    val parent = remember(entry) {
+                        navController.getBackStackEntry(Screen.OnboardingImportGraph.route)
+                    }
+                    EmailPasswordScreen(
+                        onContinue = { navController.navigate(Screen.ImportWallet.route) },
+                        onBack = { navController.popBackStack() },
+                        viewModel = hiltViewModel(parent)
+                    )
+                }
                 composable(Screen.ImportWallet.route) { entry ->
                     val parent = remember(entry) {
                         navController.getBackStackEntry(Screen.OnboardingImportGraph.route)
@@ -136,14 +200,29 @@ fun TranzoNavigation(startDestination: String = Screen.Welcome.route) {
                     }
                     SetPinScreen(
                         onPinSet = {
-                            navController.navigate(Screen.Home.route) {
-                                popUpTo(Screen.Welcome.route) { inclusive = true }
-                                launchSingleTop = true
-                            }
+                            navController.navigate(Screen.BackupPrompt.route)
                         },
                         onBack = { navController.popBackStack() },
                         viewModel = hiltViewModel(parent)
                     )
+                }
+                composable(Screen.BackupPrompt.route) { entry ->
+                    val parent = remember(entry) {
+                        navController.getBackStackEntry(Screen.OnboardingImportGraph.route)
+                    }
+                    if (driveBackupManager != null && sessionManager != null) {
+                        BackupPromptScreen(
+                            onComplete = {
+                                navController.navigate(Screen.Home.route) {
+                                    popUpTo(Screen.Welcome.route) { inclusive = true }
+                                    launchSingleTop = true
+                                }
+                            },
+                            viewModel = hiltViewModel(parent),
+                            driveBackupManager = driveBackupManager,
+                            sessionManager = sessionManager
+                        )
+                    }
                 }
             }
 
