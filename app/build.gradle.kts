@@ -87,6 +87,8 @@ android {
     packaging {
         resources {
             pickFirsts += "META-INF/DISCLAIMER"
+            pickFirsts += "META-INF/INDEX.LIST"
+            pickFirsts += "META-INF/DEPENDENCIES"
         }
     }
 }
