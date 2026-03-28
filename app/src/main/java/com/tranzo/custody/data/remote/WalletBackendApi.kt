@@ -5,6 +5,7 @@ import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.POST
 import retrofit2.http.Path
+import retrofit2.http.Query
 
 data class CreateWalletRequest(
     @SerializedName("owner") val owner: String,
@@ -45,4 +46,22 @@ interface WalletBackendApi {
 
     @POST("wallet/send-userop")
     suspend fun sendUserOperation(@Body body: SendUserOpRequest): SendUserOpResponse
+
+    @GET("v1/balances/{address}")
+    suspend fun getBackendBalances(
+        @Path("address") address: String,
+        @Query("chain") chainId: Int
+    ): BackendBalanceResponse
 }
+
+data class BackendBalanceResponse(
+    @SerializedName("balances") val balances: List<BackendTokenBalance>
+)
+
+data class BackendTokenBalance(
+    @SerializedName("symbol") val symbol: String,
+    @SerializedName("balance") val balance: String,
+    @SerializedName("rawBalance") val rawBalance: String,
+    @SerializedName("decimals") val decimals: Int,
+    @SerializedName("contractAddress") val contractAddress: String?
+)

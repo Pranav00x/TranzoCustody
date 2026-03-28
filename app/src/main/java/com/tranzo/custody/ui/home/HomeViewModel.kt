@@ -1,11 +1,13 @@
-﻿package com.tranzo.custody.ui.home
+package com.tranzo.custody.ui.home
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.tranzo.custody.data.local.UserSessionManager
+import com.tranzo.custody.data.repository.CardRepositoryImpl
 import com.tranzo.custody.domain.model.Chain
 import com.tranzo.custody.domain.model.Token
 import com.tranzo.custody.domain.model.WalletPortfolio
+import com.tranzo.custody.domain.repository.TransactionRepository
 import com.tranzo.custody.domain.repository.WalletRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -25,6 +27,8 @@ data class HomeUiState(
 @HiltViewModel
 class HomeViewModel @Inject constructor(
     private val walletRepository: WalletRepository,
+    private val cardRepository: CardRepositoryImpl,
+    private val transactionRepository: TransactionRepository,
     private val sessionManager: UserSessionManager
 ) : ViewModel() {
 
@@ -37,6 +41,13 @@ class HomeViewModel @Inject constructor(
             val addr = sessionManager.getSmartWalletAddress()
                 .ifEmpty { walletRepository.getWalletAddress(Chain.POLYGON) }
             _state.value = _state.value.copy(smartWalletAddress = addr)
+        }
+        // Refresh all data from backend on startup
+        viewModelScope.launch {
+            try { cardRepository.refreshCards() } catch (_: Exception) {}
+        }
+        viewModelScope.launch {
+            try { transactionRepository.refreshTransactions() } catch (_: Exception) {}
         }
     }
 
@@ -56,6 +67,8 @@ class HomeViewModel @Inject constructor(
         viewModelScope.launch {
             _state.value = _state.value.copy(isRefreshing = true)
             walletRepository.refreshBalances()
+            try { cardRepository.refreshCards() } catch (_: Exception) {}
+            try { transactionRepository.refreshTransactions() } catch (_: Exception) {}
             val addr = sessionManager.getSmartWalletAddress()
                 .ifEmpty { walletRepository.getWalletAddress(Chain.POLYGON) }
             _state.value = _state.value.copy(smartWalletAddress = addr)

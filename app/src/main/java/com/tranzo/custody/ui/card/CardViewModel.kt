@@ -2,6 +2,7 @@ package com.tranzo.custody.ui.card
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.tranzo.custody.data.repository.CardRepositoryImpl
 import com.tranzo.custody.domain.model.CardTransaction
 import com.tranzo.custody.domain.model.CryptoCard
 import com.tranzo.custody.domain.repository.CardRepository
@@ -21,7 +22,8 @@ data class CardUiState(
 
 @HiltViewModel
 class CardViewModel @Inject constructor(
-    private val cardRepository: CardRepository
+    private val cardRepository: CardRepository,
+    private val cardRepositoryImpl: CardRepositoryImpl
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(CardUiState())
@@ -30,6 +32,10 @@ class CardViewModel @Inject constructor(
     init {
         loadCard()
         loadTransactions()
+        // Fetch latest card data from backend
+        viewModelScope.launch {
+            try { cardRepositoryImpl.refreshCards() } catch (_: Exception) {}
+        }
     }
 
     private fun loadCard() {

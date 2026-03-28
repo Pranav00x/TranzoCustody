@@ -37,6 +37,10 @@ class ActivityViewModel @Inject constructor(
 
     init {
         loadTransactions()
+        // Fetch latest transactions from backend
+        viewModelScope.launch {
+            try { transactionRepository.refreshTransactions() } catch (_: Exception) {}
+        }
     }
 
     private fun loadTransactions() {

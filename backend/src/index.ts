@@ -10,6 +10,8 @@ import paymasterRoutes from "./routes/paymaster.routes.js";
 import cardRoutes from "./routes/card.routes.js";
 import streamRoutes from "./routes/stream.routes.js";
 import balanceRoutes from "./routes/balance.routes.js";
+import kycRoutes from "./routes/kyc.routes.js";
+import webhookRoutes from "./routes/webhook.routes.js";
 import { startTxMonitorWorker } from "./workers/tx-monitor.worker.js";
 
 const app = express();
@@ -33,6 +35,10 @@ app.use("/wallet", walletRoutes);
 app.use("/paymaster", paymasterRoutes);
 app.use("/cards", cardRoutes);
 app.use("/streams", streamRoutes);
+app.use("/kyc", kycRoutes);
+
+// ──────────────────── Webhook Routes ────────────────────────────
+app.use("/webhooks", webhookRoutes);
 
 // ──────────────────── Error Handler ─────────────────────────────
 app.use(errorHandler);

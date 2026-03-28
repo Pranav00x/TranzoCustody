@@ -62,11 +62,30 @@ class WalletRepositoryImpl @Inject constructor(
     override suspend fun refreshBalances() {
         val addr = sessionManager.getSmartWalletAddress()
         if (addr.isEmpty()) return
-        val chainId = sessionManager.getChainId()
+        val chainId = sessionManager.getChainId().takeIf { it > 0 } ?: BuildConfig.DEFAULT_CHAIN_ID
         val chain = chainFromId(chainId)
-        try {
-            val dto = tranzoApi.getBalances(addr, chain.toApiSlug())
-            val tokens = dto.balances.map { b ->
+
+        // Try backend balance API first → TranzoApi fallback → direct RPC fallback
+        val tokens = fetchFromBackendBalanceApi(addr, chainId, chain)
+            ?: fetchFromTranzoApi(addr, chain)
+            ?: fetchFromDirectRpc(addr, chainId, chain)
+
+        val totalFiat = tokens.sumOf { it.fiatValue }
+        _portfolio.value = WalletPortfolio(
+            walletBalanceFiat = totalFiat,
+            spendableBalanceFiat = _portfolio.value.spendableBalanceFiat,
+            dailyChangePercent = 0.0,
+            dailyChangeAmount = 0.0,
+            tokens = tokens,
+            wallets = listOf(Wallet(addr, chain, totalFiat, true))
+        )
+    }
+
+    /** Backend /v1/balances — returns on-chain native + ERC-20 balances. */
+    private suspend fun fetchFromBackendBalanceApi(addr: String, chainId: Int, chain: Chain): List<Token>? {
+        return try {
+            val dto = walletBackendApi.getBackendBalances(addr, chainId)
+            dto.balances.map { b ->
                 val bal = b.balance.toDoubleOrNull() ?: 0.0
                 Token(
                     symbol = b.symbol,
@@ -78,38 +97,45 @@ class WalletRepositoryImpl @Inject constructor(
                     decimals = b.decimals,
                     iconColor = 0xFF8247E5
                 )
-            }
-            val totalFiat = tokens.sumOf { it.fiatValue }
-            _portfolio.value = WalletPortfolio(
-                walletBalanceFiat = totalFiat,
-                spendableBalanceFiat = _portfolio.value.spendableBalanceFiat,
-                dailyChangePercent = 0.0,
-                dailyChangeAmount = 0.0,
-                tokens = tokens,
-                wallets = listOf(Wallet(addr, chain, totalFiat, true))
-            )
-        } catch (_: Exception) {
+            }.takeIf { it.isNotEmpty() }
+        } catch (_: Exception) { null }
+    }
+
+    /** TranzoApi (api.tranzo.money) fallback. */
+    private suspend fun fetchFromTranzoApi(addr: String, chain: Chain): List<Token>? {
+        return try {
+            val dto = tranzoApi.getBalances(addr, chain.toApiSlug())
+            dto.balances.map { b ->
+                val bal = b.balance.toDoubleOrNull() ?: 0.0
+                Token(
+                    symbol = b.symbol,
+                    name = b.symbol,
+                    chain = chain,
+                    balance = bal,
+                    fiatValue = bal,
+                    priceChange24h = 0.0,
+                    decimals = b.decimals,
+                    iconColor = 0xFF8247E5
+                )
+            }.takeIf { it.isNotEmpty() }
+        } catch (_: Exception) { null }
+    }
+
+    /** Direct RPC eth_getBalance fallback — native token only. */
+    private suspend fun fetchFromDirectRpc(addr: String, chainId: Int, chain: Chain): List<Token> {
+        return try {
             val wei = web3j.ethGetBalance(addr, DefaultBlockParameterName.LATEST).send().balance
             val native = Convert.fromWei(BigDecimal(wei), Convert.Unit.ETHER).toDouble()
             val symbol = if (chainId == 80002 || chainId == 137) "MATIC" else "ETH"
-            val token = Token(
-                symbol = symbol,
-                name = symbol,
-                chain = chain,
-                balance = native,
-                fiatValue = native,
-                priceChange24h = 0.0,
-                decimals = 18,
-                iconColor = 0xFF8247E5
+            listOf(
+                Token(
+                    symbol = symbol, name = symbol, chain = chain,
+                    balance = native, fiatValue = native, priceChange24h = 0.0,
+                    decimals = 18, iconColor = 0xFF8247E5
+                )
             )
-            _portfolio.value = WalletPortfolio(
-                walletBalanceFiat = native,
-                spendableBalanceFiat = 0.0,
-                dailyChangePercent = 0.0,
-                dailyChangeAmount = 0.0,
-                tokens = listOf(token),
-                wallets = listOf(Wallet(addr, chain, native, true))
-            )
+        } catch (_: Exception) {
+            emptyList()
         }
     }
 
