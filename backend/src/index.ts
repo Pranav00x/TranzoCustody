@@ -11,6 +11,9 @@ import cardRoutes from "./routes/card.routes.js";
 import streamRoutes from "./routes/stream.routes.js";
 import balanceRoutes from "./routes/balance.routes.js";
 import kycRoutes from "./routes/kyc.routes.js";
+import swapRoutes from "./routes/swap.routes.js";
+import bridgeRoutes from "./routes/bridge.routes.js";
+import buyRoutes from "./routes/buy.routes.js";
 import webhookRoutes from "./routes/webhook.routes.js";
 import { startTxMonitorWorker } from "./workers/tx-monitor.worker.js";
 
@@ -36,6 +39,9 @@ app.use("/paymaster", paymasterRoutes);
 app.use("/cards", cardRoutes);
 app.use("/streams", streamRoutes);
 app.use("/kyc", kycRoutes);
+app.use("/swap", swapRoutes);
+app.use("/bridge", bridgeRoutes);
+app.use("/buy", buyRoutes);
 
 // ──────────────────── Webhook Routes ────────────────────────────
 app.use("/webhooks", webhookRoutes);

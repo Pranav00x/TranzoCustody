@@ -101,4 +101,28 @@ object NetworkModule {
     fun provideStreamApi(@WalletBackendRetrofit retrofit: Retrofit): StreamApi {
         return retrofit.create(StreamApi::class.java)
     }
+
+    @Provides
+    @Singleton
+    fun provideSwapApi(@WalletBackendRetrofit retrofit: Retrofit): SwapApi {
+        return retrofit.create(SwapApi::class.java)
+    }
+
+    @Provides
+    @Singleton
+    fun provideBridgeApi(@WalletBackendRetrofit retrofit: Retrofit): BridgeApi {
+        return retrofit.create(BridgeApi::class.java)
+    }
+
+    @Provides
+    @Singleton
+    fun provideBuyApi(@WalletBackendRetrofit retrofit: Retrofit): BuyApi {
+        return retrofit.create(BuyApi::class.java)
+    }
+
+    @Provides
+    @Singleton
+    fun provideKycApi(@WalletBackendRetrofit retrofit: Retrofit): KycApi {
+        return retrofit.create(KycApi::class.java)
+    }
 }
