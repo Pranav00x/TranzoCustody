@@ -36,8 +36,8 @@ import com.tranzo.custody.ui.onboarding.EmailPasswordScreen
 import com.tranzo.custody.ui.onboarding.ImportWalletScreen
 import com.tranzo.custody.ui.onboarding.LoginScreen
 import com.tranzo.custody.ui.onboarding.SetPinScreen
-import com.tranzo.custody.ui.onboarding.VerifySeedScreen
 import com.tranzo.custody.ui.onboarding.WelcomeScreen
+import com.tranzo.custody.ui.settings.AppearanceScreen
 import com.tranzo.custody.ui.settings.DripperScreen
 import com.tranzo.custody.ui.settings.SecurityScreen
 import com.tranzo.custody.ui.settings.SettingsScreen
@@ -102,7 +102,7 @@ fun TranzoNavigation(
                 )
             }
 
-            // ── Create Wallet Flow: Email → Create → Verify → PIN → Backup ──
+            // ── Create Wallet Flow: Email → Create → PIN → Backup ──
             navigation(
                 route = Screen.OnboardingCreateGraph.route,
                 startDestination = Screen.EmailPassword.route
@@ -122,17 +122,7 @@ fun TranzoNavigation(
                         navController.getBackStackEntry(Screen.OnboardingCreateGraph.route)
                     }
                     CreateWalletScreen(
-                        onContinue = { navController.navigate(Screen.VerifySeed.route) },
-                        onBack = { navController.popBackStack() },
-                        viewModel = hiltViewModel(parent)
-                    )
-                }
-                composable(Screen.VerifySeed.route) { entry ->
-                    val parent = remember(entry) {
-                        navController.getBackStackEntry(Screen.OnboardingCreateGraph.route)
-                    }
-                    VerifySeedScreen(
-                        onVerified = { navController.navigate(Screen.SetPin.route) },
+                        onContinue = { navController.navigate(Screen.SetPin.route) },
                         onBack = { navController.popBackStack() },
                         viewModel = hiltViewModel(parent)
                     )
@@ -253,6 +243,7 @@ fun TranzoNavigation(
                     onSecurityClick = { navController.navigate(Screen.Security.route) },
                     onDripperClick = { navController.navigate(Screen.DripperDevices.route) },
                     onCardSettingsClick = { navController.navigate(Screen.CardSettings.route) },
+                    onAppearanceClick = { navController.navigate(Screen.Appearance.route) },
                     onLogout = {
                         navController.navigate(Screen.Welcome.route) {
                             popUpTo(0) { inclusive = true }
@@ -289,6 +280,9 @@ fun TranzoNavigation(
                     transactionId = txId,
                     onBack = { navController.popBackStack() }
                 )
+            }
+            composable(Screen.Appearance.route) {
+                AppearanceScreen(onBack = { navController.popBackStack() })
             }
             composable(Screen.Security.route) {
                 SecurityScreen(onBack = { navController.popBackStack() })

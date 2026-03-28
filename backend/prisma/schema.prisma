@@ -19,6 +19,7 @@ model User {
   kycProvider     String?
   createdAt       DateTime       @default(now())
   updatedAt       DateTime       @updatedAt
+  transactions    Transaction[]
   cards           Card[]
   cardSessions    CardSession[]
   sentStreams     Stream[]        @relation("sender")
@@ -57,6 +58,30 @@ model PasswordResetToken {
 
   @@index([userId])
   @@index([expiresAt])
+}
+
+model Transaction {
+  id            String        @id @default(cuid())
+  userId        String
+  user          User          @relation(fields: [userId], references: [id])
+  txHash        String
+  chainId       Int
+  from          String
+  to            String
+  value         String        // wei as string
+  token         String?       // null = native, otherwise ERC-20 symbol
+  tokenAddress  String?
+  type          TxType
+  status        TxStatus      @default(PENDING)
+  blockNumber   BigInt?
+  gasUsed       String?
+  timestamp     DateTime?
+  createdAt     DateTime      @default(now())
+
+  @@index([userId])
+  @@index([txHash])
+  @@index([chainId, from])
+  @@index([chainId, to])
 }
 
 model Card {
@@ -145,4 +170,20 @@ enum StreamStatus {
   PAUSED
   CANCELLED
   COMPLETED
+}
+
+enum TxType {
+  SEND
+  RECEIVE
+  SWAP
+  BRIDGE
+  CONTRACT_CALL
+  USER_OP
+}
+
+enum TxStatus {
+  PENDING
+  CONFIRMED
+  FAILED
+  DROPPED
 }

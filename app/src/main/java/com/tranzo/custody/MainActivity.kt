@@ -6,8 +6,10 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -15,11 +17,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import com.tranzo.custody.data.backup.DriveBackupManager
+import com.tranzo.custody.data.local.ThemePreferencesManager
 import com.tranzo.custody.data.local.UserSessionManager
 import com.tranzo.custody.navigation.Screen
 import com.tranzo.custody.navigation.TranzoNavigation
+import com.tranzo.custody.ui.theme.AppFontId
+import com.tranzo.custody.ui.theme.AppThemeId
 import com.tranzo.custody.ui.theme.TranzoTheme
-import com.tranzo.custody.ui.theme.White
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
@@ -32,11 +36,17 @@ class MainActivity : ComponentActivity() {
     @Inject
     lateinit var driveBackupManager: DriveBackupManager
 
+    @Inject
+    lateinit var themePreferencesManager: ThemePreferencesManager
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            TranzoTheme {
+            val selectedTheme by themePreferencesManager.selectedTheme.collectAsState(initial = AppThemeId.CLASSIC)
+            val selectedFont by themePreferencesManager.selectedFont.collectAsState(initial = AppFontId.INTER)
+
+            TranzoTheme(themeId = selectedTheme, fontId = selectedFont) {
                 var startDestination by remember { mutableStateOf<String?>(null) }
 
                 LaunchedEffect(Unit) {
@@ -49,7 +59,7 @@ class MainActivity : ComponentActivity() {
 
                 Surface(
                     modifier = Modifier.fillMaxSize(),
-                    color = White
+                    color = MaterialTheme.colorScheme.background
                 ) {
                     if (startDestination != null) {
                         TranzoNavigation(

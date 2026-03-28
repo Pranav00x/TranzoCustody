@@ -15,6 +15,10 @@ import swapRoutes from "./routes/swap.routes.js";
 import bridgeRoutes from "./routes/bridge.routes.js";
 import buyRoutes from "./routes/buy.routes.js";
 import webhookRoutes from "./routes/webhook.routes.js";
+import gasRoutes from "./routes/gas.routes.js";
+import portfolioRoutes from "./routes/portfolio.routes.js";
+import profileRoutes from "./routes/profile.routes.js";
+import transactionRoutes from "./routes/transaction.routes.js";
 import { startTxMonitorWorker } from "./workers/tx-monitor.worker.js";
 
 const app = express();
@@ -27,7 +31,10 @@ app.use(generalLimiter);
 
 // ──────────────────── Public Routes ─────────────────────────────
 app.use("/auth", authLimiter, authRoutes);
+app.use("/auth", authLimiter, profileRoutes);
 app.use("/v1", balanceRoutes);
+app.use("/v1", gasRoutes);
+app.use("/v1", portfolioRoutes);
 
 app.get("/health", (_req, res) => {
   res.json({ status: "ok" });
@@ -42,6 +49,7 @@ app.use("/kyc", kycRoutes);
 app.use("/swap", swapRoutes);
 app.use("/bridge", bridgeRoutes);
 app.use("/buy", buyRoutes);
+app.use("/transactions", transactionRoutes);
 
 // ──────────────────── Webhook Routes ────────────────────────────
 app.use("/webhooks", webhookRoutes);

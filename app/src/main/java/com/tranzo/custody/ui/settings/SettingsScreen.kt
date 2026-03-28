@@ -27,6 +27,7 @@ import androidx.compose.material.icons.filled.CreditCard
 import androidx.compose.material.icons.filled.Description
 import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.Notifications
+import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material.icons.filled.Security
@@ -65,6 +66,7 @@ fun SettingsScreen(
     onSecurityClick: () -> Unit,
     onDripperClick: () -> Unit,
     onCardSettingsClick: () -> Unit,
+    onAppearanceClick: () -> Unit = {},
     onLogout: () -> Unit,
     viewModel: SettingsViewModel = hiltViewModel()
 ) {
@@ -187,6 +189,7 @@ fun SettingsScreen(
 
         // Preferences
         SectionTitle("Preferences")
+        SettingsItem(Icons.Default.Palette, "Appearance", subtitle = "Theme & Font", onClick = onAppearanceClick)
         SettingsItem(Icons.Default.Language, "Default Currency", subtitle = state.defaultCurrency)
 
         Row(

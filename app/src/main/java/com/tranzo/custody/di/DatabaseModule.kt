@@ -3,6 +3,7 @@ package com.tranzo.custody.di
 import android.content.Context
 import androidx.room.Room
 import com.tranzo.custody.data.local.TranzoDatabase
+import com.tranzo.custody.data.local.ThemePreferencesManager
 import com.tranzo.custody.data.local.UserSessionManager
 import com.tranzo.custody.data.local.dao.TransactionDao
 import dagger.Module
@@ -35,5 +36,11 @@ object DatabaseModule {
     @Singleton
     fun provideUserSessionManager(@ApplicationContext context: Context): UserSessionManager {
         return UserSessionManager(context)
+    }
+
+    @Provides
+    @Singleton
+    fun provideThemePreferencesManager(@ApplicationContext context: Context): ThemePreferencesManager {
+        return ThemePreferencesManager(context)
     }
 }

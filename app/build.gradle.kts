@@ -111,6 +111,7 @@ dependencies {
     implementation("androidx.compose.material:material-icons-extended")
     implementation("androidx.compose.animation:animation")
     implementation("androidx.compose.foundation:foundation")
+    implementation("androidx.compose.ui:ui-text-google-fonts:1.7.5")
 
     // Navigation
     implementation("androidx.navigation:navigation-compose:2.8.4")
