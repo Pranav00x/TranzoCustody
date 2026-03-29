@@ -33,3 +33,17 @@
 -keep class dagger.hilt.** { *; }
 -keep class javax.inject.** { *; }
 -keep class * extends dagger.hilt.android.internal.managers.ComponentSupplier { *; }
+
+# Google Play Services & Auth
+-keep class com.google.android.gms.** { *; }
+-keep interface com.google.android.gms.** { *; }
+
+# Google API Client & Drive SDK
+-keep class com.google.api.client.** { *; }
+-keep class com.google.api.services.drive.** { *; }
+-keep class com.google.api.services.** { *; }
+-keepattributes Signature
+-keepattributes InnerClasses
+-keepattributes EnclosingMethod
+-dontwarn com.google.api.client.**
+-dontwarn com.google.api.services.**

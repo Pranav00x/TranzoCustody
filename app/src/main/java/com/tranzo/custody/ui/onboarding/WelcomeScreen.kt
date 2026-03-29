@@ -1,4 +1,4 @@
-﻿package com.tranzo.custody.ui.onboarding
+package com.tranzo.custody.ui.onboarding
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -27,9 +27,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.tranzo.custody.ui.theme.Black
-import com.tranzo.custody.ui.theme.TextMuted
-import com.tranzo.custody.ui.theme.White
+import com.tranzo.custody.ui.theme.LocalTranzoTheme
 
 @Composable
 fun WelcomeScreen(
@@ -37,10 +35,12 @@ fun WelcomeScreen(
     onImportWallet: () -> Unit,
     onLogin: () -> Unit = {}
 ) {
+    val tranzoTheme = LocalTranzoTheme.current
+
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(White)
+            .background(MaterialTheme.colorScheme.background)
             .padding(horizontal = 32.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
@@ -51,14 +51,14 @@ fun WelcomeScreen(
             modifier = Modifier
                 .size(80.dp)
                 .clip(RoundedCornerShape(20.dp))
-                .background(Black),
+                .background(MaterialTheme.colorScheme.primary),
             contentAlignment = Alignment.Center
         ) {
             Box(
                 modifier = Modifier
                     .size(36.dp)
                     .rotate(45f)
-                    .border(3.dp, White, RoundedCornerShape(4.dp))
+                    .border(3.dp, MaterialTheme.colorScheme.onPrimary, RoundedCornerShape(4.dp))
             )
         }
 
@@ -68,7 +68,7 @@ fun WelcomeScreen(
             text = "Tranzo",
             style = MaterialTheme.typography.displayMedium,
             fontWeight = FontWeight.ExtraBold,
-            color = Black
+            color = MaterialTheme.colorScheme.onBackground
         )
 
         Spacer(modifier = Modifier.height(12.dp))
@@ -76,7 +76,7 @@ fun WelcomeScreen(
         Text(
             text = "Non-custodial smart wallet.\nYour keys. Your crypto.",
             style = MaterialTheme.typography.bodyLarge,
-            color = TextMuted,
+            color = tranzoTheme.textMuted,
             textAlign = TextAlign.Center,
             lineHeight = 26.sp
         )
@@ -89,7 +89,7 @@ fun WelcomeScreen(
                 .fillMaxWidth()
                 .height(56.dp),
             shape = RoundedCornerShape(999.dp),
-            colors = ButtonDefaults.buttonColors(containerColor = Black, contentColor = White)
+            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary, contentColor = MaterialTheme.colorScheme.onPrimary)
         ) {
             Text("Create new wallet", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
         }
@@ -102,8 +102,8 @@ fun WelcomeScreen(
                 .fillMaxWidth()
                 .height(56.dp),
             shape = RoundedCornerShape(999.dp),
-            border = androidx.compose.foundation.BorderStroke(1.5.dp, Black),
-            colors = ButtonDefaults.outlinedButtonColors(contentColor = Black)
+            border = androidx.compose.foundation.BorderStroke(1.5.dp, MaterialTheme.colorScheme.primary),
+            colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.primary)
         ) {
             Text("I already have a recovery phrase", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
         }
@@ -118,7 +118,7 @@ fun WelcomeScreen(
                 "Already have an account? Log in",
                 style = MaterialTheme.typography.bodyMedium,
                 fontWeight = FontWeight.Medium,
-                color = TextMuted
+                color = tranzoTheme.textMuted
             )
         }
 

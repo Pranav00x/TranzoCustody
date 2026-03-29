@@ -46,15 +46,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.tranzo.custody.domain.model.Transaction
 import com.tranzo.custody.domain.model.TransactionStatus
 import com.tranzo.custody.domain.model.TransactionType
-import com.tranzo.custody.ui.theme.Black
-import com.tranzo.custody.ui.theme.DividerColor
-import com.tranzo.custody.ui.theme.Negative
-import com.tranzo.custody.ui.theme.NegativeLight
-import com.tranzo.custody.ui.theme.Positive
-import com.tranzo.custody.ui.theme.PositiveLight
-import com.tranzo.custody.ui.theme.SurfaceSecondary
-import com.tranzo.custody.ui.theme.TextMuted
-import com.tranzo.custody.ui.theme.White
+import com.tranzo.custody.ui.theme.LocalTranzoTheme
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -66,6 +58,7 @@ fun TransactionDetailScreen(
     viewModel: ActivityViewModel = hiltViewModel()
 ) {
     var transaction by remember { mutableStateOf<Transaction?>(null) }
+    val tranzoTheme = LocalTranzoTheme.current
 
     LaunchedEffect(transactionId) {
         transaction = viewModel.getTransactionDetail(transactionId)
@@ -74,7 +67,7 @@ fun TransactionDetailScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(White)
+            .background(MaterialTheme.colorScheme.background)
             .verticalScroll(rememberScrollState())
             .padding(horizontal = 24.dp)
     ) {
@@ -82,20 +75,20 @@ fun TransactionDetailScreen(
 
         Row(verticalAlignment = Alignment.CenterVertically) {
             IconButton(onClick = onBack) {
-                Icon(Icons.AutoMirrored.Filled.ArrowBack, "Back", tint = Black)
+                Icon(Icons.AutoMirrored.Filled.ArrowBack, "Back", tint = MaterialTheme.colorScheme.onBackground)
             }
-            Text("Transaction Details", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold, color = Black)
+            Text("Transaction Details", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onBackground)
         }
 
         transaction?.let { tx ->
             Spacer(modifier = Modifier.height(32.dp))
 
             val (icon, bgColor, iconColor) = when (tx.type) {
-                TransactionType.SENT -> Triple(Icons.Default.ArrowUpward, NegativeLight, Negative)
-                TransactionType.RECEIVED -> Triple(Icons.Default.ArrowDownward, PositiveLight, Positive)
-                TransactionType.SWAPPED -> Triple(Icons.Default.SwapHoriz, SurfaceSecondary, Black)
-                TransactionType.CARD_SPEND -> Triple(Icons.Default.CreditCard, SurfaceSecondary, Black)
-                TransactionType.BOUGHT -> Triple(Icons.Default.ShoppingCart, PositiveLight, Positive)
+                TransactionType.SENT -> Triple(Icons.Default.ArrowUpward, MaterialTheme.colorScheme.error.copy(alpha = 0.15f), MaterialTheme.colorScheme.error)
+                TransactionType.RECEIVED -> Triple(Icons.Default.ArrowDownward, tranzoTheme.positive.copy(alpha = 0.15f), MaterialTheme.colorScheme.tertiary)
+                TransactionType.SWAPPED -> Triple(Icons.Default.SwapHoriz, MaterialTheme.colorScheme.primaryContainer, MaterialTheme.colorScheme.onBackground)
+                TransactionType.CARD_SPEND -> Triple(Icons.Default.CreditCard, MaterialTheme.colorScheme.primaryContainer, MaterialTheme.colorScheme.onBackground)
+                TransactionType.BOUGHT -> Triple(Icons.Default.ShoppingCart, tranzoTheme.positive.copy(alpha = 0.15f), MaterialTheme.colorScheme.tertiary)
             }
 
             Column(
@@ -114,17 +107,17 @@ fun TransactionDetailScreen(
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                Text(tx.title, style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold, color = Black)
+                Text(tx.title, style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onBackground)
                 Spacer(modifier = Modifier.height(4.dp))
-                Text(tx.amount, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.SemiBold, color = Black)
-                Text(tx.fiatAmount, style = MaterialTheme.typography.bodyMedium, color = TextMuted)
+                Text(tx.amount, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.onBackground)
+                Text(tx.fiatAmount, style = MaterialTheme.typography.bodyMedium, color = tranzoTheme.textMuted)
 
                 Spacer(modifier = Modifier.height(12.dp))
 
                 val statusColor = when (tx.status) {
-                    TransactionStatus.CONFIRMED -> Positive
+                    TransactionStatus.CONFIRMED -> MaterialTheme.colorScheme.tertiary
                     TransactionStatus.PENDING -> Color(0xFFF59E0B)
-                    TransactionStatus.FAILED -> Negative
+                    TransactionStatus.FAILED -> MaterialTheme.colorScheme.error
                 }
                 Box(
                     modifier = Modifier
@@ -147,7 +140,7 @@ fun TransactionDetailScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .clip(RoundedCornerShape(16.dp))
-                    .background(SurfaceSecondary)
+                    .background(MaterialTheme.colorScheme.primaryContainer)
                     .padding(20.dp)
             ) {
                 Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
@@ -167,7 +160,7 @@ fun TransactionDetailScreen(
                     onClick = { },
                     modifier = Modifier.fillMaxWidth().height(52.dp),
                     shape = RoundedCornerShape(999.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = SurfaceSecondary, contentColor = Black)
+                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primaryContainer, contentColor = MaterialTheme.colorScheme.onBackground)
                 ) {
                     Icon(Icons.Default.OpenInNew, null, modifier = Modifier.size(18.dp))
                     Spacer(modifier = Modifier.size(8.dp))
@@ -176,7 +169,7 @@ fun TransactionDetailScreen(
             }
         } ?: run {
             Spacer(modifier = Modifier.height(100.dp))
-            Text("Transaction not found", style = MaterialTheme.typography.bodyMedium, color = TextMuted, modifier = Modifier.align(Alignment.CenterHorizontally))
+            Text("Transaction not found", style = MaterialTheme.typography.bodyMedium, color = tranzoTheme.textMuted, modifier = Modifier.align(Alignment.CenterHorizontally))
         }
 
         Spacer(modifier = Modifier.height(32.dp))
@@ -185,16 +178,17 @@ fun TransactionDetailScreen(
 
 @Composable
 private fun DetailRow(label: String, value: String) {
+    val tranzoTheme = LocalTranzoTheme.current
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
-        Text(label, style = MaterialTheme.typography.bodyMedium, color = TextMuted)
+        Text(label, style = MaterialTheme.typography.bodyMedium, color = tranzoTheme.textMuted)
         Text(
             text = value,
             style = MaterialTheme.typography.bodyMedium,
             fontWeight = FontWeight.Medium,
-            color = Black,
+            color = MaterialTheme.colorScheme.onBackground,
             modifier = Modifier.padding(start = 16.dp)
         )
     }

@@ -47,14 +47,7 @@ import com.tranzo.custody.ui.components.AssetListItem
 import com.tranzo.custody.ui.components.QuickActionButton
 import com.tranzo.custody.ui.components.ShimmerAssetItem
 import com.tranzo.custody.ui.components.formatCurrency
-import com.tranzo.custody.ui.theme.Black
-import com.tranzo.custody.ui.theme.BorderColor
-import com.tranzo.custody.ui.theme.Negative
-import com.tranzo.custody.ui.theme.Positive
-import com.tranzo.custody.ui.theme.PositiveLight
-import com.tranzo.custody.ui.theme.SurfaceSecondary
-import com.tranzo.custody.ui.theme.TextMuted
-import com.tranzo.custody.ui.theme.White
+import com.tranzo.custody.ui.theme.LocalTranzoTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -75,7 +68,7 @@ fun HomeScreen(
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
-                .background(White)
+                .background(MaterialTheme.colorScheme.background)
         ) {
             // Header
             item {
@@ -87,27 +80,27 @@ fun HomeScreen(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     IconButton(onClick = { }) {
-                        Icon(Icons.Default.QrCode, "QR Code", tint = Black, modifier = Modifier.size(24.dp))
+                        Icon(Icons.Default.QrCode, "QR Code", tint = MaterialTheme.colorScheme.onBackground, modifier = Modifier.size(24.dp))
                     }
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         Text(
                             text = "Tranzo",
                             style = MaterialTheme.typography.headlineMedium,
                             fontWeight = FontWeight.ExtraBold,
-                            color = Black
+                            color = MaterialTheme.colorScheme.onBackground
                         )
                         if (state.smartWalletAddress.isNotEmpty()) {
                             Spacer(modifier = Modifier.height(4.dp))
                             Text(
                                 text = state.smartWalletAddress,
                                 style = MaterialTheme.typography.labelSmall,
-                                color = TextMuted,
+                                color = LocalTranzoTheme.current.textMuted,
                                 maxLines = 1
                             )
                         }
                     }
                     IconButton(onClick = { }) {
-                        Icon(Icons.Default.Notifications, "Notifications", tint = Black, modifier = Modifier.size(24.dp))
+                        Icon(Icons.Default.Notifications, "Notifications", tint = MaterialTheme.colorScheme.onBackground, modifier = Modifier.size(24.dp))
                     }
                 }
             }
@@ -120,21 +113,21 @@ fun HomeScreen(
                         .padding(horizontal = 20.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    Text("Total Portfolio", style = MaterialTheme.typography.bodyMedium, color = TextMuted)
+                    Text("Total Portfolio", style = MaterialTheme.typography.bodyMedium, color = LocalTranzoTheme.current.textMuted)
                     Spacer(modifier = Modifier.height(4.dp))
 
                     if (state.isLoading) {
-                        Text("Loading...", style = MaterialTheme.typography.bodyMedium, color = TextMuted)
+                        Text("Loading...", style = MaterialTheme.typography.bodyMedium, color = LocalTranzoTheme.current.textMuted)
                     } else {
                         state.portfolio?.let { portfolio ->
                             Text(
                                 text = formatCurrency(portfolio.totalBalanceFiat),
                                 style = MaterialTheme.typography.displayLarge,
                                 fontWeight = FontWeight.ExtraBold,
-                                color = Black
+                                color = MaterialTheme.colorScheme.onBackground
                             )
                             Spacer(modifier = Modifier.height(4.dp))
-                            val changeColor = if (portfolio.dailyChangePercent >= 0) Positive else Negative
+                            val changeColor = if (portfolio.dailyChangePercent >= 0) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.error
                             val prefix = if (portfolio.dailyChangePercent >= 0) "+" else ""
                             Text(
                                 text = "$prefix${"%.2f".format(portfolio.dailyChangePercent)}% today",
@@ -162,25 +155,25 @@ fun HomeScreen(
                         modifier = Modifier
                             .weight(1f)
                             .clip(RoundedCornerShape(16.dp))
-                            .border(1.dp, BorderColor, RoundedCornerShape(16.dp))
+                            .border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(16.dp))
                             .padding(16.dp)
                     ) {
                         Column {
                             Row(verticalAlignment = Alignment.CenterVertically) {
-                                Icon(Icons.Default.AccountBalanceWallet, null, tint = Black, modifier = Modifier.size(16.dp))
+                                Icon(Icons.Default.AccountBalanceWallet, null, tint = MaterialTheme.colorScheme.onBackground, modifier = Modifier.size(16.dp))
                                 Spacer(modifier = Modifier.width(6.dp))
-                                Text("Wallet", style = MaterialTheme.typography.labelMedium, color = TextMuted)
+                                Text("Wallet", style = MaterialTheme.typography.labelMedium, color = LocalTranzoTheme.current.textMuted)
                             }
                             Spacer(modifier = Modifier.height(8.dp))
                             Text(
                                 text = formatCurrency(state.portfolio?.walletBalanceFiat ?: 0.0),
                                 style = MaterialTheme.typography.titleLarge,
                                 fontWeight = FontWeight.Bold,
-                                color = Black,
+                                color = MaterialTheme.colorScheme.onBackground,
                                 fontSize = 20.sp
                             )
                             Spacer(modifier = Modifier.height(2.dp))
-                            Text("Deposited · Crypto assets", style = MaterialTheme.typography.labelSmall, color = TextMuted, lineHeight = 14.sp)
+                            Text("Deposited · Crypto assets", style = MaterialTheme.typography.labelSmall, color = LocalTranzoTheme.current.textMuted, lineHeight = 14.sp)
                         }
                     }
 
@@ -189,26 +182,26 @@ fun HomeScreen(
                         modifier = Modifier
                             .weight(1f)
                             .clip(RoundedCornerShape(16.dp))
-                            .border(1.dp, BorderColor, RoundedCornerShape(16.dp))
+                            .border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(16.dp))
                             .clickable(onClick = onAddToSpend)
                             .padding(16.dp)
                     ) {
                         Column {
                             Row(verticalAlignment = Alignment.CenterVertically) {
-                                Icon(Icons.Default.CreditCard, null, tint = Positive, modifier = Modifier.size(16.dp))
+                                Icon(Icons.Default.CreditCard, null, tint = MaterialTheme.colorScheme.tertiary, modifier = Modifier.size(16.dp))
                                 Spacer(modifier = Modifier.width(6.dp))
-                                Text("Spendable", style = MaterialTheme.typography.labelMedium, color = TextMuted)
+                                Text("Spendable", style = MaterialTheme.typography.labelMedium, color = LocalTranzoTheme.current.textMuted)
                             }
                             Spacer(modifier = Modifier.height(8.dp))
                             Text(
                                 text = formatCurrency(state.portfolio?.spendableBalanceFiat ?: 0.0),
                                 style = MaterialTheme.typography.titleLarge,
                                 fontWeight = FontWeight.Bold,
-                                color = Positive,
+                                color = MaterialTheme.colorScheme.tertiary,
                                 fontSize = 20.sp
                             )
                             Spacer(modifier = Modifier.height(2.dp))
-                            Text("Card balance · Payments", style = MaterialTheme.typography.labelSmall, color = TextMuted, lineHeight = 14.sp)
+                            Text("Card balance · Payments", style = MaterialTheme.typography.labelSmall, color = LocalTranzoTheme.current.textMuted, lineHeight = 14.sp)
                         }
                     }
                 }
@@ -221,7 +214,7 @@ fun HomeScreen(
                         .fillMaxWidth()
                         .padding(horizontal = 20.dp)
                         .clip(RoundedCornerShape(12.dp))
-                        .background(PositiveLight)
+                        .background(LocalTranzoTheme.current.positive.copy(alpha = 0.15f))
                         .clickable(onClick = onAddToSpend)
                         .padding(horizontal = 16.dp, vertical = 12.dp)
                 ) {
@@ -230,12 +223,12 @@ fun HomeScreen(
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.Center
                     ) {
-                        Icon(Icons.Default.Add, null, tint = Positive, modifier = Modifier.size(18.dp))
+                        Icon(Icons.Default.Add, null, tint = MaterialTheme.colorScheme.tertiary, modifier = Modifier.size(18.dp))
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(
                             "Add to Spendable Balance",
                             style = MaterialTheme.typography.labelLarge,
-                            color = Positive,
+                            color = MaterialTheme.colorScheme.tertiary,
                             fontWeight = FontWeight.SemiBold
                         )
                     }
@@ -270,8 +263,8 @@ fun HomeScreen(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Column {
-                        Text("Your Assets", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold, color = Black)
-                        Text("Deposited crypto · Managed by Tranzo", style = MaterialTheme.typography.bodySmall, color = TextMuted)
+                        Text("Your Assets", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onBackground)
+                        Text("Deposited crypto · Managed by Tranzo", style = MaterialTheme.typography.bodySmall, color = LocalTranzoTheme.current.textMuted)
                     }
                 }
             }

@@ -133,8 +133,14 @@ class DriveBackupManager @Inject constructor(
         try {
             val result = decrypt(json, password)
             RestoreResult.Success(mnemonic = result.mnemonic, ownerAddr = result.ownerAddr)
-        } catch (_: Exception) {
+        } catch (_: org.json.JSONException) {
+            RestoreResult.Error("Backup file is corrupted or not valid JSON")
+        } catch (_: javax.crypto.AEADBadTagException) {
             RestoreResult.WrongPassword
+        } catch (_: javax.crypto.BadPaddingException) {
+            RestoreResult.WrongPassword
+        } catch (e: Exception) {
+            RestoreResult.Error(e.message ?: "Failed to restore backup")
         }
     }
 
@@ -221,4 +227,5 @@ sealed class RestoreResult {
     data class Success(val mnemonic: String, val ownerAddr: String) : RestoreResult()
     data object NoBackupFound : RestoreResult()
     data object WrongPassword : RestoreResult()
+    data class Error(val message: String) : RestoreResult()
 }

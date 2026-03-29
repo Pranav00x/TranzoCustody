@@ -1,4 +1,4 @@
-﻿package com.tranzo.custody.ui.onboarding
+package com.tranzo.custody.ui.onboarding
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
@@ -28,11 +28,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.tranzo.custody.ui.theme.Black
-import com.tranzo.custody.ui.theme.BorderColor
-import com.tranzo.custody.ui.theme.Negative
-import com.tranzo.custody.ui.theme.TextMuted
-import com.tranzo.custody.ui.theme.White
+import com.tranzo.custody.ui.theme.LocalTranzoTheme
 
 @Composable
 fun ImportWalletScreen(
@@ -41,19 +37,20 @@ fun ImportWalletScreen(
     viewModel: OnboardingViewModel = hiltViewModel()
 ) {
     val state by viewModel.state.collectAsState()
+    val tranzoTheme = LocalTranzoTheme.current
 
     LaunchedEffect(Unit) { viewModel.setMode(OnboardingMode.IMPORT) }
 
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(White)
+            .background(MaterialTheme.colorScheme.background)
             .padding(horizontal = 24.dp)
             .verticalScroll(rememberScrollState())
     ) {
         Spacer(modifier = Modifier.height(16.dp))
         IconButton(onClick = onBack) {
-            Icon(Icons.AutoMirrored.Filled.ArrowBack, "Back", tint = Black)
+            Icon(Icons.AutoMirrored.Filled.ArrowBack, "Back", tint = MaterialTheme.colorScheme.onBackground)
         }
         Spacer(modifier = Modifier.height(16.dp))
 
@@ -61,13 +58,13 @@ fun ImportWalletScreen(
             text = "Import wallet",
             style = MaterialTheme.typography.displaySmall,
             fontWeight = FontWeight.ExtraBold,
-            color = Black
+            color = MaterialTheme.colorScheme.onBackground
         )
         Spacer(modifier = Modifier.height(8.dp))
         Text(
             text = "Enter your 12-word recovery phrase. It is processed only on this device.",
             style = MaterialTheme.typography.bodyLarge,
-            color = TextMuted
+            color = tranzoTheme.textMuted
         )
         Spacer(modifier = Modifier.height(24.dp))
 
@@ -78,16 +75,16 @@ fun ImportWalletScreen(
             minLines = 4,
             shape = RoundedCornerShape(12.dp),
             colors = OutlinedTextFieldDefaults.colors(
-                focusedBorderColor = Black,
-                unfocusedBorderColor = BorderColor,
-                cursorColor = Black
+                focusedBorderColor = MaterialTheme.colorScheme.primary,
+                unfocusedBorderColor = MaterialTheme.colorScheme.outline,
+                cursorColor = MaterialTheme.colorScheme.primary
             ),
-            placeholder = { Text("word1 word2 word3 ...", color = TextMuted) }
+            placeholder = { Text("word1 word2 word3 ...", color = tranzoTheme.textMuted) }
         )
 
         if (state.error != null) {
             Spacer(modifier = Modifier.height(12.dp))
-            Text(state.error!!, color = Negative, style = MaterialTheme.typography.bodySmall)
+            Text(state.error!!, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall)
         }
 
         Spacer(modifier = Modifier.height(24.dp))
@@ -100,7 +97,7 @@ fun ImportWalletScreen(
                 .fillMaxWidth()
                 .height(56.dp),
             shape = RoundedCornerShape(999.dp),
-            colors = ButtonDefaults.buttonColors(containerColor = Black, contentColor = White),
+            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary, contentColor = MaterialTheme.colorScheme.onPrimary),
             enabled = state.importMnemonicInput.isNotBlank()
         ) {
             Text("Continue", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
@@ -108,4 +105,3 @@ fun ImportWalletScreen(
         Spacer(modifier = Modifier.height(32.dp))
     }
 }
-

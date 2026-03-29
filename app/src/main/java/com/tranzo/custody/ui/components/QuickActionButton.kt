@@ -16,8 +16,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
-import com.tranzo.custody.ui.theme.Black
-import com.tranzo.custody.ui.theme.White
 
 @Composable
 fun QuickActionButton(
@@ -35,13 +33,13 @@ fun QuickActionButton(
             modifier = Modifier
                 .size(56.dp)
                 .clip(CircleShape)
-                .background(Black),
+                .background(MaterialTheme.colorScheme.primary),
             contentAlignment = Alignment.Center
         ) {
             Icon(
                 imageVector = icon,
                 contentDescription = label,
-                tint = White,
+                tint = MaterialTheme.colorScheme.onPrimary,
                 modifier = Modifier.size(24.dp)
             )
         }

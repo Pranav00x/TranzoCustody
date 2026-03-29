@@ -37,11 +37,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
-import com.tranzo.custody.ui.theme.Black
-import com.tranzo.custody.ui.theme.Negative
-import com.tranzo.custody.ui.theme.TextMuted
-import com.tranzo.custody.ui.theme.TextSecondary
-import com.tranzo.custody.ui.theme.White
+import com.tranzo.custody.ui.theme.LocalTranzoTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -52,11 +48,12 @@ fun EmailPasswordScreen(
 ) {
     val state by viewModel.state.collectAsState()
     var passwordVisible by remember { mutableStateOf(false) }
+    val tranzoTheme = LocalTranzoTheme.current
 
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(White)
+            .background(MaterialTheme.colorScheme.background)
     ) {
         TopAppBar(
             title = {},
@@ -65,7 +62,7 @@ fun EmailPasswordScreen(
                     Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
                 }
             },
-            colors = TopAppBarDefaults.topAppBarColors(containerColor = White)
+            colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.background)
         )
 
         Column(
@@ -77,7 +74,7 @@ fun EmailPasswordScreen(
                 text = "Create your account",
                 style = MaterialTheme.typography.headlineMedium,
                 fontWeight = FontWeight.Bold,
-                color = Black
+                color = MaterialTheme.colorScheme.onBackground
             )
 
             Spacer(modifier = Modifier.height(8.dp))
@@ -85,7 +82,7 @@ fun EmailPasswordScreen(
             Text(
                 text = "Your email and password are used to log in and encrypt your wallet backup.",
                 style = MaterialTheme.typography.bodyMedium,
-                color = TextSecondary
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
 
             Spacer(modifier = Modifier.height(32.dp))
@@ -94,7 +91,7 @@ fun EmailPasswordScreen(
                 value = state.email,
                 onValueChange = { viewModel.setEmail(it) },
                 label = { Text("Email") },
-                placeholder = { Text("you@example.com", color = TextMuted) },
+                placeholder = { Text("you@example.com", color = tranzoTheme.textMuted) },
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true,
                 keyboardOptions = KeyboardOptions(
@@ -103,8 +100,8 @@ fun EmailPasswordScreen(
                 ),
                 shape = RoundedCornerShape(12.dp),
                 colors = OutlinedTextFieldDefaults.colors(
-                    focusedBorderColor = Black,
-                    unfocusedBorderColor = TextMuted.copy(alpha = 0.3f)
+                    focusedBorderColor = MaterialTheme.colorScheme.primary,
+                    unfocusedBorderColor = tranzoTheme.textMuted.copy(alpha = 0.3f)
                 )
             )
 
@@ -114,7 +111,7 @@ fun EmailPasswordScreen(
                 value = state.password,
                 onValueChange = { viewModel.setPassword(it) },
                 label = { Text("Password") },
-                placeholder = { Text("At least 8 characters", color = TextMuted) },
+                placeholder = { Text("At least 8 characters", color = tranzoTheme.textMuted) },
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true,
                 visualTransformation = if (passwordVisible) VisualTransformation.None
@@ -134,8 +131,8 @@ fun EmailPasswordScreen(
                 },
                 shape = RoundedCornerShape(12.dp),
                 colors = OutlinedTextFieldDefaults.colors(
-                    focusedBorderColor = Black,
-                    unfocusedBorderColor = TextMuted.copy(alpha = 0.3f)
+                    focusedBorderColor = MaterialTheme.colorScheme.primary,
+                    unfocusedBorderColor = tranzoTheme.textMuted.copy(alpha = 0.3f)
                 )
             )
 
@@ -144,7 +141,7 @@ fun EmailPasswordScreen(
                 Text(
                     text = state.error!!,
                     style = MaterialTheme.typography.bodySmall,
-                    color = Negative
+                    color = MaterialTheme.colorScheme.error
                 )
             }
 
@@ -161,8 +158,8 @@ fun EmailPasswordScreen(
                     .height(56.dp),
                 shape = RoundedCornerShape(999.dp),
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = Black,
-                    contentColor = White
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    contentColor = MaterialTheme.colorScheme.onPrimary
                 ),
                 enabled = state.email.isNotBlank() && state.password.isNotBlank()
             ) {

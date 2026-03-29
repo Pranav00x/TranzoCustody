@@ -30,12 +30,7 @@ import androidx.compose.ui.unit.dp
 import com.tranzo.custody.domain.model.Transaction
 import com.tranzo.custody.domain.model.TransactionStatus
 import com.tranzo.custody.domain.model.TransactionType
-import com.tranzo.custody.ui.theme.Negative
-import com.tranzo.custody.ui.theme.NegativeLight
-import com.tranzo.custody.ui.theme.Positive
-import com.tranzo.custody.ui.theme.PositiveLight
-import com.tranzo.custody.ui.theme.SurfaceSecondary
-import com.tranzo.custody.ui.theme.TextMuted
+import com.tranzo.custody.ui.theme.LocalTranzoTheme
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -46,12 +41,18 @@ fun TransactionItem(
     onClick: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
+    val positive = MaterialTheme.colorScheme.tertiary
+    val negative = MaterialTheme.colorScheme.error
+    val positiveLight = LocalTranzoTheme.current.positive.copy(alpha = 0.15f)
+    val negativeLight = MaterialTheme.colorScheme.error.copy(alpha = 0.15f)
+    val primaryContainer = MaterialTheme.colorScheme.primaryContainer
+
     val (icon, bgColor, iconColor) = when (transaction.type) {
-        TransactionType.SENT -> Triple(Icons.Default.ArrowUpward, NegativeLight, Negative)
-        TransactionType.RECEIVED -> Triple(Icons.Default.ArrowDownward, PositiveLight, Positive)
-        TransactionType.SWAPPED -> Triple(Icons.Default.SwapHoriz, SurfaceSecondary, Color.Black)
-        TransactionType.CARD_SPEND -> Triple(Icons.Default.CreditCard, SurfaceSecondary, Color.Black)
-        TransactionType.BOUGHT -> Triple(Icons.Default.ShoppingCart, PositiveLight, Positive)
+        TransactionType.SENT -> Triple(Icons.Default.ArrowUpward, negativeLight, negative)
+        TransactionType.RECEIVED -> Triple(Icons.Default.ArrowDownward, positiveLight, positive)
+        TransactionType.SWAPPED -> Triple(Icons.Default.SwapHoriz, primaryContainer, MaterialTheme.colorScheme.onBackground)
+        TransactionType.CARD_SPEND -> Triple(Icons.Default.CreditCard, primaryContainer, MaterialTheme.colorScheme.onBackground)
+        TransactionType.BOUGHT -> Triple(Icons.Default.ShoppingCart, positiveLight, positive)
     }
 
     Row(
@@ -88,7 +89,7 @@ fun TransactionItem(
                 Text(
                     text = formatTimestamp(transaction.timestamp),
                     style = MaterialTheme.typography.bodySmall,
-                    color = TextMuted
+                    color = LocalTranzoTheme.current.textMuted
                 )
                 if (transaction.status == TransactionStatus.PENDING) {
                     Text(
@@ -110,7 +111,7 @@ fun TransactionItem(
             Text(
                 text = transaction.fiatAmount,
                 style = MaterialTheme.typography.bodySmall,
-                color = TextMuted
+                color = LocalTranzoTheme.current.textMuted
             )
         }
     }

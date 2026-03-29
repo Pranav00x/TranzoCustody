@@ -1,4 +1,4 @@
-﻿package com.tranzo.custody.ui.onboarding
+package com.tranzo.custody.ui.onboarding
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -28,11 +28,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.tranzo.custody.ui.theme.Black
-import com.tranzo.custody.ui.theme.BorderColor
-import com.tranzo.custody.ui.theme.Negative
-import com.tranzo.custody.ui.theme.TextMuted
-import com.tranzo.custody.ui.theme.White
+import com.tranzo.custody.ui.theme.LocalTranzoTheme
 
 @Composable
 fun CreateWalletScreen(
@@ -41,6 +37,7 @@ fun CreateWalletScreen(
     viewModel: OnboardingViewModel = hiltViewModel()
 ) {
     val state by viewModel.state.collectAsState()
+    val tranzoTheme = LocalTranzoTheme.current
 
     LaunchedEffect(Unit) {
         viewModel.setMode(OnboardingMode.CREATE)
@@ -50,13 +47,13 @@ fun CreateWalletScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(White)
+            .background(MaterialTheme.colorScheme.background)
             .padding(horizontal = 24.dp)
             .verticalScroll(rememberScrollState())
     ) {
         Spacer(modifier = Modifier.height(16.dp))
         IconButton(onClick = onBack) {
-            Icon(Icons.AutoMirrored.Filled.ArrowBack, "Back", tint = Black)
+            Icon(Icons.AutoMirrored.Filled.ArrowBack, "Back", tint = MaterialTheme.colorScheme.onBackground)
         }
         Spacer(modifier = Modifier.height(16.dp))
 
@@ -64,13 +61,13 @@ fun CreateWalletScreen(
             text = "Your recovery phrase",
             style = MaterialTheme.typography.displaySmall,
             fontWeight = FontWeight.ExtraBold,
-            color = Black
+            color = MaterialTheme.colorScheme.onBackground
         )
         Spacer(modifier = Modifier.height(8.dp))
         Text(
             text = "Write these 12 words down and store them offline. Anyone with this phrase controls your wallet. Tranzo never sees or stores it.",
             style = MaterialTheme.typography.bodyLarge,
-            color = TextMuted
+            color = tranzoTheme.textMuted
         )
         Spacer(modifier = Modifier.height(24.dp))
 
@@ -90,7 +87,7 @@ fun CreateWalletScreen(
                             text = "$n. $w",
                             modifier = Modifier
                                 .weight(1f)
-                                .border(1.dp, BorderColor, RoundedCornerShape(8.dp))
+                                .border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(8.dp))
                                 .padding(12.dp),
                             style = MaterialTheme.typography.bodyMedium,
                             fontWeight = FontWeight.Medium
@@ -102,7 +99,7 @@ fun CreateWalletScreen(
 
         if (state.error != null) {
             Spacer(modifier = Modifier.height(12.dp))
-            Text(state.error!!, color = Negative, style = MaterialTheme.typography.bodySmall)
+            Text(state.error!!, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall)
         }
 
         Spacer(modifier = Modifier.height(32.dp))
@@ -116,7 +113,7 @@ fun CreateWalletScreen(
                 .fillMaxWidth()
                 .height(56.dp),
             shape = RoundedCornerShape(999.dp),
-            colors = ButtonDefaults.buttonColors(containerColor = Black, contentColor = White),
+            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary, contentColor = MaterialTheme.colorScheme.onPrimary),
             enabled = words.size == 12
         ) {
             Text("I wrote it down — continue", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
@@ -124,4 +121,3 @@ fun CreateWalletScreen(
         Spacer(modifier = Modifier.height(32.dp))
     }
 }
-

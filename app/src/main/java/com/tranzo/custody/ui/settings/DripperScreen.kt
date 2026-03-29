@@ -34,27 +34,25 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import com.tranzo.custody.ui.theme.Black
-import com.tranzo.custody.ui.theme.BorderColor
-import com.tranzo.custody.ui.theme.SurfaceSecondary
-import com.tranzo.custody.ui.theme.TextMuted
-import com.tranzo.custody.ui.theme.White
+import com.tranzo.custody.ui.theme.LocalTranzoTheme
 
 @Composable
 fun DripperScreen(onBack: () -> Unit) {
+    val tranzoTheme = LocalTranzoTheme.current
+
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(White)
+            .background(MaterialTheme.colorScheme.background)
             .padding(horizontal = 24.dp)
     ) {
         Spacer(modifier = Modifier.height(16.dp))
 
         Row(verticalAlignment = Alignment.CenterVertically) {
             IconButton(onClick = onBack) {
-                Icon(Icons.AutoMirrored.Filled.ArrowBack, "Back", tint = Black)
+                Icon(Icons.AutoMirrored.Filled.ArrowBack, "Back", tint = MaterialTheme.colorScheme.onBackground)
             }
-            Text("Dripper", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold, color = Black)
+            Text("Dripper", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onBackground)
         }
 
         Spacer(modifier = Modifier.height(48.dp))
@@ -67,10 +65,10 @@ fun DripperScreen(onBack: () -> Unit) {
                 modifier = Modifier
                     .size(100.dp)
                     .clip(CircleShape)
-                    .background(SurfaceSecondary),
+                    .background(MaterialTheme.colorScheme.primaryContainer),
                 contentAlignment = Alignment.Center
             ) {
-                Icon(Icons.Default.Security, null, tint = Black, modifier = Modifier.size(48.dp))
+                Icon(Icons.Default.Security, null, tint = MaterialTheme.colorScheme.onBackground, modifier = Modifier.size(48.dp))
             }
 
             Spacer(modifier = Modifier.height(24.dp))
@@ -87,7 +85,7 @@ fun DripperScreen(onBack: () -> Unit) {
             Text(
                 "Connect your Dripper device for maximum transaction security and hardware-based signing.",
                 style = MaterialTheme.typography.bodyMedium,
-                color = TextMuted,
+                color = tranzoTheme.textMuted,
                 textAlign = TextAlign.Center,
                 modifier = Modifier.padding(horizontal = 16.dp)
             )
@@ -100,7 +98,7 @@ fun DripperScreen(onBack: () -> Unit) {
             modifier = Modifier
                 .fillMaxWidth()
                 .clip(RoundedCornerShape(16.dp))
-                .background(SurfaceSecondary)
+                .background(MaterialTheme.colorScheme.primaryContainer)
                 .padding(20.dp)
         ) {
             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
@@ -121,7 +119,7 @@ fun DripperScreen(onBack: () -> Unit) {
                 .fillMaxWidth()
                 .height(56.dp),
             shape = RoundedCornerShape(999.dp),
-            colors = ButtonDefaults.buttonColors(containerColor = Black, contentColor = White)
+            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary, contentColor = MaterialTheme.colorScheme.onPrimary)
         ) {
             Icon(Icons.Default.Bluetooth, null, modifier = Modifier.size(20.dp))
             Spacer(modifier = Modifier.width(8.dp))
@@ -136,11 +134,11 @@ fun DripperScreen(onBack: () -> Unit) {
                 .fillMaxWidth()
                 .height(56.dp),
             shape = RoundedCornerShape(999.dp),
-            border = androidx.compose.foundation.BorderStroke(1.5.dp, Black)
+            border = androidx.compose.foundation.BorderStroke(1.5.dp, MaterialTheme.colorScheme.primary)
         ) {
-            Icon(Icons.Default.Usb, null, tint = Black, modifier = Modifier.size(20.dp))
+            Icon(Icons.Default.Usb, null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(20.dp))
             Spacer(modifier = Modifier.width(8.dp))
-            Text("Connect via USB-C", fontWeight = FontWeight.SemiBold, color = Black)
+            Text("Connect via USB-C", fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.primary)
         }
 
         Spacer(modifier = Modifier.height(32.dp))
@@ -149,11 +147,12 @@ fun DripperScreen(onBack: () -> Unit) {
 
 @Composable
 private fun SpecRow(label: String, value: String) {
+    val tranzoTheme = LocalTranzoTheme.current
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
-        Text(label, style = MaterialTheme.typography.bodyMedium, color = TextMuted)
-        Text(value, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Medium, color = Black)
+        Text(label, style = MaterialTheme.typography.bodyMedium, color = tranzoTheme.textMuted)
+        Text(value, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Medium, color = MaterialTheme.colorScheme.onBackground)
     }
 }

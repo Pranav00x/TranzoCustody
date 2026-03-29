@@ -21,10 +21,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.tranzo.custody.domain.model.Token
-import com.tranzo.custody.ui.theme.Negative
-import com.tranzo.custody.ui.theme.Positive
-import com.tranzo.custody.ui.theme.TextMuted
-import com.tranzo.custody.ui.theme.White
+import com.tranzo.custody.ui.theme.LocalTranzoTheme
 import java.text.NumberFormat
 import java.util.Locale
 
@@ -51,7 +48,7 @@ fun AssetListItem(
             Text(
                 text = token.symbol.firstOrNull()?.toString() ?: "?",
                 style = MaterialTheme.typography.titleMedium,
-                color = White,
+                color = MaterialTheme.colorScheme.onPrimary,
                 fontWeight = FontWeight.Bold
             )
         }
@@ -67,7 +64,7 @@ fun AssetListItem(
             Text(
                 text = token.name,
                 style = MaterialTheme.typography.bodySmall,
-                color = TextMuted
+                color = LocalTranzoTheme.current.textMuted
             )
         }
 
@@ -80,7 +77,7 @@ fun AssetListItem(
             Text(
                 text = "${if (token.priceChange24h >= 0) "+" else ""}${"%.2f".format(token.priceChange24h)}%",
                 style = MaterialTheme.typography.bodySmall,
-                color = if (token.priceChange24h >= 0) Positive else Negative
+                color = if (token.priceChange24h >= 0) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.error
             )
         }
     }

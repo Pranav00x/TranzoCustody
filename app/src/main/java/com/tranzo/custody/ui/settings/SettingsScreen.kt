@@ -1,4 +1,4 @@
-﻿package com.tranzo.custody.ui.settings
+package com.tranzo.custody.ui.settings
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -51,15 +51,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.tranzo.custody.domain.model.KycStatus
 import com.tranzo.custody.domain.model.SpendMode
-import com.tranzo.custody.ui.theme.Black
-import com.tranzo.custody.ui.theme.BorderColor
-import com.tranzo.custody.ui.theme.Negative
-import com.tranzo.custody.ui.theme.NegativeLight
-import com.tranzo.custody.ui.theme.Positive
-import com.tranzo.custody.ui.theme.PositiveLight
-import com.tranzo.custody.ui.theme.SurfaceSecondary
-import com.tranzo.custody.ui.theme.TextMuted
-import com.tranzo.custody.ui.theme.White
+import com.tranzo.custody.ui.theme.LocalTranzoTheme
 
 @Composable
 fun SettingsScreen(
@@ -71,11 +63,12 @@ fun SettingsScreen(
     viewModel: SettingsViewModel = hiltViewModel()
 ) {
     val state by viewModel.state.collectAsState()
+    val tranzoTheme = LocalTranzoTheme.current
 
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(White)
+            .background(MaterialTheme.colorScheme.background)
             .verticalScroll(rememberScrollState())
     ) {
         Spacer(modifier = Modifier.height(16.dp))
@@ -84,7 +77,7 @@ fun SettingsScreen(
             text = "Settings",
             style = MaterialTheme.typography.headlineMedium,
             fontWeight = FontWeight.ExtraBold,
-            color = Black,
+            color = MaterialTheme.colorScheme.onBackground,
             modifier = Modifier.padding(horizontal = 20.dp, vertical = 16.dp)
         )
 
@@ -93,22 +86,22 @@ fun SettingsScreen(
                 .fillMaxWidth()
                 .padding(horizontal = 20.dp, vertical = 8.dp)
                 .clip(RoundedCornerShape(16.dp))
-                .border(1.dp, BorderColor, RoundedCornerShape(16.dp))
+                .border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(16.dp))
                 .padding(16.dp)
         ) {
             Column {
                 Text("Your wallet", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold)
                 Spacer(modifier = Modifier.height(6.dp))
-                Text("Smart account", style = MaterialTheme.typography.labelSmall, color = TextMuted)
+                Text("Smart account", style = MaterialTheme.typography.labelSmall, color = tranzoTheme.textMuted)
                 Text(state.smartWalletAddressShort, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Medium)
                 Spacer(modifier = Modifier.height(8.dp))
-                Text("Owner key (EOA)", style = MaterialTheme.typography.labelSmall, color = TextMuted)
-                Text(state.ownerAddressShort, style = MaterialTheme.typography.bodySmall, color = TextMuted)
+                Text("Owner key (EOA)", style = MaterialTheme.typography.labelSmall, color = tranzoTheme.textMuted)
+                Text(state.ownerAddressShort, style = MaterialTheme.typography.bodySmall, color = tranzoTheme.textMuted)
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
                     text = if (state.seedBackedUp) "Recovery phrase marked as backed up" else "Back up your recovery phrase from Security",
                     style = MaterialTheme.typography.bodySmall,
-                    color = if (state.seedBackedUp) Positive else Color(0xFFF59E0B)
+                    color = if (state.seedBackedUp) MaterialTheme.colorScheme.tertiary else Color(0xFFF59E0B)
                 )
             }
         }
@@ -123,7 +116,7 @@ fun SettingsScreen(
                 .fillMaxWidth()
                 .padding(horizontal = 20.dp, vertical = 4.dp)
                 .clip(RoundedCornerShape(16.dp))
-                .background(SurfaceSecondary)
+                .background(MaterialTheme.colorScheme.primaryContainer)
                 .padding(16.dp)
         ) {
             Column {
@@ -132,7 +125,7 @@ fun SettingsScreen(
                 Text(
                     "Choose how your card payments are funded.",
                     style = MaterialTheme.typography.bodySmall,
-                    color = TextMuted
+                    color = tranzoTheme.textMuted
                 )
                 Spacer(modifier = Modifier.height(14.dp))
 
@@ -198,17 +191,17 @@ fun SettingsScreen(
                 .padding(horizontal = 20.dp, vertical = 14.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Icon(Icons.Default.Notifications, null, tint = Black, modifier = Modifier.size(24.dp))
+            Icon(Icons.Default.Notifications, null, tint = MaterialTheme.colorScheme.onBackground, modifier = Modifier.size(24.dp))
             Spacer(modifier = Modifier.width(16.dp))
             Text("Push Notifications", style = MaterialTheme.typography.bodyLarge, modifier = Modifier.weight(1f))
             Switch(
                 checked = state.pushNotificationsEnabled,
                 onCheckedChange = { viewModel.togglePushNotifications(it) },
                 colors = SwitchDefaults.colors(
-                    checkedThumbColor = White,
-                    checkedTrackColor = Black,
-                    uncheckedThumbColor = White,
-                    uncheckedTrackColor = TextMuted.copy(alpha = 0.3f)
+                    checkedThumbColor = MaterialTheme.colorScheme.onPrimary,
+                    checkedTrackColor = MaterialTheme.colorScheme.primary,
+                    uncheckedThumbColor = MaterialTheme.colorScheme.onPrimary,
+                    uncheckedTrackColor = tranzoTheme.textMuted.copy(alpha = 0.3f)
                 )
             )
         }
@@ -230,24 +223,25 @@ fun SettingsScreen(
                 .padding(horizontal = 20.dp, vertical = 16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Icon(Icons.AutoMirrored.Filled.ExitToApp, null, tint = Negative, modifier = Modifier.size(24.dp))
+            Icon(Icons.AutoMirrored.Filled.ExitToApp, null, tint = MaterialTheme.colorScheme.error, modifier = Modifier.size(24.dp))
             Spacer(modifier = Modifier.width(16.dp))
-            Text("Reset wallet", style = MaterialTheme.typography.bodyLarge, color = Negative, fontWeight = FontWeight.SemiBold)
+            Text("Reset wallet", style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.error, fontWeight = FontWeight.SemiBold)
         }
 
         Spacer(modifier = Modifier.height(16.dp))
-        Text("Tranzo v${state.appVersion}", style = MaterialTheme.typography.bodySmall, color = TextMuted, modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 8.dp))
+        Text("Tranzo v${state.appVersion}", style = MaterialTheme.typography.bodySmall, color = tranzoTheme.textMuted, modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 8.dp))
         Spacer(modifier = Modifier.height(32.dp))
     }
 }
 
 @Composable
 private fun KycBadge(status: KycStatus) {
+    val tranzoTheme = LocalTranzoTheme.current
     val (bg, fg, text) = when (status) {
-        KycStatus.VERIFIED -> Triple(PositiveLight, Positive, "Verified")
+        KycStatus.VERIFIED -> Triple(tranzoTheme.positive.copy(alpha = 0.15f), MaterialTheme.colorScheme.tertiary, "Verified")
         KycStatus.PENDING -> Triple(Color(0xFFFEF3C7), Color(0xFFF59E0B), "Pending")
-        KycStatus.REJECTED -> Triple(NegativeLight, Negative, "Rejected")
-        KycStatus.NOT_STARTED -> Triple(SurfaceSecondary, TextMuted, "KYC Required")
+        KycStatus.REJECTED -> Triple(MaterialTheme.colorScheme.error.copy(alpha = 0.15f), MaterialTheme.colorScheme.error, "Rejected")
+        KycStatus.NOT_STARTED -> Triple(MaterialTheme.colorScheme.primaryContainer, tranzoTheme.textMuted, "KYC Required")
     }
     Box(
         modifier = Modifier
@@ -275,15 +269,16 @@ private fun SpendModeOption(
     isSelected: Boolean,
     onClick: () -> Unit
 ) {
+    val tranzoTheme = LocalTranzoTheme.current
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(12.dp))
             .then(
-                if (isSelected) Modifier.border(2.dp, Black, RoundedCornerShape(12.dp))
-                else Modifier.border(1.dp, BorderColor, RoundedCornerShape(12.dp))
+                if (isSelected) Modifier.border(2.dp, MaterialTheme.colorScheme.primary, RoundedCornerShape(12.dp))
+                else Modifier.border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(12.dp))
             )
-            .background(White)
+            .background(MaterialTheme.colorScheme.surface)
             .clickable(onClick = onClick)
             .padding(14.dp),
         verticalAlignment = Alignment.CenterVertically
@@ -293,30 +288,32 @@ private fun SpendModeOption(
                 .size(20.dp)
                 .clip(CircleShape)
                 .then(
-                    if (isSelected) Modifier.background(Black)
-                    else Modifier.border(1.5.dp, BorderColor, CircleShape)
+                    if (isSelected) Modifier.background(MaterialTheme.colorScheme.primary)
+                    else Modifier.border(1.5.dp, MaterialTheme.colorScheme.outline, CircleShape)
                 ),
             contentAlignment = Alignment.Center
         ) {
             if (isSelected) {
-                Box(modifier = Modifier.size(8.dp).clip(CircleShape).background(White))
+                Box(modifier = Modifier.size(8.dp).clip(CircleShape).background(MaterialTheme.colorScheme.onPrimary))
             }
         }
         Spacer(modifier = Modifier.width(12.dp))
         Column {
-            Text(title, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.SemiBold, color = Black)
-            Text(description, style = MaterialTheme.typography.bodySmall, color = TextMuted)
+            Text(title, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.onBackground)
+            Text(description, style = MaterialTheme.typography.bodySmall, color = tranzoTheme.textMuted)
         }
     }
 }
 
 @Composable
 private fun SectionTitle(title: String) {
-    Text(title, style = MaterialTheme.typography.labelLarge, color = TextMuted, modifier = Modifier.padding(horizontal = 20.dp, vertical = 8.dp))
+    val tranzoTheme = LocalTranzoTheme.current
+    Text(title, style = MaterialTheme.typography.labelLarge, color = tranzoTheme.textMuted, modifier = Modifier.padding(horizontal = 20.dp, vertical = 8.dp))
 }
 
 @Composable
 private fun SettingsItem(icon: ImageVector, title: String, subtitle: String? = null, onClick: () -> Unit = {}) {
+    val tranzoTheme = LocalTranzoTheme.current
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -324,13 +321,12 @@ private fun SettingsItem(icon: ImageVector, title: String, subtitle: String? = n
             .padding(horizontal = 20.dp, vertical = 14.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Icon(icon, null, tint = Black, modifier = Modifier.size(24.dp))
+        Icon(icon, null, tint = MaterialTheme.colorScheme.onBackground, modifier = Modifier.size(24.dp))
         Spacer(modifier = Modifier.width(16.dp))
         Column(modifier = Modifier.weight(1f)) {
-            Text(title, style = MaterialTheme.typography.bodyLarge, color = Black)
-            subtitle?.let { Text(it, style = MaterialTheme.typography.bodySmall, color = TextMuted) }
+            Text(title, style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onBackground)
+            subtitle?.let { Text(it, style = MaterialTheme.typography.bodySmall, color = tranzoTheme.textMuted) }
         }
-        Icon(Icons.Default.ChevronRight, null, tint = TextMuted, modifier = Modifier.size(20.dp))
+        Icon(Icons.Default.ChevronRight, null, tint = tranzoTheme.textMuted, modifier = Modifier.size(20.dp))
     }
 }
-

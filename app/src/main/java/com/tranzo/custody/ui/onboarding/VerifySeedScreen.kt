@@ -28,11 +28,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.tranzo.custody.ui.theme.Black
-import com.tranzo.custody.ui.theme.BorderColor
-import com.tranzo.custody.ui.theme.Negative
-import com.tranzo.custody.ui.theme.TextMuted
-import com.tranzo.custody.ui.theme.White
+import com.tranzo.custody.ui.theme.LocalTranzoTheme
 
 @Composable
 fun VerifySeedScreen(
@@ -41,6 +37,7 @@ fun VerifySeedScreen(
     viewModel: OnboardingViewModel = hiltViewModel()
 ) {
     val state by viewModel.state.collectAsState()
+    val tranzoTheme = LocalTranzoTheme.current
 
     LaunchedEffect(state.mnemonic, state.challenges.size) {
         if (state.challenges.isEmpty() && state.mnemonic.split(" ").filter { it.isNotBlank() }.size == 12) {
@@ -51,13 +48,13 @@ fun VerifySeedScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(White)
+            .background(MaterialTheme.colorScheme.background)
             .padding(horizontal = 24.dp)
             .verticalScroll(rememberScrollState())
     ) {
         Spacer(modifier = Modifier.height(16.dp))
         IconButton(onClick = onBack) {
-            Icon(Icons.AutoMirrored.Filled.ArrowBack, "Back", tint = Black)
+            Icon(Icons.AutoMirrored.Filled.ArrowBack, "Back", tint = MaterialTheme.colorScheme.onBackground)
         }
         Spacer(modifier = Modifier.height(16.dp))
 
@@ -65,13 +62,13 @@ fun VerifySeedScreen(
             text = "Confirm your phrase",
             style = MaterialTheme.typography.displaySmall,
             fontWeight = FontWeight.ExtraBold,
-            color = Black
+            color = MaterialTheme.colorScheme.onBackground
         )
         Spacer(modifier = Modifier.height(8.dp))
         Text(
             text = "Tap the correct word for each position.",
             style = MaterialTheme.typography.bodyLarge,
-            color = TextMuted
+            color = tranzoTheme.textMuted
         )
         Spacer(modifier = Modifier.height(24.dp))
 
@@ -91,7 +88,7 @@ fun VerifySeedScreen(
                             .fillMaxWidth()
                             .border(
                                 width = if (selected) 2.dp else 1.dp,
-                                color = if (selected) Black else BorderColor,
+                                color = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline,
                                 shape = RoundedCornerShape(12.dp)
                             )
                             .clickable { viewModel.setVerificationPick(ch.wordIndex, choice) }
@@ -104,7 +101,7 @@ fun VerifySeedScreen(
         }
 
         if (state.error != null) {
-            Text(state.error!!, color = Negative, style = MaterialTheme.typography.bodySmall)
+            Text(state.error!!, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall)
             Spacer(modifier = Modifier.height(8.dp))
         }
 
@@ -114,7 +111,7 @@ fun VerifySeedScreen(
                 .fillMaxWidth()
                 .height(56.dp),
             shape = RoundedCornerShape(999.dp),
-            colors = ButtonDefaults.buttonColors(containerColor = Black, contentColor = White),
+            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary, contentColor = MaterialTheme.colorScheme.onPrimary),
             enabled = state.challenges.isNotEmpty() && state.challenges.all { state.verificationPicks.containsKey(it.wordIndex) }
         ) {
             Text("Continue", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
@@ -122,4 +119,3 @@ fun VerifySeedScreen(
         Spacer(modifier = Modifier.height(32.dp))
     }
 }
-

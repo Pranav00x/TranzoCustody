@@ -50,11 +50,7 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.tranzo.custody.data.backup.DriveBackupManager
-import com.tranzo.custody.ui.theme.Black
-import com.tranzo.custody.ui.theme.Negative
-import com.tranzo.custody.ui.theme.TextMuted
-import com.tranzo.custody.ui.theme.TextSecondary
-import com.tranzo.custody.ui.theme.White
+import com.tranzo.custody.ui.theme.LocalTranzoTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -68,6 +64,7 @@ fun LoginScreen(
     var passwordVisible by remember { mutableStateOf(false) }
     var showRestoreSheet by remember { mutableStateOf(false) }
     var mnemonicInput by remember { mutableStateOf("") }
+    val tranzoTheme = LocalTranzoTheme.current
 
     // Navigate on success
     LaunchedEffect(state.loginSuccess) {
@@ -98,7 +95,7 @@ fun LoginScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(White)
+            .background(MaterialTheme.colorScheme.background)
     ) {
         TopAppBar(
             title = {},
@@ -107,7 +104,7 @@ fun LoginScreen(
                     Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
                 }
             },
-            colors = TopAppBarDefaults.topAppBarColors(containerColor = White)
+            colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.background)
         )
 
         Column(
@@ -120,7 +117,7 @@ fun LoginScreen(
                 text = if (showRestoreSheet) "Restore your wallet" else "Welcome back",
                 style = MaterialTheme.typography.headlineMedium,
                 fontWeight = FontWeight.Bold,
-                color = Black
+                color = MaterialTheme.colorScheme.onBackground
             )
 
             Spacer(modifier = Modifier.height(8.dp))
@@ -131,7 +128,7 @@ fun LoginScreen(
                 else
                     "Log in with your email and password.",
                 style = MaterialTheme.typography.bodyMedium,
-                color = TextSecondary
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
 
             Spacer(modifier = Modifier.height(32.dp))
@@ -150,8 +147,8 @@ fun LoginScreen(
                     ),
                     shape = RoundedCornerShape(12.dp),
                     colors = OutlinedTextFieldDefaults.colors(
-                        focusedBorderColor = Black,
-                        unfocusedBorderColor = TextMuted.copy(alpha = 0.3f)
+                        focusedBorderColor = MaterialTheme.colorScheme.primary,
+                        unfocusedBorderColor = tranzoTheme.textMuted.copy(alpha = 0.3f)
                     )
                 )
 
@@ -180,8 +177,8 @@ fun LoginScreen(
                     },
                     shape = RoundedCornerShape(12.dp),
                     colors = OutlinedTextFieldDefaults.colors(
-                        focusedBorderColor = Black,
-                        unfocusedBorderColor = TextMuted.copy(alpha = 0.3f)
+                        focusedBorderColor = MaterialTheme.colorScheme.primary,
+                        unfocusedBorderColor = tranzoTheme.textMuted.copy(alpha = 0.3f)
                     )
                 )
 
@@ -189,14 +186,14 @@ fun LoginScreen(
                     onClick = { viewModel.forgotPassword() },
                     modifier = Modifier.align(Alignment.End)
                 ) {
-                    Text("Forgot password?", color = TextSecondary, style = MaterialTheme.typography.bodySmall)
+                    Text("Forgot password?", color = MaterialTheme.colorScheme.onSurfaceVariant, style = MaterialTheme.typography.bodySmall)
                 }
 
                 if (state.error != null) {
                     Text(
                         text = state.error!!,
                         style = MaterialTheme.typography.bodySmall,
-                        color = Negative
+                        color = MaterialTheme.colorScheme.error
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                 }
@@ -209,14 +206,14 @@ fun LoginScreen(
                         .fillMaxWidth()
                         .height(56.dp),
                     shape = RoundedCornerShape(999.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = Black, contentColor = White),
+                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary, contentColor = MaterialTheme.colorScheme.onPrimary),
                     enabled = !state.isLoading && state.email.isNotBlank() && state.password.isNotBlank()
                 ) {
                     if (state.isLoading) {
                         CircularProgressIndicator(
                             modifier = Modifier.size(20.dp),
                             strokeWidth = 2.dp,
-                            color = White
+                            color = MaterialTheme.colorScheme.onPrimary
                         )
                     } else {
                         Text(
@@ -237,14 +234,14 @@ fun LoginScreen(
                         .fillMaxWidth()
                         .height(56.dp),
                     shape = RoundedCornerShape(16.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = Black, contentColor = White),
+                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary, contentColor = MaterialTheme.colorScheme.onPrimary),
                     enabled = !state.isRestoring
                 ) {
                     if (state.isRestoring) {
                         CircularProgressIndicator(
                             modifier = Modifier.size(20.dp),
                             strokeWidth = 2.dp,
-                            color = White
+                            color = MaterialTheme.colorScheme.onPrimary
                         )
                     } else {
                         Text(
@@ -261,7 +258,7 @@ fun LoginScreen(
                     text = "Or enter your recovery phrase",
                     style = MaterialTheme.typography.bodyMedium,
                     fontWeight = FontWeight.SemiBold,
-                    color = Black
+                    color = MaterialTheme.colorScheme.onBackground
                 )
 
                 Spacer(modifier = Modifier.height(12.dp))
@@ -270,14 +267,14 @@ fun LoginScreen(
                     value = mnemonicInput,
                     onValueChange = { mnemonicInput = it },
                     label = { Text("12-word recovery phrase") },
-                    placeholder = { Text("word1 word2 word3 ...", color = TextMuted) },
+                    placeholder = { Text("word1 word2 word3 ...", color = tranzoTheme.textMuted) },
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(120.dp),
                     shape = RoundedCornerShape(12.dp),
                     colors = OutlinedTextFieldDefaults.colors(
-                        focusedBorderColor = Black,
-                        unfocusedBorderColor = TextMuted.copy(alpha = 0.3f)
+                        focusedBorderColor = MaterialTheme.colorScheme.primary,
+                        unfocusedBorderColor = tranzoTheme.textMuted.copy(alpha = 0.3f)
                     )
                 )
 
@@ -289,8 +286,8 @@ fun LoginScreen(
                         .fillMaxWidth()
                         .height(48.dp),
                     shape = RoundedCornerShape(999.dp),
-                    border = androidx.compose.foundation.BorderStroke(1.5.dp, Black),
-                    colors = ButtonDefaults.outlinedButtonColors(contentColor = Black),
+                    border = androidx.compose.foundation.BorderStroke(1.5.dp, MaterialTheme.colorScheme.primary),
+                    colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.primary),
                     enabled = !state.isRestoring && mnemonicInput.isNotBlank()
                 ) {
                     Text(
@@ -305,7 +302,7 @@ fun LoginScreen(
                     Text(
                         text = state.restoreError!!,
                         style = MaterialTheme.typography.bodySmall,
-                        color = Negative
+                        color = MaterialTheme.colorScheme.error
                     )
                 }
 

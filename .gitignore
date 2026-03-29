@@ -25,3 +25,4 @@ smart_contracts/broadcast/
 # Backend
 backend/node_modules/
 backend/.env
+app/google-services.json

@@ -3,12 +3,22 @@ package com.tranzo.custody.navigation
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -143,18 +153,34 @@ fun TranzoNavigation(
                     val parent = remember(entry) {
                         navController.getBackStackEntry(Screen.OnboardingCreateGraph.route)
                     }
+                    val onComplete: () -> Unit = {
+                        navController.navigate(Screen.Home.route) {
+                            popUpTo(Screen.Welcome.route) { inclusive = true }
+                            launchSingleTop = true
+                        }
+                    }
                     if (driveBackupManager != null && sessionManager != null) {
                         BackupPromptScreen(
-                            onComplete = {
-                                navController.navigate(Screen.Home.route) {
-                                    popUpTo(Screen.Welcome.route) { inclusive = true }
-                                    launchSingleTop = true
-                                }
-                            },
+                            onComplete = onComplete,
                             viewModel = hiltViewModel(parent),
                             driveBackupManager = driveBackupManager,
                             sessionManager = sessionManager
                         )
+                    } else {
+                        Column(
+                            modifier = Modifier.fillMaxSize(),
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.Center
+                        ) {
+                            Text(
+                                text = "Backup service is unavailable",
+                                style = MaterialTheme.typography.bodyLarge
+                            )
+                            Spacer(modifier = Modifier.height(16.dp))
+                            TextButton(onClick = onComplete) {
+                                Text("Skip")
+                            }
+                        }
                     }
                 }
             }
@@ -200,18 +226,34 @@ fun TranzoNavigation(
                     val parent = remember(entry) {
                         navController.getBackStackEntry(Screen.OnboardingImportGraph.route)
                     }
+                    val onComplete: () -> Unit = {
+                        navController.navigate(Screen.Home.route) {
+                            popUpTo(Screen.Welcome.route) { inclusive = true }
+                            launchSingleTop = true
+                        }
+                    }
                     if (driveBackupManager != null && sessionManager != null) {
                         BackupPromptScreen(
-                            onComplete = {
-                                navController.navigate(Screen.Home.route) {
-                                    popUpTo(Screen.Welcome.route) { inclusive = true }
-                                    launchSingleTop = true
-                                }
-                            },
+                            onComplete = onComplete,
                             viewModel = hiltViewModel(parent),
                             driveBackupManager = driveBackupManager,
                             sessionManager = sessionManager
                         )
+                    } else {
+                        Column(
+                            modifier = Modifier.fillMaxSize(),
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.Center
+                        ) {
+                            Text(
+                                text = "Backup service is unavailable",
+                                style = MaterialTheme.typography.bodyLarge
+                            )
+                            Spacer(modifier = Modifier.height(16.dp))
+                            TextButton(onClick = onComplete) {
+                                Text("Skip")
+                            }
+                        }
                     }
                 }
             }

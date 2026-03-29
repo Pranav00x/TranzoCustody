@@ -1,4 +1,4 @@
-﻿package com.tranzo.custody.ui.onboarding
+package com.tranzo.custody.ui.onboarding
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
@@ -28,10 +28,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.tranzo.custody.ui.components.PinDots
 import com.tranzo.custody.ui.components.PinKeypad
-import com.tranzo.custody.ui.theme.Black
-import com.tranzo.custody.ui.theme.Negative
-import com.tranzo.custody.ui.theme.TextMuted
-import com.tranzo.custody.ui.theme.White
+import com.tranzo.custody.ui.theme.LocalTranzoTheme
 
 @Composable
 fun SetPinScreen(
@@ -41,6 +38,7 @@ fun SetPinScreen(
 ) {
     val state by viewModel.state.collectAsState()
     var showError by remember { mutableStateOf(false) }
+    val tranzoTheme = LocalTranzoTheme.current
 
     val currentPin = if (state.isSettingPin) state.pin else state.confirmPin
 
@@ -74,7 +72,7 @@ fun SetPinScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(White)
+            .background(MaterialTheme.colorScheme.background)
             .padding(horizontal = 24.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -84,7 +82,7 @@ fun SetPinScreen(
             onClick = onBack,
             modifier = Modifier.align(Alignment.Start)
         ) {
-            Icon(Icons.AutoMirrored.Filled.ArrowBack, "Back", tint = Black)
+            Icon(Icons.AutoMirrored.Filled.ArrowBack, "Back", tint = MaterialTheme.colorScheme.onBackground)
         }
 
         Spacer(modifier = Modifier.height(48.dp))
@@ -93,7 +91,7 @@ fun SetPinScreen(
             text = if (state.isSettingPin) "Create PIN" else "Confirm PIN",
             style = MaterialTheme.typography.headlineLarge,
             fontWeight = FontWeight.ExtraBold,
-            color = Black
+            color = MaterialTheme.colorScheme.onBackground
         )
 
         Spacer(modifier = Modifier.height(8.dp))
@@ -102,7 +100,7 @@ fun SetPinScreen(
             text = if (state.isSettingPin) "Encrypts your keys on this device"
                 else "Re-enter your PIN to confirm",
             style = MaterialTheme.typography.bodyMedium,
-            color = TextMuted
+            color = tranzoTheme.textMuted
         )
 
         Spacer(modifier = Modifier.height(48.dp))
@@ -114,14 +112,14 @@ fun SetPinScreen(
             Text(
                 text = state.error!!,
                 style = MaterialTheme.typography.bodySmall,
-                color = Negative,
+                color = MaterialTheme.colorScheme.error,
                 fontWeight = FontWeight.Medium
             )
         }
 
         if (state.isLoading) {
             Spacer(modifier = Modifier.height(16.dp))
-            Text("Securing wallet…", style = MaterialTheme.typography.bodyMedium, color = TextMuted)
+            Text("Securing wallet…", style = MaterialTheme.typography.bodyMedium, color = tranzoTheme.textMuted)
         }
 
         Spacer(modifier = Modifier.weight(1f))
@@ -134,4 +132,3 @@ fun SetPinScreen(
         Spacer(modifier = Modifier.height(48.dp))
     }
 }
-

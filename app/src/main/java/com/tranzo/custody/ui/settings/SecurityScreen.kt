@@ -28,10 +28,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.tranzo.custody.ui.theme.Black
-import com.tranzo.custody.ui.theme.DividerColor
-import com.tranzo.custody.ui.theme.TextMuted
-import com.tranzo.custody.ui.theme.White
+import com.tranzo.custody.ui.theme.LocalTranzoTheme
 
 @Composable
 fun SecurityScreen(
@@ -39,11 +36,12 @@ fun SecurityScreen(
     viewModel: SettingsViewModel = hiltViewModel()
 ) {
     val state by viewModel.state.collectAsState()
+    val tranzoTheme = LocalTranzoTheme.current
 
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(White)
+            .background(MaterialTheme.colorScheme.background)
             .padding(horizontal = 24.dp)
             .verticalScroll(rememberScrollState())
     ) {
@@ -51,9 +49,9 @@ fun SecurityScreen(
 
         Row(verticalAlignment = Alignment.CenterVertically) {
             IconButton(onClick = onBack) {
-                Icon(Icons.AutoMirrored.Filled.ArrowBack, "Back", tint = Black)
+                Icon(Icons.AutoMirrored.Filled.ArrowBack, "Back", tint = MaterialTheme.colorScheme.onBackground)
             }
-            Text("Security", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold, color = Black)
+            Text("Security", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onBackground)
         }
 
         Spacer(modifier = Modifier.height(24.dp))
@@ -68,7 +66,7 @@ fun SecurityScreen(
             onCheckedChange = { viewModel.toggleBiometric(it) }
         )
 
-        HorizontalDivider(color = DividerColor)
+        HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
 
         Row(
             modifier = Modifier
@@ -79,12 +77,12 @@ fun SecurityScreen(
         ) {
             Column {
                 Text("Auto-Lock Timer", style = MaterialTheme.typography.bodyLarge)
-                Text("Lock app after inactivity", style = MaterialTheme.typography.bodySmall, color = TextMuted)
+                Text("Lock app after inactivity", style = MaterialTheme.typography.bodySmall, color = tranzoTheme.textMuted)
             }
             Text("${state.autoLockMinutes} min", style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.SemiBold)
         }
 
-        HorizontalDivider(color = DividerColor)
+        HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
 
         Row(
             modifier = Modifier
@@ -94,7 +92,7 @@ fun SecurityScreen(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text("Change PIN", style = MaterialTheme.typography.bodyLarge)
-            Icon(Icons.AutoMirrored.Filled.ArrowBack, null, tint = TextMuted)
+            Icon(Icons.AutoMirrored.Filled.ArrowBack, null, tint = tranzoTheme.textMuted)
         }
 
         Spacer(modifier = Modifier.height(32.dp))
@@ -111,11 +109,11 @@ fun SecurityScreen(
         ) {
             Column {
                 Text("Two-Factor Authentication", style = MaterialTheme.typography.bodyLarge)
-                Text("Add extra protection to your account", style = MaterialTheme.typography.bodySmall, color = TextMuted)
+                Text("Add extra protection to your account", style = MaterialTheme.typography.bodySmall, color = tranzoTheme.textMuted)
             }
         }
 
-        HorizontalDivider(color = DividerColor)
+        HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
 
         Row(
             modifier = Modifier
@@ -126,7 +124,7 @@ fun SecurityScreen(
         ) {
             Column {
                 Text("Active Sessions", style = MaterialTheme.typography.bodyLarge)
-                Text("Manage your login sessions", style = MaterialTheme.typography.bodySmall, color = TextMuted)
+                Text("Manage your login sessions", style = MaterialTheme.typography.bodySmall, color = tranzoTheme.textMuted)
             }
         }
 
@@ -141,6 +139,7 @@ private fun SecuritySwitchRow(
     checked: Boolean,
     onCheckedChange: (Boolean) -> Unit
 ) {
+    val tranzoTheme = LocalTranzoTheme.current
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -148,17 +147,17 @@ private fun SecuritySwitchRow(
         verticalAlignment = Alignment.CenterVertically
     ) {
         Column(modifier = Modifier.weight(1f)) {
-            Text(title, style = MaterialTheme.typography.bodyLarge, color = Black)
-            Text(subtitle, style = MaterialTheme.typography.bodySmall, color = TextMuted)
+            Text(title, style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onBackground)
+            Text(subtitle, style = MaterialTheme.typography.bodySmall, color = tranzoTheme.textMuted)
         }
         Switch(
             checked = checked,
             onCheckedChange = onCheckedChange,
             colors = SwitchDefaults.colors(
-                checkedThumbColor = White,
-                checkedTrackColor = Black,
-                uncheckedThumbColor = White,
-                uncheckedTrackColor = TextMuted.copy(alpha = 0.3f)
+                checkedThumbColor = MaterialTheme.colorScheme.onPrimary,
+                checkedTrackColor = MaterialTheme.colorScheme.primary,
+                uncheckedThumbColor = MaterialTheme.colorScheme.onPrimary,
+                uncheckedTrackColor = tranzoTheme.textMuted.copy(alpha = 0.3f)
             )
         )
     }

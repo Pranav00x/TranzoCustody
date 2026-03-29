@@ -25,10 +25,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.tranzo.custody.ui.theme.Black
-import com.tranzo.custody.ui.theme.BorderColor
-import com.tranzo.custody.ui.theme.TextMuted
-import com.tranzo.custody.ui.theme.White
+import com.tranzo.custody.ui.theme.LocalTranzoTheme
 
 @Composable
 fun PinDots(
@@ -48,11 +45,11 @@ fun PinDots(
                     .clip(CircleShape)
                     .then(
                         if (index < filledCount) {
-                            Modifier.background(Black)
+                            Modifier.background(MaterialTheme.colorScheme.onBackground)
                         } else {
                             Modifier
-                                .background(White)
-                                .border(1.5.dp, BorderColor, CircleShape)
+                                .background(MaterialTheme.colorScheme.background)
+                                .border(1.5.dp, MaterialTheme.colorScheme.outline, CircleShape)
                         }
                     )
             )
@@ -97,7 +94,7 @@ fun PinKeypad(
                                 Icon(
                                     imageVector = Icons.AutoMirrored.Filled.Backspace,
                                     contentDescription = "Delete",
-                                    tint = TextMuted,
+                                    tint = LocalTranzoTheme.current.textMuted,
                                     modifier = Modifier.size(28.dp)
                                 )
                             }
@@ -114,7 +111,7 @@ fun PinKeypad(
                                     text = key.toString(),
                                     fontSize = 28.sp,
                                     fontWeight = FontWeight.SemiBold,
-                                    color = Black
+                                    color = MaterialTheme.colorScheme.onBackground
                                 )
                             }
                         }

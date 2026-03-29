@@ -51,14 +51,7 @@ import com.tranzo.custody.domain.model.KycStatus
 import com.tranzo.custody.domain.model.SpendMode
 import com.tranzo.custody.ui.components.CryptoCardView
 import com.tranzo.custody.ui.components.formatCurrency
-import com.tranzo.custody.ui.theme.Black
-import com.tranzo.custody.ui.theme.Negative
-import com.tranzo.custody.ui.theme.NegativeLight
-import com.tranzo.custody.ui.theme.Positive
-import com.tranzo.custody.ui.theme.PositiveLight
-import com.tranzo.custody.ui.theme.SurfaceSecondary
-import com.tranzo.custody.ui.theme.TextMuted
-import com.tranzo.custody.ui.theme.White
+import com.tranzo.custody.ui.theme.LocalTranzoTheme
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -70,11 +63,12 @@ fun CardScreen(
     viewModel: CardViewModel = hiltViewModel()
 ) {
     val state by viewModel.state.collectAsState()
+    val tranzoTheme = LocalTranzoTheme.current
 
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
-            .background(White)
+            .background(MaterialTheme.colorScheme.background)
     ) {
         // Header
         item {
@@ -85,9 +79,9 @@ fun CardScreen(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text("My Card", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.ExtraBold, color = Black)
+                Text("My Card", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.ExtraBold, color = MaterialTheme.colorScheme.onBackground)
                 IconButton(onClick = { }) {
-                    Icon(Icons.Default.Lock, "Lock", tint = Black, modifier = Modifier.size(22.dp))
+                    Icon(Icons.Default.Lock, "Lock", tint = MaterialTheme.colorScheme.onBackground, modifier = Modifier.size(22.dp))
                 }
             }
         }
@@ -118,21 +112,21 @@ fun CardScreen(
                         .fillMaxWidth()
                         .padding(horizontal = 20.dp)
                         .clip(RoundedCornerShape(16.dp))
-                        .background(SurfaceSecondary)
+                        .background(MaterialTheme.colorScheme.primaryContainer)
                         .padding(20.dp)
                 ) {
                     Column {
                         Row(verticalAlignment = Alignment.CenterVertically) {
-                            Text("Spendable Balance", style = MaterialTheme.typography.labelLarge, color = TextMuted)
+                            Text("Spendable Balance", style = MaterialTheme.typography.labelLarge, color = tranzoTheme.textMuted)
                             Spacer(modifier = Modifier.weight(1f))
                             Text(
                                 if (card.spendMode == SpendMode.AUTO_CONVERT) "Auto-convert ON" else "Prepaid",
                                 style = MaterialTheme.typography.labelSmall,
-                                color = if (card.spendMode == SpendMode.AUTO_CONVERT) Positive else TextMuted,
+                                color = if (card.spendMode == SpendMode.AUTO_CONVERT) MaterialTheme.colorScheme.tertiary else tranzoTheme.textMuted,
                                 fontWeight = FontWeight.SemiBold,
                                 modifier = Modifier
                                     .clip(RoundedCornerShape(999.dp))
-                                    .background(if (card.spendMode == SpendMode.AUTO_CONVERT) PositiveLight else White)
+                                    .background(if (card.spendMode == SpendMode.AUTO_CONVERT) tranzoTheme.positive.copy(alpha = 0.15f) else MaterialTheme.colorScheme.surface)
                                     .padding(horizontal = 8.dp, vertical = 3.dp)
                             )
                         }
@@ -141,13 +135,13 @@ fun CardScreen(
                             formatCurrency(card.spendableBalance),
                             style = MaterialTheme.typography.displaySmall,
                             fontWeight = FontWeight.ExtraBold,
-                            color = Black
+                            color = MaterialTheme.colorScheme.onBackground
                         )
                         Spacer(modifier = Modifier.height(4.dp))
                         Text(
                             "Card balance · Used for payments",
                             style = MaterialTheme.typography.bodySmall,
-                            color = TextMuted
+                            color = tranzoTheme.textMuted
                         )
 
                         Spacer(modifier = Modifier.height(16.dp))
@@ -156,7 +150,7 @@ fun CardScreen(
                             onClick = onAddFunds,
                             modifier = Modifier.fillMaxWidth().height(48.dp),
                             shape = RoundedCornerShape(999.dp),
-                            colors = ButtonDefaults.buttonColors(containerColor = Black, contentColor = White),
+                            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary, contentColor = MaterialTheme.colorScheme.onPrimary),
                             enabled = card.kycStatus == KycStatus.VERIFIED
                         ) {
                             Icon(Icons.Default.Add, null, modifier = Modifier.size(18.dp))
@@ -200,20 +194,20 @@ fun CardScreen(
         item {
             state.card?.let { card ->
                 Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp)) {
-                    Text("Monthly Spending", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold, color = Black)
+                    Text("Monthly Spending", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.onBackground)
                     Spacer(modifier = Modifier.height(12.dp))
 
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
                             .clip(RoundedCornerShape(16.dp))
-                            .background(SurfaceSecondary)
+                            .background(MaterialTheme.colorScheme.primaryContainer)
                             .padding(20.dp)
                     ) {
                         Column {
                             Row(Modifier.fillMaxWidth(), Arrangement.SpaceBetween) {
-                                Text(formatCurrency(card.monthlySpent), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold, color = Black)
-                                Text("of ${formatCurrency(card.monthlyLimit)}", style = MaterialTheme.typography.bodyMedium, color = TextMuted)
+                                Text(formatCurrency(card.monthlySpent), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onBackground)
+                                Text("of ${formatCurrency(card.monthlyLimit)}", style = MaterialTheme.typography.bodyMedium, color = tranzoTheme.textMuted)
                             }
                             Spacer(modifier = Modifier.height(12.dp))
                             val progress = (if (card.monthlyLimit > 0) card.monthlySpent / card.monthlyLimit else 0.0)
@@ -223,12 +217,12 @@ fun CardScreen(
                             LinearProgressIndicator(
                                 progress = { progress },
                                 modifier = Modifier.fillMaxWidth().height(8.dp).clip(RoundedCornerShape(4.dp)),
-                                color = Black,
-                                trackColor = White,
+                                color = MaterialTheme.colorScheme.primary,
+                                trackColor = MaterialTheme.colorScheme.surface,
                                 strokeCap = StrokeCap.Round,
                             )
                             Spacer(modifier = Modifier.height(8.dp))
-                            Text("${(progress * 100).toInt()}% of monthly limit", style = MaterialTheme.typography.bodySmall, color = TextMuted)
+                            Text("${(progress * 100).toInt()}% of monthly limit", style = MaterialTheme.typography.bodySmall, color = tranzoTheme.textMuted)
                         }
                     }
                 }
@@ -238,7 +232,7 @@ fun CardScreen(
 
         // Recent Transactions
         item {
-            Text("Recent Transactions", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold, color = Black, modifier = Modifier.padding(horizontal = 20.dp))
+            Text("Recent Transactions", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.onBackground, modifier = Modifier.padding(horizontal = 20.dp))
             Spacer(modifier = Modifier.height(8.dp))
         }
 
@@ -259,13 +253,13 @@ private fun KycBanner(status: KycStatus) {
 
     when (status) {
         KycStatus.NOT_STARTED -> {
-            bgColor = NegativeLight; iconColor = Negative; icon = Icons.Default.Warning; text = "KYC required to activate card"
+            bgColor = MaterialTheme.colorScheme.error.copy(alpha = 0.15f); iconColor = MaterialTheme.colorScheme.error; icon = Icons.Default.Warning; text = "KYC required to activate card"
         }
         KycStatus.PENDING -> {
             bgColor = Color(0xFFFEF3C7); iconColor = Color(0xFFF59E0B); icon = Icons.Default.Schedule; text = "KYC verification in progress"
         }
         KycStatus.REJECTED -> {
-            bgColor = NegativeLight; iconColor = Negative; icon = Icons.Default.Warning; text = "KYC rejected — please resubmit"
+            bgColor = MaterialTheme.colorScheme.error.copy(alpha = 0.15f); iconColor = MaterialTheme.colorScheme.error; icon = Icons.Default.Warning; text = "KYC rejected — please resubmit"
         }
         else -> return
     }
@@ -288,44 +282,46 @@ private fun KycBanner(status: KycStatus) {
 
 @Composable
 private fun CardActionItem(icon: ImageVector, label: String, onClick: () -> Unit) {
+    val tranzoTheme = LocalTranzoTheme.current
     Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(8.dp)) {
         IconButton(
             onClick = onClick,
-            modifier = Modifier.size(52.dp).clip(CircleShape).background(SurfaceSecondary)
+            modifier = Modifier.size(52.dp).clip(CircleShape).background(MaterialTheme.colorScheme.primaryContainer)
         ) {
-            Icon(icon, label, tint = Black, modifier = Modifier.size(24.dp))
+            Icon(icon, label, tint = MaterialTheme.colorScheme.onBackground, modifier = Modifier.size(24.dp))
         }
-        Text(label, style = MaterialTheme.typography.labelSmall, color = TextMuted)
+        Text(label, style = MaterialTheme.typography.labelSmall, color = tranzoTheme.textMuted)
     }
 }
 
 @Composable
 private fun CardTransactionItem(transaction: CardTransaction) {
+    val tranzoTheme = LocalTranzoTheme.current
     Row(
         modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Box(
-            modifier = Modifier.size(44.dp).clip(CircleShape).background(SurfaceSecondary),
+            modifier = Modifier.size(44.dp).clip(CircleShape).background(MaterialTheme.colorScheme.primaryContainer),
             contentAlignment = Alignment.Center
         ) {
-            Text(transaction.merchantIcon, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = Black)
+            Text(transaction.merchantIcon, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onBackground)
         }
         Column(modifier = Modifier.weight(1f).padding(start = 12.dp)) {
-            Text(transaction.merchantName, style = MaterialTheme.typography.titleSmall, color = Black)
+            Text(transaction.merchantName, style = MaterialTheme.typography.titleSmall, color = MaterialTheme.colorScheme.onBackground)
             Row {
                 Text(
                     SimpleDateFormat("MMM d, h:mm a", Locale.US).format(Date(transaction.timestamp)),
                     style = MaterialTheme.typography.bodySmall,
-                    color = TextMuted
+                    color = tranzoTheme.textMuted
                 )
                 Text(
                     " · ${transaction.sourceLabel}",
                     style = MaterialTheme.typography.bodySmall,
-                    color = TextMuted
+                    color = tranzoTheme.textMuted
                 )
             }
         }
-        Text("-${formatCurrency(transaction.amount)}", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold, color = Black)
+        Text("-${formatCurrency(transaction.amount)}", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.onBackground)
     }
 }

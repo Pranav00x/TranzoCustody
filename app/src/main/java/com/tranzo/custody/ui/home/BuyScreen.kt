@@ -37,14 +37,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.tranzo.custody.ui.theme.Black
-import com.tranzo.custody.ui.theme.BorderColor
-import com.tranzo.custody.ui.theme.SurfaceSecondary
-import com.tranzo.custody.ui.theme.TextMuted
-import com.tranzo.custody.ui.theme.White
+import com.tranzo.custody.ui.theme.LocalTranzoTheme
 
 @Composable
 fun BuyScreen(onBack: () -> Unit) {
@@ -59,21 +54,21 @@ fun BuyScreen(onBack: () -> Unit) {
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(White)
+            .background(MaterialTheme.colorScheme.background)
             .padding(horizontal = 24.dp)
     ) {
         Spacer(modifier = Modifier.height(16.dp))
 
         Row(verticalAlignment = Alignment.CenterVertically) {
             IconButton(onClick = onBack) {
-                Icon(Icons.AutoMirrored.Filled.ArrowBack, "Back", tint = Black)
+                Icon(Icons.AutoMirrored.Filled.ArrowBack, "Back", tint = MaterialTheme.colorScheme.onBackground)
             }
-            Text("Buy Crypto", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold, color = Black)
+            Text("Buy Crypto", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onBackground)
         }
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        Text("You Pay", style = MaterialTheme.typography.labelLarge, color = TextMuted)
+        Text("You Pay", style = MaterialTheme.typography.labelLarge, color = LocalTranzoTheme.current.textMuted)
         Spacer(modifier = Modifier.height(8.dp))
 
         Row(verticalAlignment = Alignment.CenterVertically) {
@@ -81,8 +76,8 @@ fun BuyScreen(onBack: () -> Unit) {
                 value = amount,
                 onValueChange = { amount = it },
                 modifier = Modifier.weight(1f),
-                placeholder = { Text("0.00", color = TextMuted) },
-                colors = OutlinedTextFieldDefaults.colors(focusedBorderColor = Black, unfocusedBorderColor = BorderColor, cursorColor = Black),
+                placeholder = { Text("0.00", color = LocalTranzoTheme.current.textMuted) },
+                colors = OutlinedTextFieldDefaults.colors(focusedBorderColor = MaterialTheme.colorScheme.primary, unfocusedBorderColor = MaterialTheme.colorScheme.outline, cursorColor = MaterialTheme.colorScheme.primary),
                 shape = RoundedCornerShape(12.dp),
                 singleLine = true
             )
@@ -93,13 +88,13 @@ fun BuyScreen(onBack: () -> Unit) {
                         modifier = Modifier
                             .clip(RoundedCornerShape(8.dp))
                             .then(
-                                if (cur == selectedCurrency) Modifier.background(Black)
-                                else Modifier.border(1.dp, BorderColor, RoundedCornerShape(8.dp))
+                                if (cur == selectedCurrency) Modifier.background(MaterialTheme.colorScheme.primary)
+                                else Modifier.border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(8.dp))
                             )
                             .clickable { selectedCurrency = cur }
                             .padding(horizontal = 10.dp, vertical = 8.dp)
                     ) {
-                        Text(cur, style = MaterialTheme.typography.labelSmall, color = if (cur == selectedCurrency) White else Black, fontWeight = FontWeight.SemiBold)
+                        Text(cur, style = MaterialTheme.typography.labelSmall, color = if (cur == selectedCurrency) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onBackground, fontWeight = FontWeight.SemiBold)
                     }
                 }
             }
@@ -107,7 +102,7 @@ fun BuyScreen(onBack: () -> Unit) {
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        Text("You Receive", style = MaterialTheme.typography.labelLarge, color = TextMuted)
+        Text("You Receive", style = MaterialTheme.typography.labelLarge, color = LocalTranzoTheme.current.textMuted)
         Spacer(modifier = Modifier.height(8.dp))
 
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -116,8 +111,8 @@ fun BuyScreen(onBack: () -> Unit) {
                     modifier = Modifier
                         .clip(RoundedCornerShape(12.dp))
                         .then(
-                            if (token == selectedToken) Modifier.border(2.dp, Black, RoundedCornerShape(12.dp))
-                            else Modifier.border(1.dp, BorderColor, RoundedCornerShape(12.dp))
+                            if (token == selectedToken) Modifier.border(2.dp, MaterialTheme.colorScheme.primary, RoundedCornerShape(12.dp))
+                            else Modifier.border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(12.dp))
                         )
                         .clickable { selectedToken = token }
                         .padding(horizontal = 16.dp, vertical = 12.dp)
@@ -129,7 +124,7 @@ fun BuyScreen(onBack: () -> Unit) {
 
         Spacer(modifier = Modifier.height(32.dp))
 
-        Text("Payment Method", style = MaterialTheme.typography.labelLarge, color = TextMuted)
+        Text("Payment Method", style = MaterialTheme.typography.labelLarge, color = LocalTranzoTheme.current.textMuted)
         Spacer(modifier = Modifier.height(12.dp))
 
         listOf(
@@ -141,23 +136,23 @@ fun BuyScreen(onBack: () -> Unit) {
                     .fillMaxWidth()
                     .clip(RoundedCornerShape(12.dp))
                     .then(
-                        if (index == selectedPayment) Modifier.border(2.dp, Black, RoundedCornerShape(12.dp))
-                        else Modifier.border(1.dp, BorderColor, RoundedCornerShape(12.dp))
+                        if (index == selectedPayment) Modifier.border(2.dp, MaterialTheme.colorScheme.primary, RoundedCornerShape(12.dp))
+                        else Modifier.border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(12.dp))
                     )
                     .clickable { selectedPayment = index }
                     .padding(16.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Box(
-                    modifier = Modifier.size(40.dp).clip(CircleShape).background(SurfaceSecondary),
+                    modifier = Modifier.size(40.dp).clip(CircleShape).background(MaterialTheme.colorScheme.primaryContainer),
                     contentAlignment = Alignment.Center
                 ) {
-                    Icon(icon, null, tint = Black, modifier = Modifier.size(20.dp))
+                    Icon(icon, null, tint = MaterialTheme.colorScheme.onBackground, modifier = Modifier.size(20.dp))
                 }
                 Spacer(modifier = Modifier.width(12.dp))
                 Column {
                     Text(title, style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold)
-                    Text(subtitle, style = MaterialTheme.typography.bodySmall, color = TextMuted)
+                    Text(subtitle, style = MaterialTheme.typography.bodySmall, color = LocalTranzoTheme.current.textMuted)
                 }
             }
             if (index == 0) Spacer(modifier = Modifier.height(8.dp))
@@ -169,7 +164,7 @@ fun BuyScreen(onBack: () -> Unit) {
             onClick = { onBack() },
             modifier = Modifier.fillMaxWidth().height(56.dp),
             shape = RoundedCornerShape(999.dp),
-            colors = ButtonDefaults.buttonColors(containerColor = Black, contentColor = White),
+            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary, contentColor = MaterialTheme.colorScheme.onPrimary),
             enabled = amount.isNotBlank()
         ) {
             Text("Continue", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)

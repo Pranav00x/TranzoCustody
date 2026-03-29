@@ -6,6 +6,7 @@ import com.tranzo.custody.data.local.TranzoDatabase
 import com.tranzo.custody.data.local.ThemePreferencesManager
 import com.tranzo.custody.data.local.UserSessionManager
 import com.tranzo.custody.data.local.dao.TransactionDao
+import com.tranzo.custody.data.backup.DriveBackupManager
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -42,5 +43,11 @@ object DatabaseModule {
     @Singleton
     fun provideThemePreferencesManager(@ApplicationContext context: Context): ThemePreferencesManager {
         return ThemePreferencesManager(context)
+    }
+
+    @Provides
+    @Singleton
+    fun provideDriveBackupManager(@ApplicationContext context: Context): DriveBackupManager {
+        return DriveBackupManager(context)
     }
 }

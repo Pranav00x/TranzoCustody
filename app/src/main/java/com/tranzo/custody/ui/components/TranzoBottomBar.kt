@@ -20,9 +20,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
-import com.tranzo.custody.ui.theme.Black
-import com.tranzo.custody.ui.theme.TextMuted
-import com.tranzo.custody.ui.theme.White
+import com.tranzo.custody.ui.theme.LocalTranzoTheme
 
 data class BottomNavItem(
     val route: String,
@@ -46,7 +44,7 @@ fun TranzoBottomBar(
 ) {
     NavigationBar(
         modifier = modifier,
-        containerColor = White,
+        containerColor = MaterialTheme.colorScheme.background,
         tonalElevation = 0.dp
     ) {
         bottomNavItems.forEach { item ->
@@ -68,11 +66,11 @@ fun TranzoBottomBar(
                     )
                 },
                 colors = NavigationBarItemDefaults.colors(
-                    selectedIconColor = Black,
-                    selectedTextColor = Black,
-                    unselectedIconColor = TextMuted,
-                    unselectedTextColor = TextMuted,
-                    indicatorColor = White
+                    selectedIconColor = MaterialTheme.colorScheme.onBackground,
+                    selectedTextColor = MaterialTheme.colorScheme.onBackground,
+                    unselectedIconColor = LocalTranzoTheme.current.textMuted,
+                    unselectedTextColor = LocalTranzoTheme.current.textMuted,
+                    indicatorColor = MaterialTheme.colorScheme.background
                 )
             )
         }

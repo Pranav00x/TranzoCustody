@@ -48,14 +48,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.tranzo.custody.ui.components.formatCurrency
-import com.tranzo.custody.ui.theme.Black
-import com.tranzo.custody.ui.theme.BorderColor
-import com.tranzo.custody.ui.theme.DividerColor
-import com.tranzo.custody.ui.theme.Positive
-import com.tranzo.custody.ui.theme.PositiveLight
-import com.tranzo.custody.ui.theme.SurfaceSecondary
-import com.tranzo.custody.ui.theme.TextMuted
-import com.tranzo.custody.ui.theme.White
+import com.tranzo.custody.ui.theme.LocalTranzoTheme
 
 @Composable
 fun BridgeScreen(
@@ -78,7 +71,7 @@ fun BridgeScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(White)
+            .background(MaterialTheme.colorScheme.background)
             .verticalScroll(rememberScrollState())
             .padding(horizontal = 24.dp)
     ) {
@@ -86,13 +79,13 @@ fun BridgeScreen(
 
         Row(verticalAlignment = Alignment.CenterVertically) {
             IconButton(onClick = onBack) {
-                Icon(Icons.AutoMirrored.Filled.ArrowBack, "Back", tint = Black)
+                Icon(Icons.AutoMirrored.Filled.ArrowBack, "Back", tint = MaterialTheme.colorScheme.onBackground)
             }
             Text(
                 "Add to Spend",
                 style = MaterialTheme.typography.headlineMedium,
                 fontWeight = FontWeight.Bold,
-                color = Black
+                color = MaterialTheme.colorScheme.onBackground
             )
         }
 
@@ -101,7 +94,7 @@ fun BridgeScreen(
         Text(
             "Convert your deposited crypto to card spending balance.",
             style = MaterialTheme.typography.bodyMedium,
-            color = TextMuted
+            color = LocalTranzoTheme.current.textMuted
         )
 
         Spacer(modifier = Modifier.height(28.dp))
@@ -111,25 +104,25 @@ fun BridgeScreen(
             modifier = Modifier
                 .fillMaxWidth()
                 .clip(RoundedCornerShape(16.dp))
-                .background(SurfaceSecondary)
+                .background(MaterialTheme.colorScheme.primaryContainer)
                 .padding(20.dp)
         ) {
             Column {
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(Icons.Default.Wallet, null, tint = Black, modifier = Modifier.size(18.dp))
+                    Icon(Icons.Default.Wallet, null, tint = MaterialTheme.colorScheme.onBackground, modifier = Modifier.size(18.dp))
                     Spacer(modifier = Modifier.width(8.dp))
-                    Text("From: Wallet", style = MaterialTheme.typography.labelLarge, color = TextMuted)
+                    Text("From: Wallet", style = MaterialTheme.typography.labelLarge, color = LocalTranzoTheme.current.textMuted)
                     Spacer(modifier = Modifier.weight(1f))
-                    Text("Crypto", style = MaterialTheme.typography.labelSmall, color = TextMuted,
+                    Text("Crypto", style = MaterialTheme.typography.labelSmall, color = LocalTranzoTheme.current.textMuted,
                         modifier = Modifier
                             .clip(RoundedCornerShape(999.dp))
-                            .background(White)
+                            .background(MaterialTheme.colorScheme.background)
                             .padding(horizontal = 8.dp, vertical = 3.dp))
                 }
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                Text("Select Token", style = MaterialTheme.typography.labelMedium, color = TextMuted)
+                Text("Select Token", style = MaterialTheme.typography.labelMedium, color = LocalTranzoTheme.current.textMuted)
                 Spacer(modifier = Modifier.height(8.dp))
 
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -139,16 +132,16 @@ fun BridgeScreen(
                             modifier = Modifier
                                 .clip(RoundedCornerShape(10.dp))
                                 .then(
-                                    if (isSelected) Modifier.border(2.dp, Black, RoundedCornerShape(10.dp))
-                                    else Modifier.border(1.dp, BorderColor, RoundedCornerShape(10.dp))
+                                    if (isSelected) Modifier.border(2.dp, MaterialTheme.colorScheme.primary, RoundedCornerShape(10.dp))
+                                    else Modifier.border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(10.dp))
                                 )
-                                .background(White)
+                                .background(MaterialTheme.colorScheme.background)
                                 .clickable { viewModel.selectToken(token) }
                                 .padding(horizontal = 12.dp, vertical = 8.dp)
                         ) {
                             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                                 Text(token.symbol, style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.SemiBold)
-                                Text("${"%.2f".format(token.balance)}", style = MaterialTheme.typography.labelSmall, color = TextMuted)
+                                Text("${"%.2f".format(token.balance)}", style = MaterialTheme.typography.labelSmall, color = LocalTranzoTheme.current.textMuted)
                             }
                         }
                     }
@@ -156,7 +149,7 @@ fun BridgeScreen(
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                Text("Amount", style = MaterialTheme.typography.labelMedium, color = TextMuted)
+                Text("Amount", style = MaterialTheme.typography.labelMedium, color = LocalTranzoTheme.current.textMuted)
                 Spacer(modifier = Modifier.height(6.dp))
 
                 OutlinedTextField(
@@ -165,14 +158,14 @@ fun BridgeScreen(
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(12.dp),
                     colors = OutlinedTextFieldDefaults.colors(
-                        focusedBorderColor = Black,
-                        unfocusedBorderColor = BorderColor,
-                        cursorColor = Black,
-                        focusedContainerColor = White,
-                        unfocusedContainerColor = White
+                        focusedBorderColor = MaterialTheme.colorScheme.primary,
+                        unfocusedBorderColor = MaterialTheme.colorScheme.outline,
+                        cursorColor = MaterialTheme.colorScheme.primary,
+                        focusedContainerColor = MaterialTheme.colorScheme.background,
+                        unfocusedContainerColor = MaterialTheme.colorScheme.background
                     ),
-                    placeholder = { Text("0.00", color = TextMuted) },
-                    suffix = { state.selectedToken?.let { Text(it.symbol, color = TextMuted) } },
+                    placeholder = { Text("0.00", color = LocalTranzoTheme.current.textMuted) },
+                    suffix = { state.selectedToken?.let { Text(it.symbol, color = LocalTranzoTheme.current.textMuted) } },
                     singleLine = true,
                     isError = state.error != null
                 )
@@ -182,7 +175,7 @@ fun BridgeScreen(
                     Text(
                         "Available: ${"%.4f".format(token.balance)} ${token.symbol} ≈ ${formatCurrency(token.fiatValue)}",
                         style = MaterialTheme.typography.bodySmall,
-                        color = TextMuted
+                        color = LocalTranzoTheme.current.textMuted
                     )
                 }
 
@@ -199,10 +192,10 @@ fun BridgeScreen(
                 modifier = Modifier
                     .size(40.dp)
                     .clip(CircleShape)
-                    .background(Black),
+                    .background(MaterialTheme.colorScheme.primary),
                 contentAlignment = Alignment.Center
             ) {
-                Icon(Icons.Default.ArrowDownward, null, tint = White, modifier = Modifier.size(22.dp))
+                Icon(Icons.Default.ArrowDownward, null, tint = MaterialTheme.colorScheme.onPrimary, modifier = Modifier.size(22.dp))
             }
         }
 
@@ -211,19 +204,19 @@ fun BridgeScreen(
             modifier = Modifier
                 .fillMaxWidth()
                 .clip(RoundedCornerShape(16.dp))
-                .background(SurfaceSecondary)
+                .background(MaterialTheme.colorScheme.primaryContainer)
                 .padding(20.dp)
         ) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Icon(Icons.Default.CreditCard, null, tint = Black, modifier = Modifier.size(18.dp))
+                Icon(Icons.Default.CreditCard, null, tint = MaterialTheme.colorScheme.onBackground, modifier = Modifier.size(18.dp))
                 Spacer(modifier = Modifier.width(8.dp))
-                Text("To: Card Balance", style = MaterialTheme.typography.labelLarge, color = TextMuted)
+                Text("To: Card Balance", style = MaterialTheme.typography.labelLarge, color = LocalTranzoTheme.current.textMuted)
                 Spacer(modifier = Modifier.weight(1f))
-                Text("Spendable", style = MaterialTheme.typography.labelSmall, color = Positive,
+                Text("Spendable", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.tertiary,
                     fontWeight = FontWeight.SemiBold,
                     modifier = Modifier
                         .clip(RoundedCornerShape(999.dp))
-                        .background(PositiveLight)
+                        .background(LocalTranzoTheme.current.positive.copy(alpha = 0.15f))
                         .padding(horizontal = 8.dp, vertical = 3.dp))
             }
         }
@@ -237,25 +230,25 @@ fun BridgeScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .clip(RoundedCornerShape(16.dp))
-                        .border(1.dp, BorderColor, RoundedCornerShape(16.dp))
+                        .border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(16.dp))
                         .padding(20.dp)
                 ) {
                     Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                         Text("Conversion Preview", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold)
-                        HorizontalDivider(color = DividerColor)
+                        HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
                         PreviewRow("You send", "${"%.4f".format(preview.fromAmount)} ${preview.fromToken.symbol}")
                         PreviewRow("Exchange rate", "1 ${preview.fromToken.symbol} = ${formatCurrency(preview.exchangeRate)}")
                         PreviewRow("Network fee", formatCurrency(preview.networkFee))
                         PreviewRow("Platform fee (0.5%)", formatCurrency(preview.platformFee))
-                        HorizontalDivider(color = DividerColor)
+                        HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
                         Row(Modifier.fillMaxWidth(), Arrangement.SpaceBetween) {
                             Text("You receive", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold)
-                            Text(formatCurrency(preview.estimatedTotal), style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold, color = Positive)
+                            Text(formatCurrency(preview.estimatedTotal), style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.tertiary)
                         }
                         Text(
                             "Crypto → Fiat conversion. Funds will be available on your card balance.",
                             style = MaterialTheme.typography.bodySmall,
-                            color = TextMuted
+                            color = LocalTranzoTheme.current.textMuted
                         )
                     }
                 }
@@ -264,7 +257,7 @@ fun BridgeScreen(
 
         if (state.isLoadingPreview) {
             Box(Modifier.fillMaxWidth().padding(24.dp), contentAlignment = Alignment.Center) {
-                CircularProgressIndicator(color = Black, modifier = Modifier.size(24.dp), strokeWidth = 2.dp)
+                CircularProgressIndicator(color = MaterialTheme.colorScheme.primary, modifier = Modifier.size(24.dp), strokeWidth = 2.dp)
             }
         }
 
@@ -274,11 +267,11 @@ fun BridgeScreen(
             onClick = { viewModel.executeTopUp() },
             modifier = Modifier.fillMaxWidth().height(56.dp),
             shape = RoundedCornerShape(999.dp),
-            colors = ButtonDefaults.buttonColors(containerColor = Black, contentColor = White),
+            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary, contentColor = MaterialTheme.colorScheme.onPrimary),
             enabled = state.preview != null && !state.isProcessing && state.error == null
         ) {
             if (state.isProcessing) {
-                CircularProgressIndicator(color = White, modifier = Modifier.size(22.dp), strokeWidth = 2.dp)
+                CircularProgressIndicator(color = MaterialTheme.colorScheme.onPrimary, modifier = Modifier.size(22.dp), strokeWidth = 2.dp)
             } else {
                 Text(
                     "Add to Spendable Balance",
@@ -295,7 +288,7 @@ fun BridgeScreen(
 @Composable
 private fun PreviewRow(label: String, value: String) {
     Row(Modifier.fillMaxWidth(), Arrangement.SpaceBetween) {
-        Text(label, style = MaterialTheme.typography.bodySmall, color = TextMuted)
+        Text(label, style = MaterialTheme.typography.bodySmall, color = LocalTranzoTheme.current.textMuted)
         Text(value, style = MaterialTheme.typography.bodySmall, fontWeight = FontWeight.Medium)
     }
 }
@@ -305,7 +298,7 @@ private fun BridgeSuccessView(creditedAmount: Double, onDone: () -> Unit) {
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(White)
+            .background(MaterialTheme.colorScheme.background)
             .padding(32.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
@@ -313,7 +306,7 @@ private fun BridgeSuccessView(creditedAmount: Double, onDone: () -> Unit) {
         Icon(
             Icons.Default.CheckCircle,
             null,
-            tint = Positive,
+            tint = MaterialTheme.colorScheme.tertiary,
             modifier = Modifier.size(80.dp)
         )
         Spacer(modifier = Modifier.height(24.dp))
@@ -327,13 +320,13 @@ private fun BridgeSuccessView(creditedAmount: Double, onDone: () -> Unit) {
             formatCurrency(creditedAmount),
             style = MaterialTheme.typography.displaySmall,
             fontWeight = FontWeight.Bold,
-            color = Positive
+            color = MaterialTheme.colorScheme.tertiary
         )
         Spacer(modifier = Modifier.height(8.dp))
         Text(
             "has been added to your spendable card balance.",
             style = MaterialTheme.typography.bodyMedium,
-            color = TextMuted,
+            color = LocalTranzoTheme.current.textMuted,
             textAlign = TextAlign.Center
         )
         Spacer(modifier = Modifier.height(48.dp))
@@ -341,7 +334,7 @@ private fun BridgeSuccessView(creditedAmount: Double, onDone: () -> Unit) {
             onClick = onDone,
             modifier = Modifier.fillMaxWidth().height(56.dp),
             shape = RoundedCornerShape(999.dp),
-            colors = ButtonDefaults.buttonColors(containerColor = Black, contentColor = White)
+            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary, contentColor = MaterialTheme.colorScheme.onPrimary)
         ) {
             Text("Done", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
         }

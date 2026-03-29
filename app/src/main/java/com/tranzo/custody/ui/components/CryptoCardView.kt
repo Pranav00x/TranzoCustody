@@ -16,6 +16,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Contactless
 import androidx.compose.material.icons.filled.Memory
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -26,17 +27,18 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.tranzo.custody.domain.model.CryptoCard
-import com.tranzo.custody.ui.theme.CardDarkEnd
-import com.tranzo.custody.ui.theme.CardDarkStart
 import com.tranzo.custody.ui.theme.GoldChip
 import com.tranzo.custody.ui.theme.GoldChipLight
-import com.tranzo.custody.ui.theme.White
+import com.tranzo.custody.ui.theme.LocalTranzoTheme
 
 @Composable
 fun CryptoCardView(
     card: CryptoCard,
     modifier: Modifier = Modifier
 ) {
+    val cardDarkStart = LocalTranzoTheme.current.cardDarkStart
+    val cardDarkEnd = LocalTranzoTheme.current.cardDarkEnd
+
     Box(
         modifier = modifier
             .fillMaxWidth()
@@ -44,7 +46,7 @@ fun CryptoCardView(
             .clip(RoundedCornerShape(16.dp))
             .background(
                 Brush.linearGradient(
-                    colors = listOf(CardDarkStart, CardDarkEnd)
+                    colors = listOf(cardDarkStart, cardDarkEnd)
                 )
             )
             .padding(24.dp)
@@ -60,7 +62,7 @@ fun CryptoCardView(
             ) {
                 Text(
                     text = "Tranzo",
-                    color = White,
+                    color = MaterialTheme.colorScheme.onPrimary,
                     fontSize = 22.sp,
                     fontWeight = FontWeight.ExtraBold,
                     letterSpacing = 1.sp
@@ -68,7 +70,7 @@ fun CryptoCardView(
                 Icon(
                     imageVector = Icons.Default.Contactless,
                     contentDescription = "Contactless",
-                    tint = White.copy(alpha = 0.8f),
+                    tint = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.8f),
                     modifier = Modifier.size(28.dp)
                 )
             }
@@ -98,7 +100,7 @@ fun CryptoCardView(
             Column {
                 Text(
                     text = "••••  ••••  ••••  ${card.lastFourDigits}",
-                    color = White,
+                    color = MaterialTheme.colorScheme.onPrimary,
                     fontSize = 18.sp,
                     fontWeight = FontWeight.Medium,
                     letterSpacing = 2.sp
@@ -112,20 +114,20 @@ fun CryptoCardView(
                     Column {
                         Text(
                             text = card.cardholderName,
-                            color = White.copy(alpha = 0.7f),
+                            color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.7f),
                             fontSize = 10.sp,
                             fontWeight = FontWeight.Medium,
                             letterSpacing = 1.sp
                         )
                         Text(
                             text = "EXP ${card.expiryDate}",
-                            color = White.copy(alpha = 0.5f),
+                            color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.5f),
                             fontSize = 10.sp
                         )
                     }
                     Text(
                         text = "VISA",
-                        color = White,
+                        color = MaterialTheme.colorScheme.onPrimary,
                         fontSize = 20.sp,
                         fontWeight = FontWeight.ExtraBold,
                         letterSpacing = 2.sp

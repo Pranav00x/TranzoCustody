@@ -132,6 +132,12 @@ class LoginViewModel @Inject constructor(
                             restoreError = "Wrong password — backup was encrypted with a different password"
                         )
                     }
+                    is RestoreResult.Error -> {
+                        _state.value = _state.value.copy(
+                            isRestoring = false,
+                            restoreError = result.message
+                        )
+                    }
                 }
             } catch (e: Exception) {
                 _state.value = _state.value.copy(

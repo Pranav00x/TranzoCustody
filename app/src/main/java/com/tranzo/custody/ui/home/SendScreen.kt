@@ -41,12 +41,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.tranzo.custody.domain.model.Chain
-import com.tranzo.custody.ui.theme.Black
-import com.tranzo.custody.ui.theme.BorderColor
-import com.tranzo.custody.ui.theme.Negative
-import com.tranzo.custody.ui.theme.SurfaceSecondary
-import com.tranzo.custody.ui.theme.TextMuted
-import com.tranzo.custody.ui.theme.White
+import com.tranzo.custody.ui.theme.LocalTranzoTheme
 
 @Composable
 fun SendScreen(
@@ -64,26 +59,26 @@ fun SendScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(White)
+            .background(MaterialTheme.colorScheme.background)
             .padding(horizontal = 24.dp)
     ) {
         Spacer(modifier = Modifier.height(16.dp))
 
         Row(verticalAlignment = Alignment.CenterVertically) {
             IconButton(onClick = onBack) {
-                Icon(Icons.AutoMirrored.Filled.ArrowBack, "Back", tint = Black)
+                Icon(Icons.AutoMirrored.Filled.ArrowBack, "Back", tint = MaterialTheme.colorScheme.onBackground)
             }
             Text(
                 text = "Send",
                 style = MaterialTheme.typography.headlineMedium,
                 fontWeight = FontWeight.Bold,
-                color = Black
+                color = MaterialTheme.colorScheme.onBackground
             )
         }
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        Text("Select asset", style = MaterialTheme.typography.labelLarge, color = TextMuted)
+        Text("Select asset", style = MaterialTheme.typography.labelLarge, color = LocalTranzoTheme.current.textMuted)
         Spacer(modifier = Modifier.height(8.dp))
 
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -92,8 +87,8 @@ fun SendScreen(
                     modifier = Modifier
                         .clip(RoundedCornerShape(12.dp))
                         .then(
-                            if (index == selectedTokenIndex) Modifier.border(2.dp, Black, RoundedCornerShape(12.dp))
-                            else Modifier.border(1.dp, BorderColor, RoundedCornerShape(12.dp))
+                            if (index == selectedTokenIndex) Modifier.border(2.dp, MaterialTheme.colorScheme.primary, RoundedCornerShape(12.dp))
+                            else Modifier.border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(12.dp))
                         )
                         .clickable { selectedTokenIndex = index }
                         .padding(horizontal = 16.dp, vertical = 10.dp)
@@ -109,7 +104,7 @@ fun SendScreen(
                             Text(
                                 text = token.symbol.first().toString(),
                                 style = MaterialTheme.typography.labelSmall,
-                                color = White,
+                                color = MaterialTheme.colorScheme.onPrimary,
                                 fontWeight = FontWeight.Bold
                             )
                         }
@@ -126,7 +121,7 @@ fun SendScreen(
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        Text("Recipient", style = MaterialTheme.typography.labelLarge, color = TextMuted)
+        Text("Recipient", style = MaterialTheme.typography.labelLarge, color = LocalTranzoTheme.current.textMuted)
         Spacer(modifier = Modifier.height(8.dp))
 
         OutlinedTextField(
@@ -135,14 +130,14 @@ fun SendScreen(
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(12.dp),
             colors = OutlinedTextFieldDefaults.colors(
-                focusedBorderColor = Black,
-                unfocusedBorderColor = BorderColor,
-                cursorColor = Black
+                focusedBorderColor = MaterialTheme.colorScheme.primary,
+                unfocusedBorderColor = MaterialTheme.colorScheme.outline,
+                cursorColor = MaterialTheme.colorScheme.primary
             ),
-            placeholder = { Text("0x?", color = TextMuted) },
+            placeholder = { Text("0x?", color = LocalTranzoTheme.current.textMuted) },
             trailingIcon = {
                 IconButton(onClick = { }) {
-                    Icon(Icons.Default.QrCodeScanner, "Scan", tint = Black)
+                    Icon(Icons.Default.QrCodeScanner, "Scan", tint = MaterialTheme.colorScheme.onBackground)
                 }
             },
             singleLine = true
@@ -150,7 +145,7 @@ fun SendScreen(
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        Text("Amount", style = MaterialTheme.typography.labelLarge, color = TextMuted)
+        Text("Amount", style = MaterialTheme.typography.labelLarge, color = LocalTranzoTheme.current.textMuted)
         Spacer(modifier = Modifier.height(8.dp))
 
         OutlinedTextField(
@@ -159,12 +154,12 @@ fun SendScreen(
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(12.dp),
             colors = OutlinedTextFieldDefaults.colors(
-                focusedBorderColor = Black,
-                unfocusedBorderColor = BorderColor,
-                cursorColor = Black
+                focusedBorderColor = MaterialTheme.colorScheme.primary,
+                unfocusedBorderColor = MaterialTheme.colorScheme.outline,
+                cursorColor = MaterialTheme.colorScheme.primary
             ),
-            placeholder = { Text("0.00", color = TextMuted) },
-            suffix = { selectedToken?.let { Text(it.symbol, color = TextMuted) } },
+            placeholder = { Text("0.00", color = LocalTranzoTheme.current.textMuted) },
+            suffix = { selectedToken?.let { Text(it.symbol, color = LocalTranzoTheme.current.textMuted) } },
             singleLine = true
         )
 
@@ -173,17 +168,17 @@ fun SendScreen(
             Text(
                 text = "Available: ${"%.4f".format(it.balance)} ${it.symbol}",
                 style = MaterialTheme.typography.bodySmall,
-                color = TextMuted
+                color = LocalTranzoTheme.current.textMuted
             )
         }
 
         state.sendError?.let {
             Spacer(modifier = Modifier.height(12.dp))
-            Text(it, color = Negative, style = MaterialTheme.typography.bodySmall)
+            Text(it, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall)
         }
         state.sendMessage?.let {
             Spacer(modifier = Modifier.height(12.dp))
-            Text(it, color = Black, style = MaterialTheme.typography.bodySmall)
+            Text(it, color = MaterialTheme.colorScheme.onBackground, style = MaterialTheme.typography.bodySmall)
         }
 
         Spacer(modifier = Modifier.weight(1f))
@@ -198,7 +193,7 @@ fun SendScreen(
                 .fillMaxWidth()
                 .height(56.dp),
             shape = RoundedCornerShape(999.dp),
-            colors = ButtonDefaults.buttonColors(containerColor = Black, contentColor = White),
+            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary, contentColor = MaterialTheme.colorScheme.onPrimary),
             enabled = toAddress.isNotBlank() && amount.isNotBlank() && !state.isSending && selectedToken != null
         ) {
             Text(

@@ -41,13 +41,7 @@ import androidx.compose.ui.unit.dp
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.tranzo.custody.data.backup.DriveBackupManager
 import com.tranzo.custody.data.local.UserSessionManager
-import com.tranzo.custody.ui.theme.Black
-import com.tranzo.custody.ui.theme.Negative
-import com.tranzo.custody.ui.theme.Positive
-import com.tranzo.custody.ui.theme.SurfaceSecondary
-import com.tranzo.custody.ui.theme.TextMuted
-import com.tranzo.custody.ui.theme.TextSecondary
-import com.tranzo.custody.ui.theme.White
+import com.tranzo.custody.ui.theme.LocalTranzoTheme
 import kotlinx.coroutines.launch
 
 @Composable
@@ -61,38 +55,53 @@ fun BackupPromptScreen(
     var isBackingUp by remember { mutableStateOf(false) }
     var backupSuccess by remember { mutableStateOf<Boolean?>(null) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
+    val tranzoTheme = LocalTranzoTheme.current
 
     val googleSignInLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.StartActivityForResult()
     ) { result ->
-        if (result.resultCode == Activity.RESULT_OK) {
-            val account = result.data?.let {
-                GoogleSignIn.getSignedInAccountFromIntent(it).result
-            }
-            if (account != null) {
-                scope.launch {
-                    isBackingUp = true
-                    errorMessage = null
-                    try {
-                        val state = viewModel.state.value
-                        driveBackupManager.backup(
-                            mnemonic = state.mnemonic.ifBlank {
-                                // mnemonic may have been cleared after setup — skip if empty
-                                throw IllegalStateException("Mnemonic no longer available")
-                            },
-                            password = state.password,
-                            ownerAddr = sessionManager.getOwnerAddress() ?: "",
-                            account = account
-                        )
-                        sessionManager.markSeedBackedUp()
-                        backupSuccess = true
-                    } catch (e: Exception) {
-                        errorMessage = e.message ?: "Backup failed"
-                        backupSuccess = false
-                    } finally {
-                        isBackingUp = false
-                    }
+        when (result.resultCode) {
+            Activity.RESULT_OK -> {
+                val task = result.data?.let {
+                    GoogleSignIn.getSignedInAccountFromIntent(it)
                 }
+                try {
+                    val account = task?.result
+                    if (account != null) {
+                        scope.launch {
+                            isBackingUp = true
+                            errorMessage = null
+                            try {
+                                val state = viewModel.state.value
+                                driveBackupManager.backup(
+                                    mnemonic = state.mnemonic.ifBlank {
+                                        throw IllegalStateException("Mnemonic no longer available")
+                                    },
+                                    password = state.password,
+                                    ownerAddr = sessionManager.getOwnerAddress() ?: "",
+                                    account = account
+                                )
+                                sessionManager.markSeedBackedUp()
+                                backupSuccess = true
+                            } catch (e: Exception) {
+                                errorMessage = e.message ?: "Backup failed"
+                                backupSuccess = false
+                            } finally {
+                                isBackingUp = false
+                            }
+                        }
+                    } else {
+                        errorMessage = "Google Sign-In failed: no account returned"
+                    }
+                } catch (e: Exception) {
+                    errorMessage = "Google Sign-In failed: ${e.message ?: "unknown error"}"
+                }
+            }
+            Activity.RESULT_CANCELED -> {
+                errorMessage = "Google Sign-In was cancelled"
+            }
+            else -> {
+                errorMessage = "Google Sign-In failed with code ${result.resultCode}"
             }
         }
     }
@@ -100,7 +109,7 @@ fun BackupPromptScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(White)
+            .background(MaterialTheme.colorScheme.background)
             .padding(horizontal = 24.dp)
     ) {
         Spacer(modifier = Modifier.height(64.dp))
@@ -109,7 +118,7 @@ fun BackupPromptScreen(
             text = "Secure your wallet",
             style = MaterialTheme.typography.headlineMedium,
             fontWeight = FontWeight.Bold,
-            color = Black
+            color = MaterialTheme.colorScheme.onBackground
         )
 
         Spacer(modifier = Modifier.height(8.dp))
@@ -117,14 +126,14 @@ fun BackupPromptScreen(
         Text(
             text = "Back up your recovery phrase so you can restore your wallet if you lose this device.",
             style = MaterialTheme.typography.bodyMedium,
-            color = TextSecondary
+            color = MaterialTheme.colorScheme.onSurfaceVariant
         )
 
         Spacer(modifier = Modifier.height(32.dp))
 
         // Google Drive backup option
         BackupOptionCard(
-            icon = { Icon(Icons.Filled.Cloud, contentDescription = null, tint = Black, modifier = Modifier.size(28.dp)) },
+            icon = { Icon(Icons.Filled.Cloud, contentDescription = null, tint = MaterialTheme.colorScheme.onBackground, modifier = Modifier.size(28.dp)) },
             title = "Google Drive backup",
             subtitle = "Encrypted with your password. Automatic and secure.",
             isLoading = isBackingUp,
@@ -139,9 +148,9 @@ fun BackupPromptScreen(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Recovery phrase option (already shown during onboarding)
+        // Recovery phrase option
         BackupOptionCard(
-            icon = { Icon(Icons.Filled.Key, contentDescription = null, tint = Black, modifier = Modifier.size(28.dp)) },
+            icon = { Icon(Icons.Filled.Key, contentDescription = null, tint = MaterialTheme.colorScheme.onBackground, modifier = Modifier.size(28.dp)) },
             title = "Recovery phrase",
             subtitle = "You already wrote it down during setup.",
             isLoading = false,
@@ -158,7 +167,7 @@ fun BackupPromptScreen(
             Text(
                 text = errorMessage!!,
                 style = MaterialTheme.typography.bodySmall,
-                color = Negative
+                color = MaterialTheme.colorScheme.error
             )
         }
 
@@ -170,11 +179,11 @@ fun BackupPromptScreen(
                 .fillMaxWidth()
                 .height(56.dp),
             shape = RoundedCornerShape(999.dp),
-            colors = ButtonDefaults.buttonColors(containerColor = Black, contentColor = White),
+            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary, contentColor = MaterialTheme.colorScheme.onPrimary),
             enabled = !isBackingUp
         ) {
             Text(
-                if (backupSuccess == true) "Continue" else "Continue",
+                "Continue",
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.SemiBold
             )
@@ -190,14 +199,14 @@ fun BackupPromptScreen(
             Icon(
                 Icons.Filled.SkipNext,
                 contentDescription = null,
-                tint = TextMuted,
+                tint = tranzoTheme.textMuted,
                 modifier = Modifier.size(18.dp)
             )
             Spacer(modifier = Modifier.width(4.dp))
             Text(
                 "Skip for now",
                 style = MaterialTheme.typography.bodyMedium,
-                color = TextMuted
+                color = tranzoTheme.textMuted
             )
         }
 
@@ -214,12 +223,13 @@ private fun BackupOptionCard(
     isSuccess: Boolean,
     onClick: () -> Unit
 ) {
+    val tranzoTheme = LocalTranzoTheme.current
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(16.dp))
-            .border(1.dp, if (isSuccess) Positive.copy(alpha = 0.3f) else TextMuted.copy(alpha = 0.15f), RoundedCornerShape(16.dp))
-            .background(if (isSuccess) Positive.copy(alpha = 0.05f) else SurfaceSecondary)
+            .border(1.dp, if (isSuccess) MaterialTheme.colorScheme.tertiary.copy(alpha = 0.3f) else tranzoTheme.textMuted.copy(alpha = 0.15f), RoundedCornerShape(16.dp))
+            .background(if (isSuccess) MaterialTheme.colorScheme.tertiary.copy(alpha = 0.05f) else MaterialTheme.colorScheme.primaryContainer)
             .clickable(enabled = !isLoading) { onClick() }
             .padding(20.dp),
         verticalAlignment = Alignment.CenterVertically
@@ -233,13 +243,13 @@ private fun BackupOptionCard(
                 text = title,
                 style = MaterialTheme.typography.titleSmall,
                 fontWeight = FontWeight.SemiBold,
-                color = Black
+                color = MaterialTheme.colorScheme.onBackground
             )
             Spacer(modifier = Modifier.height(2.dp))
             Text(
                 text = subtitle,
                 style = MaterialTheme.typography.bodySmall,
-                color = TextSecondary
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
 
@@ -247,10 +257,10 @@ private fun BackupOptionCard(
             CircularProgressIndicator(
                 modifier = Modifier.size(20.dp),
                 strokeWidth = 2.dp,
-                color = Black
+                color = MaterialTheme.colorScheme.primary
             )
         } else if (isSuccess) {
-            Text("✓", color = Positive, fontWeight = FontWeight.Bold)
+            Text("✓", color = MaterialTheme.colorScheme.tertiary, fontWeight = FontWeight.Bold)
         }
     }
 }

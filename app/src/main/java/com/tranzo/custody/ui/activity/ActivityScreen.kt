@@ -32,11 +32,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.tranzo.custody.ui.components.TransactionItem
-import com.tranzo.custody.ui.theme.Black
-import com.tranzo.custody.ui.theme.BorderColor
-import com.tranzo.custody.ui.theme.SurfaceSecondary
-import com.tranzo.custody.ui.theme.TextMuted
-import com.tranzo.custody.ui.theme.White
+import com.tranzo.custody.ui.theme.LocalTranzoTheme
 
 @Composable
 fun ActivityScreen(
@@ -44,11 +40,12 @@ fun ActivityScreen(
     viewModel: ActivityViewModel = hiltViewModel()
 ) {
     val state by viewModel.state.collectAsState()
+    val tranzoTheme = LocalTranzoTheme.current
 
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(White)
+            .background(MaterialTheme.colorScheme.background)
     ) {
         // Header
         Row(
@@ -61,7 +58,7 @@ fun ActivityScreen(
                 text = "Activity",
                 style = MaterialTheme.typography.headlineMedium,
                 fontWeight = FontWeight.ExtraBold,
-                color = Black
+                color = MaterialTheme.colorScheme.onBackground
             )
         }
 
@@ -74,12 +71,12 @@ fun ActivityScreen(
                 .padding(horizontal = 20.dp),
             shape = RoundedCornerShape(12.dp),
             colors = OutlinedTextFieldDefaults.colors(
-                focusedBorderColor = Black,
-                unfocusedBorderColor = BorderColor,
-                cursorColor = Black
+                focusedBorderColor = MaterialTheme.colorScheme.primary,
+                unfocusedBorderColor = MaterialTheme.colorScheme.outline,
+                cursorColor = MaterialTheme.colorScheme.primary
             ),
-            placeholder = { Text("Search transactions...", color = TextMuted) },
-            leadingIcon = { Icon(Icons.Default.Search, null, tint = TextMuted) },
+            placeholder = { Text("Search transactions...", color = tranzoTheme.textMuted) },
+            leadingIcon = { Icon(Icons.Default.Search, null, tint = tranzoTheme.textMuted) },
             singleLine = true
         )
 
@@ -96,8 +93,8 @@ fun ActivityScreen(
                     modifier = Modifier
                         .clip(RoundedCornerShape(999.dp))
                         .then(
-                            if (isSelected) Modifier.background(Black)
-                            else Modifier.background(SurfaceSecondary)
+                            if (isSelected) Modifier.background(MaterialTheme.colorScheme.primary)
+                            else Modifier.background(MaterialTheme.colorScheme.primaryContainer)
                         )
                         .clickable { viewModel.setFilter(filter) }
                         .padding(horizontal = 16.dp, vertical = 8.dp)
@@ -106,7 +103,7 @@ fun ActivityScreen(
                         text = filter.label,
                         style = MaterialTheme.typography.labelMedium,
                         fontWeight = FontWeight.SemiBold,
-                        color = if (isSelected) White else TextMuted
+                        color = if (isSelected) MaterialTheme.colorScheme.onPrimary else tranzoTheme.textMuted
                     )
                 }
             }
@@ -134,7 +131,7 @@ fun ActivityScreen(
                         Text(
                             text = "No transactions found",
                             style = MaterialTheme.typography.bodyMedium,
-                            color = TextMuted
+                            color = tranzoTheme.textMuted
                         )
                     }
                 }

@@ -37,10 +37,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.tranzo.custody.ui.theme.Black
-import com.tranzo.custody.ui.theme.SurfaceSecondary
-import com.tranzo.custody.ui.theme.TextMuted
-import com.tranzo.custody.ui.theme.White
+import com.tranzo.custody.ui.theme.LocalTranzoTheme
 import com.tranzo.custody.ui.util.qrBitmap
 
 @Composable
@@ -54,7 +51,7 @@ fun ReceiveScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(White)
+            .background(MaterialTheme.colorScheme.background)
             .padding(horizontal = 24.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -65,13 +62,13 @@ fun ReceiveScreen(
             verticalAlignment = Alignment.CenterVertically
         ) {
             IconButton(onClick = onBack) {
-                Icon(Icons.AutoMirrored.Filled.ArrowBack, "Back", tint = Black)
+                Icon(Icons.AutoMirrored.Filled.ArrowBack, "Back", tint = MaterialTheme.colorScheme.onBackground)
             }
             Text(
                 text = "Receive",
                 style = MaterialTheme.typography.headlineMedium,
                 fontWeight = FontWeight.Bold,
-                color = Black
+                color = MaterialTheme.colorScheme.onBackground
             )
         }
 
@@ -80,7 +77,7 @@ fun ReceiveScreen(
         Text(
             text = "Smart account address",
             style = MaterialTheme.typography.bodyMedium,
-            color = TextMuted
+            color = LocalTranzoTheme.current.textMuted
         )
         Spacer(modifier = Modifier.height(16.dp))
 
@@ -97,7 +94,7 @@ fun ReceiveScreen(
                 modifier = Modifier
                     .size(240.dp)
                     .clip(RoundedCornerShape(16.dp))
-                    .background(SurfaceSecondary)
+                    .background(MaterialTheme.colorScheme.primaryContainer)
             )
         }
 
@@ -107,13 +104,13 @@ fun ReceiveScreen(
             modifier = Modifier
                 .fillMaxWidth()
                 .clip(RoundedCornerShape(12.dp))
-                .background(SurfaceSecondary)
+                .background(MaterialTheme.colorScheme.primaryContainer)
                 .padding(16.dp)
         ) {
             Text(
                 text = state.ifEmpty { "Complete wallet setup to see your address" },
                 style = MaterialTheme.typography.bodySmall,
-                color = TextMuted,
+                color = LocalTranzoTheme.current.textMuted,
                 textAlign = TextAlign.Center,
                 modifier = Modifier.fillMaxWidth()
             )
@@ -130,7 +127,7 @@ fun ReceiveScreen(
                     }
                 },
                 shape = RoundedCornerShape(999.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = Black, contentColor = White),
+                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary, contentColor = MaterialTheme.colorScheme.onPrimary),
                 enabled = state.isNotEmpty()
             ) {
                 Icon(Icons.Default.ContentCopy, null, modifier = Modifier.size(18.dp))
@@ -141,7 +138,7 @@ fun ReceiveScreen(
             Button(
                 onClick = { },
                 shape = RoundedCornerShape(999.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = SurfaceSecondary, contentColor = Black),
+                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primaryContainer, contentColor = MaterialTheme.colorScheme.onBackground),
                 enabled = false
             ) {
                 Icon(Icons.Default.Share, null, modifier = Modifier.size(18.dp))
