@@ -82,7 +82,10 @@ fun HomeScreen(
                     IconButton(onClick = { }) {
                         Icon(Icons.Default.QrCode, "QR Code", tint = MaterialTheme.colorScheme.onBackground, modifier = Modifier.size(24.dp))
                     }
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        modifier = Modifier.weight(1f)
+                    ) {
                         Text(
                             text = "Tranzo",
                             style = MaterialTheme.typography.headlineMedium,
@@ -91,8 +94,11 @@ fun HomeScreen(
                         )
                         if (state.smartWalletAddress.isNotEmpty()) {
                             Spacer(modifier = Modifier.height(4.dp))
+                            val truncated = if (state.smartWalletAddress.length > 12) {
+                                state.smartWalletAddress.take(6) + "…" + state.smartWalletAddress.takeLast(4)
+                            } else state.smartWalletAddress
                             Text(
-                                text = state.smartWalletAddress,
+                                text = truncated,
                                 style = MaterialTheme.typography.labelSmall,
                                 color = LocalTranzoTheme.current.textMuted,
                                 maxLines = 1

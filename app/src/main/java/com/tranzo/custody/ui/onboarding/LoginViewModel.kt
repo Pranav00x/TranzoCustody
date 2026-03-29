@@ -93,6 +93,28 @@ class LoginViewModel @Inject constructor(
         }
     }
 
+    fun loginWithBiometrics() {
+        viewModelScope.launch {
+            _state.value = _state.value.copy(isLoading = true, error = null)
+            try {
+                val hasWallet = signingManager.loadCredentials() != null
+                if (hasWallet) {
+                    val owner = sessionManager.getOwnerAddress()
+                    val smart = sessionManager.getSmartWalletAddress()
+                    if (owner.isNotEmpty() && smart.isNotEmpty()) {
+                        _state.value = _state.value.copy(isLoading = false, loginSuccess = true)
+                    } else {
+                        _state.value = _state.value.copy(isLoading = false, error = "Account data missing locally. Please log in with email/password once.")
+                    }
+                } else {
+                    _state.value = _state.value.copy(isLoading = false, error = "No wallet found on this device. Please log in with email.")
+                }
+            } catch (e: Exception) {
+                _state.value = _state.value.copy(isLoading = false, error = "Biometric login failed")
+            }
+        }
+    }
+
     fun restoreFromDrive(account: GoogleSignInAccount) {
         viewModelScope.launch {
             _state.value = _state.value.copy(isRestoring = true, restoreError = null)

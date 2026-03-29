@@ -11,12 +11,14 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Fingerprint
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.Button
@@ -42,14 +44,17 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
+import androidx.fragment.app.FragmentActivity
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.tranzo.custody.data.backup.DriveBackupManager
+import com.tranzo.custody.security.BiometricHelper
 import com.tranzo.custody.ui.theme.LocalTranzoTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -65,6 +70,21 @@ fun LoginScreen(
     var showRestoreSheet by remember { mutableStateOf(false) }
     var mnemonicInput by remember { mutableStateOf("") }
     val tranzoTheme = LocalTranzoTheme.current
+
+    val context = LocalContext.current
+    val biometricHelper = remember { BiometricHelper() }
+    val isBiometricAvailable = remember { biometricHelper.isBiometricAvailable(context) }
+
+    fun onBiometricClick() {
+        val activity = context as? FragmentActivity ?: return
+        biometricHelper.showBiometricPrompt(
+            activity = activity,
+            title = "Unlock Wallet",
+            subtitle = "Use biometrics to access your Tranzo wallet",
+            onSuccess = { viewModel.loginWithBiometrics() },
+            onError = { /* ViewModel already handles standard error state */ }
+        )
+    }
 
     // Navigate on success
     LaunchedEffect(state.loginSuccess) {
@@ -199,6 +219,22 @@ fun LoginScreen(
                 }
 
                 Spacer(modifier = Modifier.weight(1f))
+
+                if (isBiometricAvailable) {
+                    OutlinedButton(
+                        onClick = { onBiometricClick() },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(56.dp),
+                        shape = RoundedCornerShape(999.dp),
+                        border = androidx.compose.foundation.BorderStroke(1.5.dp, MaterialTheme.colorScheme.primary)
+                    ) {
+                        Icon(Icons.Default.Fingerprint, null, modifier = Modifier.size(20.dp))
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text("Unlock with Biometrics", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
+                    }
+                    Spacer(modifier = Modifier.height(12.dp))
+                }
 
                 Button(
                     onClick = { viewModel.login() },

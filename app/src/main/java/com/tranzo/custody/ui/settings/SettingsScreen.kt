@@ -1,5 +1,7 @@
 package com.tranzo.custody.ui.settings
 
+import android.content.Intent
+import android.net.Uri
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -31,6 +33,7 @@ import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material.icons.filled.Security
+import androidx.compose.material.icons.filled.SupportAgent
 import androidx.compose.material.icons.filled.UsbOff
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.Icon
@@ -46,6 +49,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -59,11 +63,13 @@ fun SettingsScreen(
     onDripperClick: () -> Unit,
     onCardSettingsClick: () -> Unit,
     onAppearanceClick: () -> Unit = {},
+    onHelpSupportClick: () -> Unit = {},
     onLogout: () -> Unit,
     viewModel: SettingsViewModel = hiltViewModel()
 ) {
     val state by viewModel.state.collectAsState()
     val tranzoTheme = LocalTranzoTheme.current
+    val context = LocalContext.current
 
     Column(
         modifier = Modifier
@@ -210,9 +216,15 @@ fun SettingsScreen(
 
         // Support
         SectionTitle("Support")
-        SettingsItem(Icons.AutoMirrored.Filled.HelpOutline, "Help Center")
-        SettingsItem(Icons.Default.Description, "Terms of Service")
-        SettingsItem(Icons.Default.Description, "Privacy Policy")
+        SettingsItem(Icons.Default.SupportAgent, "Help & Support", subtitle = "Legal, Bugs, Partnerships", onClick = onHelpSupportClick)
+        SettingsItem(Icons.Default.Description, "Terms of Service", onClick = {
+            val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://tranzo.money"))
+            context.startActivity(intent)
+        })
+        SettingsItem(Icons.Default.Description, "Privacy Policy", onClick = {
+            val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://tranzo.money/privacy"))
+            context.startActivity(intent)
+        })
 
         Spacer(modifier = Modifier.height(16.dp))
 

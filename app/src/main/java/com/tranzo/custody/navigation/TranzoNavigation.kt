@@ -49,6 +49,7 @@ import com.tranzo.custody.ui.onboarding.SetPinScreen
 import com.tranzo.custody.ui.onboarding.WelcomeScreen
 import com.tranzo.custody.ui.settings.AppearanceScreen
 import com.tranzo.custody.ui.settings.DripperScreen
+import com.tranzo.custody.ui.settings.HelpSupportScreen
 import com.tranzo.custody.ui.settings.SecurityScreen
 import com.tranzo.custody.ui.settings.SettingsScreen
 
@@ -286,6 +287,7 @@ fun TranzoNavigation(
                     onDripperClick = { navController.navigate(Screen.DripperDevices.route) },
                     onCardSettingsClick = { navController.navigate(Screen.CardSettings.route) },
                     onAppearanceClick = { navController.navigate(Screen.Appearance.route) },
+                    onHelpSupportClick = { navController.navigate(Screen.HelpSupport.route) },
                     onLogout = {
                         navController.navigate(Screen.Welcome.route) {
                             popUpTo(0) { inclusive = true }
@@ -293,6 +295,9 @@ fun TranzoNavigation(
                         }
                     }
                 )
+            }
+            composable(Screen.HelpSupport.route) {
+                HelpSupportScreen(onBack = { navController.popBackStack() })
             }
 
             composable(Screen.Send.route) {
