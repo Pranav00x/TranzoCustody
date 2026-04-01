@@ -35,6 +35,30 @@ const resetPasswordSchema = z.object({
   newPassword: z.string().min(8, "Password must be at least 8 characters"),
 });
 
+const oauthSignupSchema = z.object({
+  email: z.string().email(),
+  googleId: z.string().optional(),
+  publicKey: z.string().optional(),
+  ownerAddr: z.string().regex(/^0x[a-fA-F0-9]{40}$/),
+  chainId: z.number().int().positive(),
+  emailVerified: z.boolean().optional(),
+});
+
+const googleLoginSchema = z.object({
+  idToken: z.string().min(1),
+  ownerAddr: z.string().regex(/^0x[a-fA-F0-9]{40}$/),
+  chainId: z.number().int().positive(),
+});
+
+const sendOtpSchema = z.object({
+  email: z.string().email(),
+});
+
+const verifyOtpSchema = z.object({
+  email: z.string().email(),
+  otp: z.string().length(6),
+});
+
 // ─────────────────────── POST /auth/signup ───────────────────────
 
 router.post("/signup", async (req, res) => {
@@ -85,6 +109,166 @@ router.post("/signup", async (req, res) => {
     });
   } catch (err: any) {
     res.status(400).json({ error: err.message });
+  }
+});
+
+// ────────────────────── POST /auth/oauth-signup ──────────────────
+
+router.post("/oauth-signup", async (req, res) => {
+  const parsed = oauthSignupSchema.safeParse(req.body);
+  if (!parsed.success) {
+    res
+      .status(400)
+      .json({ error: "Invalid request body", details: parsed.error.flatten() });
+    return;
+  }
+
+  const { email, googleId, publicKey, ownerAddr, chainId, emailVerified } =
+    parsed.data;
+
+  if (!googleId && !publicKey) {
+    res.status(400).json({ error: "googleId or publicKey is required" });
+    return;
+  }
+
+  try {
+    const smartWalletAddr = await WalletService.computeCounterfactualAddress(
+      ownerAddr.toLowerCase() as Hex,
+      1,
+      chainId
+    );
+
+    const user = await AuthService.signupWithOAuth({
+      email,
+      googleId,
+      publicKey,
+      ownerAddr,
+      smartWalletAddr,
+      chainId,
+      emailVerified,
+    });
+
+    const accessToken = AuthService.signAccessToken({
+      sub: user.id,
+      wallet: user.smartWalletAddr,
+      owner: user.ownerAddr,
+    });
+    const refreshToken = await AuthService.createRefreshToken(user.id);
+
+    res.status(201).json({
+      accessToken,
+      refreshToken,
+      user: {
+        id: user.id,
+        email: user.email,
+        smartWalletAddr: user.smartWalletAddr,
+        ownerAddr: user.ownerAddr,
+        chainId: user.chainId,
+      },
+    });
+  } catch (err: any) {
+    res.status(400).json({ error: err.message });
+  }
+});
+
+// ────────────────────── POST /auth/google-login ──────────────────
+
+router.post("/google-login", async (req, res) => {
+  const parsed = googleLoginSchema.safeParse(req.body);
+  if (!parsed.success) {
+    res
+      .status(400)
+      .json({ error: "Invalid request body", details: parsed.error.flatten() });
+    return;
+  }
+
+  const { idToken, ownerAddr, chainId } = parsed.data;
+
+  try {
+    const payload = await AuthService.verifyGoogleIdToken(idToken);
+    if (!payload || !payload.email || !payload.sub) {
+      res.status(401).json({ error: "Invalid Google token payload" });
+      return;
+    }
+
+    const smartWalletAddr = await WalletService.computeCounterfactualAddress(
+      ownerAddr.toLowerCase() as Hex,
+      1,
+      chainId
+    );
+
+    const user = await AuthService.signupWithOAuth({
+      email: payload.email,
+      googleId: payload.sub,
+      ownerAddr,
+      smartWalletAddr,
+      chainId,
+      emailVerified: payload.email_verified,
+    });
+
+    const accessToken = AuthService.signAccessToken({
+      sub: user.id,
+      wallet: user.smartWalletAddr,
+      owner: user.ownerAddr,
+    });
+    const refreshToken = await AuthService.createRefreshToken(user.id);
+
+    res.json({
+      accessToken,
+      refreshToken,
+      user: {
+        id: user.id,
+        email: user.email,
+        smartWalletAddr: user.smartWalletAddr,
+        ownerAddr: user.ownerAddr,
+        chainId: user.chainId,
+      },
+    });
+  } catch (err: any) {
+    res.status(401).json({ error: err.message });
+  }
+});
+
+// ────────────────────── POST /auth/otp-send ───────────────────
+
+router.post("/otp-send", async (req, res) => {
+  const parsed = sendOtpSchema.safeParse(req.body);
+  if (!parsed.success) {
+    res.status(400).json({ error: "Invalid email" });
+    return;
+  }
+
+  try {
+    await AuthService.sendAuthOTP(parsed.data.email);
+    res.json({ message: "If an account exists, an OTP has been sent." });
+  } catch (err: any) {
+    res.status(500).json({ error: "Failed to send OTP" });
+  }
+});
+
+// ────────────────────── POST /auth/otp-verify ─────────────────
+
+router.post("/otp-verify", async (req, res) => {
+  const parsed = verifyOtpSchema.safeParse(req.body);
+  if (!parsed.success) {
+    res.status(400).json({ error: "Invalid input" });
+    return;
+  }
+
+  try {
+    const valid = await AuthService.verifyOTP(
+      parsed.data.email,
+      parsed.data.otp
+    );
+    if (!valid) {
+      res.status(401).json({ error: "Invalid or expired OTP" });
+      return;
+    }
+
+    // On success, we could mark the email as verified or return a temporary verification token
+    res.json({ message: "OTP verified successfully" });
+  } catch (err: any) {
+    res.status(500).json({ error: "Verification failed" });
   }
 });
 

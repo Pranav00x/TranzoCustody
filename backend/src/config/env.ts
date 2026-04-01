@@ -12,6 +12,7 @@ const productionEnvSchema = z.object({
   NODE_ENV: z.enum(["development", "production", "test"]).default("production"),
   DATABASE_URL: z.string().min(1),
   JWT_SECRET: z.string().min(1),
+  GOOGLE_CLIENT_ID: z.string().min(1).optional(),
   REDIS_URL: z.string().min(1),
 
   POLYGON_RPC_URL: z.string().url(),
@@ -33,6 +34,13 @@ const productionEnvSchema = z.object({
 
   REAP_API_URL: z.string().url().optional(),
   REAP_API_KEY: z.string().optional(),
+
+  RESEND_API_KEY: z.string().optional(),
+  SMTP_HOST: z.string().optional(),
+  SMTP_PORT: z.string().optional(),
+  SMTP_USER: z.string().optional(),
+  SMTP_PASS: z.string().optional(),
+  EMAIL_FROM: z.string().default("Tranzo <noreply@tranzo.money>"),
 });
 
 /**
@@ -43,11 +51,12 @@ const developmentEnvSchema = z.object({
   PORT: z.string().default("3000"),
   NODE_ENV: z.enum(["development", "production", "test"]).default("development"),
   DATABASE_URL: z.string().min(1),
-
   JWT_SECRET: z
     .string()
     .min(1)
     .default("development-only-change-me-before-any-real-deployment-min-32"),
+
+  GOOGLE_CLIENT_ID: z.string().optional(),
 
   REDIS_URL: z.string().default("redis://127.0.0.1:6379"),
 
@@ -82,6 +91,13 @@ const developmentEnvSchema = z.object({
 
   REAP_API_URL: z.string().url().optional(),
   REAP_API_KEY: z.string().optional(),
+
+  RESEND_API_KEY: z.string().optional(),
+  SMTP_HOST: z.string().optional(),
+  SMTP_PORT: z.string().optional(),
+  SMTP_USER: z.string().optional(),
+  SMTP_PASS: z.string().optional(),
+  EMAIL_FROM: z.string().default("Tranzo <noreply@tranzo.money>"),
 });
 
 const useProductionSchema = process.env.NODE_ENV === "production";

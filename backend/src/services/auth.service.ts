@@ -1,7 +1,9 @@
 import jwt from "jsonwebtoken";
 import crypto from "crypto";
+import { OAuth2Client } from "google-auth-library";
 import { ENV } from "../config/env.js";
 import prisma from "./prisma.service.js";
+import { EmailService } from "./email.service.js";
 
 const ACCESS_TOKEN_EXPIRY = "15m";
 const REFRESH_TOKEN_EXPIRY_DAYS = 30;
@@ -12,6 +14,8 @@ const SCRYPT_KEYLEN = 64;
 const SCRYPT_COST = 16384;
 const SCRYPT_BLOCK_SIZE = 8;
 const SCRYPT_PARALLELIZATION = 1;
+
+const googleClient = new OAuth2Client();
 
 export interface AccessTokenPayload {
   sub: string; // userId
@@ -92,12 +96,137 @@ export class AuthService {
     return user;
   }
 
+  static async signupWithOAuth(data: {
+    email: string;
+    googleId?: string;
+    publicKey?: string;
+    ownerAddr: string;
+    smartWalletAddr: string;
+    chainId: number;
+    emailVerified?: boolean;
+  }) {
+    const existing = await prisma.user.findFirst({
+      where: {
+        OR: [
+          { email: data.email.toLowerCase().trim() },
+          data.googleId ? { googleId: data.googleId } : {},
+        ].filter((condition) => Object.keys(condition).length > 0),
+      },
+    });
+
+    if (existing) {
+      // If user exists, update their OAuth/WebAuthn info if missing
+      return prisma.user.update({
+        where: { id: existing.id },
+        data: {
+          googleId: data.googleId ?? existing.googleId,
+          publicKey: data.publicKey ?? existing.publicKey,
+          emailVerified: data.emailVerified ?? existing.emailVerified,
+        },
+      });
+    }
+
+    const user = await prisma.user.create({
+      data: {
+        email: data.email.toLowerCase().trim(),
+        googleId: data.googleId,
+        publicKey: data.publicKey,
+        ownerAddr: data.ownerAddr.toLowerCase(),
+        smartWalletAddr: data.smartWalletAddr.toLowerCase(),
+        chainId: data.chainId,
+        emailVerified: data.emailVerified ?? false,
+      },
+    });
+
+    return user;
+  }
+
+  // ──────────────────────────── OTP ─────────────────────────────
+
+  static async sendAuthOTP(email: string) {
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    const tokenHash = crypto.createHash("sha256").update(otp).digest("hex");
+    const expiresAt = new Date(Date.now() + 10 * 60_000); // 10 minutes
+
+    const user = await prisma.user.findUnique({
+      where: { email: email.toLowerCase().trim() },
+    });
+
+    if (!user) {
+      // For security, if user doesn't exist, we still respond as if it's sent
+      // but in a real case we would want to know if it's a signup or login.
+      // This is a generic "auth" OTP.
+      return;
+    }
+
+    await prisma.passwordResetToken.create({
+      data: {
+        tokenHash,
+        userId: user.id,
+        type: "EMAIL_VERIFICATION",
+        expiresAt,
+      },
+    });
+
+    await EmailService.sendOTP(email, otp);
+  }
+
+  static async verifyOTP(email: string, otp: string): Promise<boolean> {
+    const tokenHash = crypto.createHash("sha256").update(otp).digest("hex");
+    const user = await prisma.user.findUnique({
+      where: { email: email.toLowerCase().trim() },
+    });
+
+    if (!user) return false;
+
+    const record = await prisma.passwordResetToken.findFirst({
+      where: {
+        userId: user.id,
+        tokenHash,
+        type: "EMAIL_VERIFICATION",
+        used: false,
+        expiresAt: { gt: new Date() },
+      },
+    });
+
+    if (!record) return false;
+
+    await prisma.passwordResetToken.update({
+      where: { id: record.id },
+      data: { used: true },
+    });
+
+    return true;
+  }
+
+  static async verifyGoogleIdToken(idToken: string) {
+    if (!ENV.GOOGLE_CLIENT_ID) {
+      throw new Error("GOOGLE_CLIENT_ID is not configured");
+    }
+
+    try {
+      const ticket = await googleClient.verifyIdToken({
+        idToken,
+        audience: ENV.GOOGLE_CLIENT_ID,
+      });
+      return ticket.getPayload();
+    } catch (err) {
+      throw new Error("Invalid Google ID token");
+    }
+  }
+
   static async login(email: string, password: string) {
     const user = await prisma.user.findUnique({
       where: { email: email.toLowerCase().trim() },
     });
     if (!user) {
       throw new Error("Invalid email or password");
+    }
+
+    if (!user.passwordHash) {
+      throw new Error(
+        "Account created via Google/Passkey. Please sign in using the appropriate method."
+      );
     }
 
     const valid = await this.verifyPassword(password, user.passwordHash);

@@ -10,7 +10,9 @@ datasource db {
 model User {
   id              String         @id @default(cuid())
   email           String         @unique
-  passwordHash    String
+  passwordHash    String?
+  googleId        String?        @unique
+  publicKey       String?        // For WebAuthn (Passkey)
   emailVerified   Boolean        @default(false)
   smartWalletAddr String         @unique
   ownerAddr       String         @unique
@@ -22,9 +24,9 @@ model User {
   transactions    Transaction[]
   cards           Card[]
   cardSessions    CardSession[]
-  sentStreams     Stream[]        @relation("sender")
-  refreshTokens  RefreshToken[]
-  resetTokens    PasswordResetToken[]
+  sentStreams     Stream[]       @relation("sender")
+  refreshTokens   RefreshToken[]
+  resetTokens     PasswordResetToken[]
   gasUsageToday   Float          @default(0)
   lastGasReset    DateTime       @default(now())
 }
