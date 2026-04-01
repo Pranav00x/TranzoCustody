@@ -25,7 +25,11 @@ export interface AccessTokenPayload {
 
 export class AuthService {
   // ──────────────────────── Password Hashing ──────────────────────
-
+  
+  /**
+   * Hashes a plain-text password using the scrypt algorithm.
+   * Includes a 16-byte random salt for security.
+   */
   static async hashPassword(password: string): Promise<string> {
     const salt = crypto.randomBytes(16).toString("hex");
     return new Promise((resolve, reject) => {
@@ -69,6 +73,10 @@ export class AuthService {
 
   // ──────────────────────── Signup / Login ─────────────────────────
 
+  /**
+   * Standard email/password signup.
+   * Computes password hash and creates a new user record.
+   */
   static async signup(
     email: string,
     password: string,
@@ -96,6 +104,10 @@ export class AuthService {
     return user;
   }
 
+  /**
+   * Handles signups via OAuth (Google) or WebAuthn (Passkeys).
+   * Links to existing account if email matches, or creates a new record.
+   */
   static async signupWithOAuth(data: {
     email: string;
     googleId?: string;
@@ -143,6 +155,10 @@ export class AuthService {
 
   // ──────────────────────────── OTP ─────────────────────────────
 
+  /**
+   * Generates a 6-digit OTP, stores its SHA-256 hash in the database,
+   * and sends it to the user's email via EmailService.
+   */
   static async sendAuthOTP(email: string) {
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
     const tokenHash = crypto.createHash("sha256").update(otp).digest("hex");
@@ -171,6 +187,10 @@ export class AuthService {
     await EmailService.sendOTP(email, otp);
   }
 
+  /**
+   * Verifies an OTP by hashing it and matching against active database records.
+   * Marks the OTP as used upon successful verification.
+   */
   static async verifyOTP(email: string, otp: string): Promise<boolean> {
     const tokenHash = crypto.createHash("sha256").update(otp).digest("hex");
     const user = await prisma.user.findUnique({
@@ -199,6 +219,10 @@ export class AuthService {
     return true;
   }
 
+  /**
+   * Validates a Google ID Token using the official Google OAuth2 client.
+   * Returns the decoded token payload if valid.
+   */
   static async verifyGoogleIdToken(idToken: string) {
     if (!ENV.GOOGLE_CLIENT_ID) {
       throw new Error("GOOGLE_CLIENT_ID is not configured");
@@ -215,6 +239,10 @@ export class AuthService {
     }
   }
 
+  /**
+   * Authenticates a user using email and password.
+   * Prevents login if the account was created via passwordless methods.
+   */
   static async login(email: string, password: string) {
     const user = await prisma.user.findUnique({
       where: { email: email.toLowerCase().trim() },

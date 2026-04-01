@@ -61,6 +61,10 @@ const verifyOtpSchema = z.object({
 
 // ─────────────────────── POST /auth/signup ───────────────────────
 
+/**
+ * Standard signup using email, password, and owner address.
+ * Generates a counterfactual (CREATE2) address for the user's smart wallet.
+ */
 router.post("/signup", async (req, res) => {
   const parsed = signupSchema.safeParse(req.body);
   if (!parsed.success) {
@@ -114,6 +118,10 @@ router.post("/signup", async (req, res) => {
 
 // ────────────────────── POST /auth/oauth-signup ──────────────────
 
+/**
+ * Advanced signup for OAuth and WebAuthn (Passkeys).
+ * Links social identities to a deterministic smart wallet address.
+ */
 router.post("/oauth-signup", async (req, res) => {
   const parsed = oauthSignupSchema.safeParse(req.body);
   if (!parsed.success) {
@@ -173,6 +181,10 @@ router.post("/oauth-signup", async (req, res) => {
 
 // ────────────────────── POST /auth/google-login ──────────────────
 
+/**
+ * Specialized endpoint for Google One-Tap or standard Google Sign-In.
+ * Verifies the Google ID Token and logs in (or creates) the user.
+ */
 router.post("/google-login", async (req, res) => {
   const parsed = googleLoginSchema.safeParse(req.body);
   if (!parsed.success) {
@@ -231,6 +243,10 @@ router.post("/google-login", async (req, res) => {
 
 // ────────────────────── POST /auth/otp-send ───────────────────
 
+/**
+ * Triggers a 6-digit verification code to the requested email.
+ * Ideal for passwordless flows or email verification steps.
+ */
 router.post("/otp-send", async (req, res) => {
   const parsed = sendOtpSchema.safeParse(req.body);
   if (!parsed.success) {
@@ -248,6 +264,10 @@ router.post("/otp-send", async (req, res) => {
 
 // ────────────────────── POST /auth/otp-verify ─────────────────
 
+/**
+ * Validates a previously sent OTP.
+ * Can be used as a standalone verification or part of a multi-step login.
+ */
 router.post("/otp-verify", async (req, res) => {
   const parsed = verifyOtpSchema.safeParse(req.body);
   if (!parsed.success) {
