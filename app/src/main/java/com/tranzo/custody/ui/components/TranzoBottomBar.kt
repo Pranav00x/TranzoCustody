@@ -2,6 +2,7 @@ package com.tranzo.custody.ui.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -19,9 +20,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.tranzo.custody.ui.util.glassCard
 import com.tranzo.custody.ui.theme.LocalTranzoTheme
@@ -50,54 +51,61 @@ fun TranzoBottomBar(
         modifier = modifier
             .fillMaxWidth()
             .navigationBarsPadding()
-            .padding(horizontal = 24.dp, vertical = 16.dp),
+            .padding(horizontal = 32.dp, vertical = 24.dp),
         contentAlignment = Alignment.BottomCenter
     ) {
-        NavigationBar(
+        Surface(
             modifier = Modifier
-                .height(72.dp)
-                .glassCard(cornerRadius = 999.dp, alpha = 0.15f)
-                .border(1.dp, Color.White.copy(alpha = 0.15f), RoundedCornerShape(999.dp)),
-            containerColor = Color.Transparent,
+                .height(64.dp)
+                .fillMaxWidth()
+                .glassCard(cornerRadius = 32.dp, alpha = 0.12f)
+                .border(
+                    width = 1.dp,
+                    brush = Brush.linearGradient(
+                        colors = listOf(Color.White.copy(0.2f), Color.Transparent, Color.White.copy(0.1f))
+                    ),
+                    shape = RoundedCornerShape(32.dp)
+                ),
+            color = Color.Transparent,
             tonalElevation = 0.dp
         ) {
-            bottomNavItems.forEach { item ->
-                val selected = currentRoute == item.route
-                NavigationBarItem(
-                    selected = selected,
-                    onClick = { onItemSelected(item.route) },
-                    icon = {
-                        Box(
-                            modifier = Modifier
-                                .size(if (selected) 48.dp else 40.dp)
-                                .clip(CircleShape)
-                                .background(if (selected) Color.White.copy(alpha = 0.1f) else Color.Transparent),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Icon(
-                                imageVector = if (selected) item.selectedIcon else item.unselectedIcon,
-                                contentDescription = item.label,
-                                modifier = Modifier.size(24.dp),
-                                tint = if (selected) MaterialTheme.colorScheme.primary else LocalTranzoTheme.current.textMuted
+            Row(
+                modifier = Modifier.fillMaxSize(),
+                horizontalArrangement = Arrangement.SpaceEvenly,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                bottomNavItems.forEach { item ->
+                    val selected = currentRoute == item.route
+                    
+                    Box(
+                        modifier = Modifier
+                            .size(48.dp)
+                            .clip(CircleShape)
+                            .clickable { onItemSelected(item.route) },
+                        contentAlignment = Alignment.Center
+                    ) {
+                        // Background glow for selected item
+                        if (selected) {
+                            Box(
+                                modifier = Modifier
+                                    .size(40.dp)
+                                    .background(
+                                        brush = Brush.radialGradient(
+                                            colors = listOf(MaterialTheme.colorScheme.primary.copy(0.2f), Color.Transparent)
+                                        ),
+                                        shape = CircleShape
+                                    )
                             )
                         }
-                    },
-                    label = {
-                        Text(
-                            text = item.label,
-                            style = MaterialTheme.typography.labelSmall,
-                            fontWeight = if (selected) FontWeight.Bold else FontWeight.Medium,
-                            color = if (selected) MaterialTheme.colorScheme.primary else LocalTranzoTheme.current.textMuted
+
+                        Icon(
+                            imageVector = if (selected) item.selectedIcon else item.unselectedIcon,
+                            contentDescription = item.label,
+                            modifier = Modifier.size(26.dp),
+                            tint = if (selected) MaterialTheme.colorScheme.primary else Color.White.copy(0.4f)
                         )
-                    },
-                    colors = NavigationBarItemDefaults.colors(
-                        selectedIconColor = MaterialTheme.colorScheme.primary,
-                        selectedTextColor = MaterialTheme.colorScheme.primary,
-                        unselectedIconColor = LocalTranzoTheme.current.textMuted,
-                        unselectedTextColor = LocalTranzoTheme.current.textMuted,
-                        indicatorColor = Color.Transparent
-                    )
-                )
+                    }
+                }
             }
         }
     }
