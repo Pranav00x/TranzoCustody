@@ -48,14 +48,14 @@ fun WelcomeScreen(
             .drawBehind {
                 drawCircle(
                     brush = Brush.radialGradient(
-                        colors = listOf(Color(0xFF6366F1).copy(0.15f), Color.Transparent)
+                        colors = listOf(Color.White.copy(0.08f), Color.Transparent)
                     ),
                     radius = size.width * 0.9f,
                     center = androidx.compose.ui.geometry.Offset(size.width * 0.8f, size.height * 0.2f)
                 )
                 drawCircle(
                     brush = Brush.radialGradient(
-                        colors = listOf(Color(0xFFEC4899).copy(0.12f), Color.Transparent)
+                        colors = listOf(Color.White.copy(0.06f), Color.Transparent)
                     ),
                     radius = size.width * 0.8f,
                     center = androidx.compose.ui.geometry.Offset(size.width * 0.2f, size.height * 0.8f)

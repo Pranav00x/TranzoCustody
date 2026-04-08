@@ -55,6 +55,8 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.tranzo.custody.domain.model.KycStatus
 import com.tranzo.custody.domain.model.SpendMode
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.graphics.Brush
 import com.tranzo.custody.ui.theme.LocalTranzoTheme
 
 @Composable
@@ -71,12 +73,25 @@ fun SettingsScreen(
     val tranzoTheme = LocalTranzoTheme.current
     val context = LocalContext.current
 
-    Column(
+    Box(
         modifier = Modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
-            .verticalScroll(rememberScrollState())
+            .drawBehind {
+                drawCircle(
+                    brush = Brush.radialGradient(
+                        colors = listOf(Color.White.copy(0.08f), Color.Transparent)
+                    ),
+                    radius = size.width * 0.8f,
+                    center = androidx.compose.ui.geometry.Offset(size.width * 0.1f, size.height * 0.9f)
+                )
+            }
     ) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState())
+        ) {
         Spacer(modifier = Modifier.height(16.dp))
 
         Text(

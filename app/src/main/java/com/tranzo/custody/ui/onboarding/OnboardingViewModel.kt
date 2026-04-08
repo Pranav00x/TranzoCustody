@@ -27,6 +27,8 @@ data class OnboardingState(
     val mode: OnboardingMode = OnboardingMode.CREATE,
     val email: String = "",
     val password: String = "",
+    val name: String = "",
+    val phone: String = "",
     val mnemonic: String = "",
     val importMnemonicInput: String = "",
     val challenges: List<SeedChallenge> = emptyList(),
@@ -58,6 +60,14 @@ class OnboardingViewModel @Inject constructor(
 
     // ──────────────────── Email / Password ────────────────────
 
+    fun setName(name: String) {
+        _state.value = _state.value.copy(name = name, error = null)
+    }
+
+    fun setPhone(phone: String) {
+        _state.value = _state.value.copy(phone = phone, error = null)
+    }
+
     fun setEmail(email: String) {
         _state.value = _state.value.copy(email = email, error = null)
     }
@@ -66,10 +76,18 @@ class OnboardingViewModel @Inject constructor(
         _state.value = _state.value.copy(password = password, error = null)
     }
 
-    fun validateEmailPassword(): Boolean {
+    fun validateRegistration(): Boolean {
         val s = _state.value
+        if (s.name.isBlank()) {
+            _state.value = s.copy(error = "Enter your full name")
+            return false
+        }
         if (s.email.isBlank() || !s.email.contains("@")) {
             _state.value = s.copy(error = "Enter a valid email address")
+            return false
+        }
+        if (s.phone.isBlank()) {
+            _state.value = s.copy(error = "Enter your phone number")
             return false
         }
         if (s.password.length < 8) {
@@ -189,8 +207,8 @@ class OnboardingViewModel @Inject constructor(
             _state.value = _state.value.copy(setupError = "Missing recovery phrase")
             return
         }
-        if (email.isBlank() || password.isBlank()) {
-            _state.value = _state.value.copy(setupError = "Missing email or password")
+        if (email.isBlank() || password.isBlank() || _state.value.name.isBlank()) {
+            _state.value = _state.value.copy(setupError = "Missing registration info")
             return
         }
         viewModelScope.launch {

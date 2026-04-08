@@ -71,17 +71,17 @@ fun HomeScreen(
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
             .drawBehind {
-                // Background vibrance blobs for glass support
+                // Background white frost blobs for glass support
                 drawCircle(
                     brush = Brush.radialGradient(
-                        colors = listOf(Color(0xFF6366F1).copy(0.12f), Color.Transparent)
+                        colors = listOf(Color.White.copy(0.08f), Color.Transparent)
                     ),
                     radius = size.width * 0.8f,
                     center = androidx.compose.ui.geometry.Offset(size.width * 0.9f, size.height * 0.1f)
                 )
                 drawCircle(
                     brush = Brush.radialGradient(
-                        colors = listOf(Color(0xFFEC4899).copy(0.10f), Color.Transparent)
+                        colors = listOf(Color.White.copy(0.06f), Color.Transparent)
                     ),
                     radius = size.width * 0.7f,
                     center = androidx.compose.ui.geometry.Offset(size.width * 0.1f, size.height * 0.4f)

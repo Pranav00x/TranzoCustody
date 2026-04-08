@@ -43,7 +43,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            val selectedTheme by themePreferencesManager.selectedTheme.collectAsState(initial = AppThemeId.CLASSIC)
+            val selectedTheme by themePreferencesManager.selectedTheme.collectAsState(initial = AppThemeId.MIDNIGHT)
             val selectedFont by themePreferencesManager.selectedFont.collectAsState(initial = AppFontId.INTER)
 
             TranzoTheme(themeId = selectedTheme, fontId = selectedFont) {

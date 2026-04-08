@@ -31,6 +31,9 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import com.tranzo.custody.ui.components.TransactionItem
 import com.tranzo.custody.ui.theme.LocalTranzoTheme
 
@@ -42,11 +45,23 @@ fun ActivityScreen(
     val state by viewModel.state.collectAsState()
     val tranzoTheme = LocalTranzoTheme.current
 
-    Column(
+    Box(
         modifier = Modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
+            .drawBehind {
+                drawCircle(
+                    brush = Brush.radialGradient(
+                        colors = listOf(Color.White.copy(0.08f), Color.Transparent)
+                    ),
+                    radius = size.width * 0.8f,
+                    center = androidx.compose.ui.geometry.Offset(size.width * 0.9f, size.height * 0.1f)
+                )
+            }
     ) {
+        Column(
+            modifier = Modifier.fillMaxSize()
+        ) {
         // Header
         Row(
             modifier = Modifier

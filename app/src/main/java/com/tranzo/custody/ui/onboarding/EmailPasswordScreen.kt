@@ -62,14 +62,14 @@ fun EmailPasswordScreen(
             .drawBehind {
                 drawCircle(
                     brush = Brush.radialGradient(
-                        colors = listOf(Color(0xFF6366F1).copy(0.12f), Color.Transparent)
+                        colors = listOf(Color.White.copy(0.08f), Color.Transparent)
                     ),
                     radius = size.width * 0.8f,
                     center = androidx.compose.ui.geometry.Offset(size.width * 0.9f, size.height * 0.1f)
                 )
                 drawCircle(
                     brush = Brush.radialGradient(
-                        colors = listOf(Color(0xFFEC4899).copy(0.10f), Color.Transparent)
+                        colors = listOf(Color.White.copy(0.06f), Color.Transparent)
                     ),
                     radius = size.width * 0.7f,
                     center = androidx.compose.ui.geometry.Offset(size.width * 0.1f, size.height * 0.4f)
@@ -101,15 +101,37 @@ fun EmailPasswordScreen(
                 color = MaterialTheme.colorScheme.onBackground
             )
 
-            Spacer(modifier = Modifier.height(8.dp))
-
             Text(
-                text = "Your email and password are used to log in and encrypt your wallet backup.",
+                text = "Personal details",
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
 
-            Spacer(modifier = Modifier.height(32.dp))
+            Spacer(modifier = Modifier.height(24.dp))
+
+            OutlinedTextField(
+                value = state.name,
+                onValueChange = { viewModel.setName(it) },
+                label = { Text("Full Name") },
+                placeholder = { Text("John Doe", color = tranzoTheme.textMuted) },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .glassCard(cornerRadius = 12.dp, alpha = 0.05f),
+                singleLine = true,
+                keyboardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.Text,
+                    imeAction = ImeAction.Next
+                ),
+                shape = RoundedCornerShape(12.dp),
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedBorderColor = MaterialTheme.colorScheme.primary,
+                    unfocusedBorderColor = Color.Transparent,
+                    focusedContainerColor = Color.White.copy(0.05f),
+                    unfocusedContainerColor = Color.White.copy(0.05f)
+                )
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
 
             OutlinedTextField(
                 value = state.email,
@@ -122,6 +144,30 @@ fun EmailPasswordScreen(
                 singleLine = true,
                 keyboardOptions = KeyboardOptions(
                     keyboardType = KeyboardType.Email,
+                    imeAction = ImeAction.Next
+                ),
+                shape = RoundedCornerShape(12.dp),
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedBorderColor = MaterialTheme.colorScheme.primary,
+                    unfocusedBorderColor = Color.Transparent,
+                    focusedContainerColor = Color.White.copy(0.05f),
+                    unfocusedContainerColor = Color.White.copy(0.05f)
+                )
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            OutlinedTextField(
+                value = state.phone,
+                onValueChange = { viewModel.setPhone(it) },
+                label = { Text("Phone Number") },
+                placeholder = { Text("+1 234 567 8900", color = tranzoTheme.textMuted) },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .glassCard(cornerRadius = 12.dp, alpha = 0.05f),
+                singleLine = true,
+                keyboardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.Phone,
                     imeAction = ImeAction.Next
                 ),
                 shape = RoundedCornerShape(12.dp),
@@ -181,7 +227,7 @@ fun EmailPasswordScreen(
 
             Button(
                 onClick = {
-                    if (viewModel.validateEmailPassword()) {
+                    if (viewModel.validateRegistration()) {
                         onContinue()
                     }
                 },
@@ -193,7 +239,8 @@ fun EmailPasswordScreen(
                     containerColor = MaterialTheme.colorScheme.primary,
                     contentColor = MaterialTheme.colorScheme.onPrimary
                 ),
-                enabled = state.email.isNotBlank() && state.password.isNotBlank()
+                enabled = state.name.isNotBlank() && state.email.isNotBlank() && 
+                          state.phone.isNotBlank() && state.password.isNotBlank()
             ) {
                 Text(
                     "Continue",

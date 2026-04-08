@@ -56,6 +56,11 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.graphics.Brush
+import com.tranzo.custody.ui.util.glassCard
+import com.tranzo.custody.ui.util.glassOnDark
+
 @Composable
 fun CardScreen(
     onCardSettings: () -> Unit,
@@ -65,11 +70,30 @@ fun CardScreen(
     val state by viewModel.state.collectAsState()
     val tranzoTheme = LocalTranzoTheme.current
 
-    LazyColumn(
+    Box(
         modifier = Modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
+            .drawBehind {
+                drawCircle(
+                    brush = Brush.radialGradient(
+                        colors = listOf(Color.White.copy(0.08f), Color.Transparent)
+                    ),
+                    radius = size.width * 0.8f,
+                    center = androidx.compose.ui.geometry.Offset(size.width * 0.9f, size.height * 0.1f)
+                )
+                drawCircle(
+                    brush = Brush.radialGradient(
+                        colors = listOf(Color.White.copy(0.06f), Color.Transparent)
+                    ),
+                    radius = size.width * 0.7f,
+                    center = androidx.compose.ui.geometry.Offset(size.width * 0.1f, size.height * 0.4f)
+                )
+            }
     ) {
+        LazyColumn(
+            modifier = Modifier.fillMaxSize()
+        ) {
         // Header
         item {
             Row(
@@ -99,9 +123,14 @@ fun CardScreen(
         // Card Visual
         item {
             state.card?.let { card ->
-                CryptoCardView(card = card, modifier = Modifier.padding(horizontal = 20.dp))
+                CryptoCardView(
+                    card = card, 
+                    modifier = Modifier
+                        .padding(horizontal = 20.dp)
+                        .glassCard(cornerRadius = 20.dp, alpha = 0.1f)
+                )
             }
-            Spacer(modifier = Modifier.height(20.dp))
+            Spacer(modifier = Modifier.height(24.dp))
         }
 
         // Spendable Balance (prominent)
@@ -111,56 +140,48 @@ fun CardScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 20.dp)
-                        .clip(RoundedCornerShape(16.dp))
-                        .background(MaterialTheme.colorScheme.primaryContainer)
-                        .padding(20.dp)
+                        .glassOnDark(cornerRadius = 24.dp, alpha = 0.15f)
+                        .padding(24.dp)
                 ) {
                     Column {
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Text("Spendable Balance", style = MaterialTheme.typography.labelLarge, color = tranzoTheme.textMuted)
                             Spacer(modifier = Modifier.weight(1f))
                             Text(
-                                if (card.spendMode == SpendMode.AUTO_CONVERT) "Auto-convert ON" else "Prepaid",
+                                if (card.spendMode == SpendMode.AUTO_CONVERT) "Auto-convert ON" else "Prepaid Wallet",
                                 style = MaterialTheme.typography.labelSmall,
                                 color = if (card.spendMode == SpendMode.AUTO_CONVERT) MaterialTheme.colorScheme.tertiary else tranzoTheme.textMuted,
                                 fontWeight = FontWeight.SemiBold,
                                 modifier = Modifier
                                     .clip(RoundedCornerShape(999.dp))
-                                    .background(if (card.spendMode == SpendMode.AUTO_CONVERT) tranzoTheme.positive.copy(alpha = 0.15f) else MaterialTheme.colorScheme.surface)
-                                    .padding(horizontal = 8.dp, vertical = 3.dp)
+                                    .background(if (card.spendMode == SpendMode.AUTO_CONVERT) tranzoTheme.positive.copy(alpha = 0.15f) else Color.White.copy(0.05f))
+                                    .padding(horizontal = 10.dp, vertical = 4.dp)
                             )
                         }
-                        Spacer(modifier = Modifier.height(8.dp))
+                        Spacer(modifier = Modifier.height(12.dp))
                         Text(
                             formatCurrency(card.spendableBalance),
                             style = MaterialTheme.typography.displaySmall,
                             fontWeight = FontWeight.ExtraBold,
                             color = MaterialTheme.colorScheme.onBackground
                         )
-                        Spacer(modifier = Modifier.height(4.dp))
-                        Text(
-                            "Card balance · Used for payments",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = tranzoTheme.textMuted
-                        )
-
-                        Spacer(modifier = Modifier.height(16.dp))
+                        Spacer(modifier = Modifier.height(20.dp))
 
                         Button(
                             onClick = onAddFunds,
-                            modifier = Modifier.fillMaxWidth().height(48.dp),
+                            modifier = Modifier.fillMaxWidth().height(52.dp),
                             shape = RoundedCornerShape(999.dp),
                             colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary, contentColor = MaterialTheme.colorScheme.onPrimary),
                             enabled = card.kycStatus == KycStatus.VERIFIED
                         ) {
-                            Icon(Icons.Default.Add, null, modifier = Modifier.size(18.dp))
-                            Spacer(modifier = Modifier.width(8.dp))
-                            Text("Add Funds", fontWeight = FontWeight.SemiBold)
+                            Icon(Icons.Default.Add, null, modifier = Modifier.size(20.dp))
+                            Spacer(modifier = Modifier.width(10.dp))
+                            Text("Top Up Balance", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
                         }
                     }
                 }
             }
-            Spacer(modifier = Modifier.height(20.dp))
+            Spacer(modifier = Modifier.height(24.dp))
         }
 
         // Card Actions
@@ -194,54 +215,55 @@ fun CardScreen(
         item {
             state.card?.let { card ->
                 Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp)) {
-                    Text("Monthly Spending", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.onBackground)
+                    Text("Spending Limit", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onBackground)
                     Spacer(modifier = Modifier.height(12.dp))
 
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .clip(RoundedCornerShape(16.dp))
-                            .background(MaterialTheme.colorScheme.primaryContainer)
-                            .padding(20.dp)
+                            .glassCard(cornerRadius = 20.dp, alpha = 0.08f)
+                            .padding(24.dp)
                     ) {
                         Column {
-                            Row(Modifier.fillMaxWidth(), Arrangement.SpaceBetween) {
-                                Text(formatCurrency(card.monthlySpent), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onBackground)
-                                Text("of ${formatCurrency(card.monthlyLimit)}", style = MaterialTheme.typography.bodyMedium, color = tranzoTheme.textMuted)
+                            Row(Modifier.fillMaxWidth(), Arrangement.SpaceBetween, Alignment.Bottom) {
+                                Column {
+                                    Text("Spent this month", style = MaterialTheme.typography.labelMedium, color = tranzoTheme.textMuted)
+                                    Text(formatCurrency(card.monthlySpent), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onBackground)
+                                }
+                                Text("Limit: ${formatCurrency(card.monthlyLimit)}", style = MaterialTheme.typography.bodySmall, color = tranzoTheme.textMuted)
                             }
-                            Spacer(modifier = Modifier.height(12.dp))
+                            Spacer(modifier = Modifier.height(16.dp))
                             val progress = (if (card.monthlyLimit > 0) card.monthlySpent / card.monthlyLimit else 0.0)
                                 .coerceIn(0.0, 1.0)
                                 .toFloat()
                                 .takeIf { !it.isNaN() } ?: 0f
                             LinearProgressIndicator(
                                 progress = { progress },
-                                modifier = Modifier.fillMaxWidth().height(8.dp).clip(RoundedCornerShape(4.dp)),
+                                modifier = Modifier.fillMaxWidth().height(10.dp).clip(RoundedCornerShape(5.dp)),
                                 color = MaterialTheme.colorScheme.primary,
-                                trackColor = MaterialTheme.colorScheme.surface,
+                                trackColor = Color.White.copy(0.05f),
                                 strokeCap = StrokeCap.Round,
                             )
-                            Spacer(modifier = Modifier.height(8.dp))
-                            Text("${(progress * 100).toInt()}% of monthly limit", style = MaterialTheme.typography.bodySmall, color = tranzoTheme.textMuted)
                         }
                     }
                 }
-                Spacer(modifier = Modifier.height(28.dp))
+                Spacer(modifier = Modifier.height(32.dp))
             }
         }
 
         // Recent Transactions
         item {
-            Text("Recent Transactions", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.onBackground, modifier = Modifier.padding(horizontal = 20.dp))
-            Spacer(modifier = Modifier.height(8.dp))
+            Text("Recent Transactions", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.ExtraBold, color = MaterialTheme.colorScheme.onBackground, modifier = Modifier.padding(horizontal = 20.dp))
+            Spacer(modifier = Modifier.height(12.dp))
         }
 
         items(state.transactions) { tx ->
             CardTransactionItem(transaction = tx)
         }
 
-        item { Spacer(modifier = Modifier.height(16.dp)) }
+        item { Spacer(modifier = Modifier.height(100.dp)) }
     }
+}
 }
 
 @Composable

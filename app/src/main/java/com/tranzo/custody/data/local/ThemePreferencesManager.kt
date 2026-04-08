@@ -21,8 +21,8 @@ class ThemePreferencesManager(private val context: Context) {
     }
 
     val selectedTheme: Flow<AppThemeId> = context.themeDataStore.data.map { prefs ->
-        val name = prefs[KEY_THEME] ?: AppThemeId.CLASSIC.name
-        try { AppThemeId.valueOf(name) } catch (_: Exception) { AppThemeId.CLASSIC }
+        val name = prefs[KEY_THEME] ?: AppThemeId.MIDNIGHT.name
+        try { AppThemeId.valueOf(name) } catch (_: Exception) { AppThemeId.MIDNIGHT }
     }
 
     val selectedFont: Flow<AppFontId> = context.themeDataStore.data.map { prefs ->
