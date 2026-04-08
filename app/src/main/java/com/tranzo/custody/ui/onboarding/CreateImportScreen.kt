@@ -208,5 +208,6 @@ fun CreateWalletScreen(
             Text("I wrote it down — continue", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
         }
         Spacer(modifier = Modifier.height(48.dp))
+        }
     }
 }

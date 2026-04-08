@@ -132,5 +132,6 @@ fun ImportWalletScreen(
             Text("Continue", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
         }
         Spacer(modifier = Modifier.height(32.dp))
+        }
     }
 }
