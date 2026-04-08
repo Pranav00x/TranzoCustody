@@ -27,7 +27,9 @@ data class OnboardingState(
     val mode: OnboardingMode = OnboardingMode.CREATE,
     val email: String = "",
     val password: String = "",
-    val name: String = "",
+    val firstName: String = "",
+    val lastName: String = "",
+    val dob: String = "",
     val phone: String = "",
     val mnemonic: String = "",
     val importMnemonicInput: String = "",
@@ -60,8 +62,16 @@ class OnboardingViewModel @Inject constructor(
 
     // ──────────────────── Email / Password ────────────────────
 
-    fun setName(name: String) {
-        _state.value = _state.value.copy(name = name, error = null)
+    fun setFirstName(name: String) {
+        _state.value = _state.value.copy(firstName = name, error = null)
+    }
+
+    fun setLastName(name: String) {
+        _state.value = _state.value.copy(lastName = name, error = null)
+    }
+
+    fun setDob(dob: String) {
+        _state.value = _state.value.copy(dob = dob, error = null)
     }
 
     fun setPhone(phone: String) {
@@ -78,8 +88,16 @@ class OnboardingViewModel @Inject constructor(
 
     fun validateRegistration(): Boolean {
         val s = _state.value
-        if (s.name.isBlank()) {
-            _state.value = s.copy(error = "Enter your full name")
+        if (s.firstName.isBlank()) {
+            _state.value = s.copy(error = "Enter your first name")
+            return false
+        }
+        if (s.lastName.isBlank()) {
+            _state.value = s.copy(error = "Enter your last name")
+            return false
+        }
+        if (s.dob.isBlank()) {
+            _state.value = s.copy(error = "Enter your date of birth")
             return false
         }
         if (s.email.isBlank() || !s.email.contains("@")) {
@@ -207,7 +225,7 @@ class OnboardingViewModel @Inject constructor(
             _state.value = _state.value.copy(setupError = "Missing recovery phrase")
             return
         }
-        if (email.isBlank() || password.isBlank() || _state.value.name.isBlank()) {
+        if (email.isBlank() || password.isBlank() || _state.value.firstName.isBlank()) {
             _state.value = _state.value.copy(setupError = "Missing registration info")
             return
         }
