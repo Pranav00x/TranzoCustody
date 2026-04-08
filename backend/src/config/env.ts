@@ -41,6 +41,7 @@ const productionEnvSchema = z.object({
   SMTP_USER: z.string().optional(),
   SMTP_PASS: z.string().optional(),
   EMAIL_FROM: z.string().default("Tranzo <noreply@tranzo.money>"),
+  CLIENT_URL: z.string().url().default("https://app.tranzo.money"),
 });
 
 /**
@@ -98,6 +99,7 @@ const developmentEnvSchema = z.object({
   SMTP_USER: z.string().optional(),
   SMTP_PASS: z.string().optional(),
   EMAIL_FROM: z.string().default("Tranzo <noreply@tranzo.money>"),
+  CLIENT_URL: z.string().url().default("http://localhost:5173"),
 });
 
 const useProductionSchema = process.env.NODE_ENV === "production";

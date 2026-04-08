@@ -43,8 +43,8 @@ fun TranzoBottomBar(
     modifier: Modifier = Modifier
 ) {
     NavigationBar(
-        modifier = modifier,
-        containerColor = MaterialTheme.colorScheme.background,
+        modifier = modifier.glassCard(cornerRadius = 24.dp, alpha = 0.12f),
+        containerColor = Color.Transparent,
         tonalElevation = 0.dp
     ) {
         bottomNavItems.forEach { item ->

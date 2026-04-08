@@ -86,6 +86,64 @@ class AuthRepository @Inject constructor(
     }
 
     /**
+     * Log in with a Google ID token.
+     */
+    suspend fun googleLogin(idToken: String, ownerAddr: String, chainId: Int): AuthUser {
+        val response = authApi.googleLogin(
+            GoogleLoginRequest(idToken = idToken, ownerAddr = ownerAddr, chainId = chainId)
+        )
+        sessionManager.saveAuthTokens(
+            accessToken = response.accessToken,
+            refreshToken = response.refreshToken,
+            userId = response.user.id
+        )
+        return response.user
+    }
+
+    /**
+     * Signup via OAuth or Passkey.
+     */
+    suspend fun oauthSignup(
+        email: String,
+        googleId: String? = null,
+        publicKey: String? = null,
+        ownerAddr: String,
+        chainId: Int,
+        emailVerified: Boolean? = null
+    ): AuthUser {
+        val response = authApi.oauthSignup(
+            OAuthSignupRequest(
+                email = email,
+                googleId = googleId,
+                publicKey = publicKey,
+                ownerAddr = ownerAddr,
+                chainId = chainId,
+                emailVerified = emailVerified
+            )
+        )
+        sessionManager.saveAuthTokens(
+            accessToken = response.accessToken,
+            refreshToken = response.refreshToken,
+            userId = response.user.id
+        )
+        return response.user
+    }
+
+    /**
+     * Send an OTP to the given email.
+     */
+    suspend fun sendOtp(email: String): String {
+        return authApi.sendOtp(OtpSendRequest(email = email)).message
+    }
+
+    /**
+     * Verify an OTP.
+     */
+    suspend fun verifyOtp(email: String, otp: String): String {
+        return authApi.verifyOtp(OtpVerifyRequest(email = email, otp = otp)).message
+    }
+
+    /**
      * Logout — revoke all tokens on backend + clear local storage.
      */
     suspend fun logout() {

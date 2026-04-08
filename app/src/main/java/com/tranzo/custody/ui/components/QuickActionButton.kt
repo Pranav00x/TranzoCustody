@@ -17,6 +17,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 
+import com.tranzo.custody.ui.util.glassCard
+
 @Composable
 fun QuickActionButton(
     icon: ImageVector,
@@ -32,14 +34,14 @@ fun QuickActionButton(
         Box(
             modifier = Modifier
                 .size(56.dp)
-                .clip(CircleShape)
-                .background(MaterialTheme.colorScheme.primary),
+                .glassCard(cornerRadius = 28.dp, alpha = 0.1f)
+                .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.05f)),
             contentAlignment = Alignment.Center
         ) {
             Icon(
                 imageVector = icon,
                 contentDescription = label,
-                tint = MaterialTheme.colorScheme.onPrimary,
+                tint = MaterialTheme.colorScheme.primary,
                 modifier = Modifier.size(24.dp)
             )
         }

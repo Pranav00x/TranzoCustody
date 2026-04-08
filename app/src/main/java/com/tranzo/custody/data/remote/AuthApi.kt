@@ -67,6 +67,18 @@ interface AuthApi {
     @POST("auth/login")
     suspend fun login(@Body request: LoginRequest): AuthResponse
 
+    @POST("auth/google-login")
+    suspend fun googleLogin(@Body request: GoogleLoginRequest): AuthResponse
+
+    @POST("auth/oauth-signup")
+    suspend fun oauthSignup(@Body request: OAuthSignupRequest): AuthResponse
+
+    @POST("auth/otp-send")
+    suspend fun sendOtp(@Body request: OtpSendRequest): MessageResponse
+
+    @POST("auth/otp-verify")
+    suspend fun verifyOtp(@Body request: OtpVerifyRequest): MessageResponse
+
     @POST("auth/forgot-password")
     suspend fun forgotPassword(@Body request: ForgotPasswordRequest): MessageResponse
 
@@ -79,3 +91,27 @@ interface AuthApi {
     @POST("auth/logout")
     suspend fun logout(): LogoutResponse
 }
+
+data class GoogleLoginRequest(
+    @SerializedName("idToken") val idToken: String,
+    @SerializedName("ownerAddr") val ownerAddr: String,
+    @SerializedName("chainId") val chainId: Int
+)
+
+data class OAuthSignupRequest(
+    @SerializedName("email") val email: String,
+    @SerializedName("googleId") val googleId: String? = null,
+    @SerializedName("publicKey") val publicKey: String? = null,
+    @SerializedName("ownerAddr") val ownerAddr: String,
+    @SerializedName("chainId") val chainId: Int,
+    @SerializedName("emailVerified") val emailVerified: Boolean? = null
+)
+
+data class OtpSendRequest(
+    @SerializedName("email") val email: String
+)
+
+data class OtpVerifyRequest(
+    @SerializedName("email") val email: String,
+    @SerializedName("otp") val otp: String
+)

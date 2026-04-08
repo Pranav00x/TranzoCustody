@@ -37,7 +37,12 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
+import androidx.compose.foundation.layout.Box
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import com.tranzo.custody.ui.theme.LocalTranzoTheme
+import com.tranzo.custody.ui.util.glassCard
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -50,20 +55,39 @@ fun EmailPasswordScreen(
     var passwordVisible by remember { mutableStateOf(false) }
     val tranzoTheme = LocalTranzoTheme.current
 
-    Column(
+    Box(
         modifier = Modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
+            .drawBehind {
+                drawCircle(
+                    brush = Brush.radialGradient(
+                        colors = listOf(Color(0xFF6366F1).copy(0.12f), Color.Transparent)
+                    ),
+                    radius = size.width * 0.8f,
+                    center = androidx.compose.ui.geometry.Offset(size.width * 0.9f, size.height * 0.1f)
+                )
+                drawCircle(
+                    brush = Brush.radialGradient(
+                        colors = listOf(Color(0xFFEC4899).copy(0.10f), Color.Transparent)
+                    ),
+                    radius = size.width * 0.7f,
+                    center = androidx.compose.ui.geometry.Offset(size.width * 0.1f, size.height * 0.4f)
+                )
+            }
     ) {
-        TopAppBar(
-            title = {},
-            navigationIcon = {
-                IconButton(onClick = onBack) {
-                    Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
-                }
-            },
-            colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.background)
-        )
+        Column(
+            modifier = Modifier.fillMaxSize()
+        ) {
+            TopAppBar(
+                title = {},
+                navigationIcon = {
+                    IconButton(onClick = onBack) {
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                    }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent)
+            )
 
         Column(
             modifier = Modifier
@@ -92,7 +116,9 @@ fun EmailPasswordScreen(
                 onValueChange = { viewModel.setEmail(it) },
                 label = { Text("Email") },
                 placeholder = { Text("you@example.com", color = tranzoTheme.textMuted) },
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .glassCard(cornerRadius = 12.dp, alpha = 0.05f),
                 singleLine = true,
                 keyboardOptions = KeyboardOptions(
                     keyboardType = KeyboardType.Email,
@@ -101,7 +127,9 @@ fun EmailPasswordScreen(
                 shape = RoundedCornerShape(12.dp),
                 colors = OutlinedTextFieldDefaults.colors(
                     focusedBorderColor = MaterialTheme.colorScheme.primary,
-                    unfocusedBorderColor = tranzoTheme.textMuted.copy(alpha = 0.3f)
+                    unfocusedBorderColor = Color.Transparent,
+                    focusedContainerColor = Color.White.copy(0.05f),
+                    unfocusedContainerColor = Color.White.copy(0.05f)
                 )
             )
 
@@ -112,7 +140,9 @@ fun EmailPasswordScreen(
                 onValueChange = { viewModel.setPassword(it) },
                 label = { Text("Password") },
                 placeholder = { Text("At least 8 characters", color = tranzoTheme.textMuted) },
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .glassCard(cornerRadius = 12.dp, alpha = 0.05f),
                 singleLine = true,
                 visualTransformation = if (passwordVisible) VisualTransformation.None
                     else PasswordVisualTransformation(),
@@ -132,7 +162,9 @@ fun EmailPasswordScreen(
                 shape = RoundedCornerShape(12.dp),
                 colors = OutlinedTextFieldDefaults.colors(
                     focusedBorderColor = MaterialTheme.colorScheme.primary,
-                    unfocusedBorderColor = tranzoTheme.textMuted.copy(alpha = 0.3f)
+                    unfocusedBorderColor = Color.Transparent,
+                    focusedContainerColor = Color.White.copy(0.05f),
+                    unfocusedContainerColor = Color.White.copy(0.05f)
                 )
             )
 

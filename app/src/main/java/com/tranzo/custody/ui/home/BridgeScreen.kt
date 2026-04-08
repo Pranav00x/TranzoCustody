@@ -47,8 +47,12 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.graphics.Brush
 import com.tranzo.custody.ui.components.formatCurrency
 import com.tranzo.custody.ui.theme.LocalTranzoTheme
+import com.tranzo.custody.ui.util.glassCard
+import com.tranzo.custody.ui.util.glassOnDark
 
 @Composable
 fun BridgeScreen(
@@ -68,13 +72,33 @@ fun BridgeScreen(
         return
     }
 
-    Column(
+    Box(
         modifier = Modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
-            .verticalScroll(rememberScrollState())
-            .padding(horizontal = 24.dp)
+            .drawBehind {
+                drawCircle(
+                    brush = Brush.radialGradient(
+                        colors = listOf(Color(0xFF6366F1).copy(0.12f), Color.Transparent)
+                    ),
+                    radius = size.width * 0.8f,
+                    center = androidx.compose.ui.geometry.Offset(size.width * 0.9f, size.height * 0.1f)
+                )
+                drawCircle(
+                    brush = Brush.radialGradient(
+                        colors = listOf(Color(0xFFEC4899).copy(0.10f), Color.Transparent)
+                    ),
+                    radius = size.width * 0.7f,
+                    center = androidx.compose.ui.geometry.Offset(size.width * 0.1f, size.height * 0.4f)
+                )
+            }
     ) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState())
+                .padding(horizontal = 24.dp)
+        ) {
         Spacer(modifier = Modifier.height(16.dp))
 
         Row(verticalAlignment = Alignment.CenterVertically) {
@@ -103,8 +127,8 @@ fun BridgeScreen(
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .clip(RoundedCornerShape(16.dp))
-                .background(MaterialTheme.colorScheme.primaryContainer)
+                .glassCard(cornerRadius = 16.dp, alpha = 0.08f)
+                .background(MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f))
                 .padding(20.dp)
         ) {
             Column {
@@ -203,8 +227,8 @@ fun BridgeScreen(
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .clip(RoundedCornerShape(16.dp))
-                .background(MaterialTheme.colorScheme.primaryContainer)
+                .glassOnDark(cornerRadius = 16.dp, alpha = 0.12f)
+                .background(MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f))
                 .padding(20.dp)
         ) {
             Row(verticalAlignment = Alignment.CenterVertically) {
@@ -229,8 +253,7 @@ fun BridgeScreen(
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .clip(RoundedCornerShape(16.dp))
-                        .border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(16.dp))
+                        .glassCard(cornerRadius = 16.dp, alpha = 0.05f)
                         .padding(20.dp)
                 ) {
                     Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {

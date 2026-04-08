@@ -5,6 +5,7 @@ import { AuthService } from "../services/auth.service.js";
 import { WalletService } from "../services/wallet.service.js";
 import { requireAuth } from "../middleware/auth.middleware.js";
 import prisma from "../services/prisma.service.js";
+import { EmailService } from "../services/email.service.js";
 
 const router = Router();
 
@@ -92,6 +93,11 @@ router.post("/signup", async (req, res) => {
       chainId
     );
 
+    // Send welcome email (non-blocking)
+    EmailService.sendWelcomeEmail(user.email, user.smartWalletAddr).catch(
+      (err) => console.error("Failed to send welcome email:", err)
+    );
+
     // Issue tokens
     const accessToken = AuthService.signAccessToken({
       sub: user.id,
@@ -146,7 +152,7 @@ router.post("/oauth-signup", async (req, res) => {
       chainId
     );
 
-    const user = await AuthService.signupWithOAuth({
+    const { user, isNewUser } = await AuthService.signupWithOAuth({
       email,
       googleId,
       publicKey,
@@ -155,6 +161,12 @@ router.post("/oauth-signup", async (req, res) => {
       chainId,
       emailVerified,
     });
+
+    if (isNewUser) {
+      EmailService.sendWelcomeEmail(user.email, user.smartWalletAddr).catch(
+        (err) => console.error("Failed to send welcome email:", err)
+      );
+    }
 
     const accessToken = AuthService.signAccessToken({
       sub: user.id,
@@ -209,7 +221,7 @@ router.post("/google-login", async (req, res) => {
       chainId
     );
 
-    const user = await AuthService.signupWithOAuth({
+    const { user, isNewUser } = await AuthService.signupWithOAuth({
       email: payload.email,
       googleId: payload.sub,
       ownerAddr,
@@ -217,6 +229,12 @@ router.post("/google-login", async (req, res) => {
       chainId,
       emailVerified: payload.email_verified,
     });
+
+    if (isNewUser) {
+      EmailService.sendWelcomeEmail(user.email, user.smartWalletAddr).catch(
+        (err) => console.error("Failed to send welcome email:", err)
+      );
+    }
 
     const accessToken = AuthService.signAccessToken({
       sub: user.id,
@@ -343,13 +361,9 @@ router.post("/forgot-password", async (req, res) => {
       parsed.data.email
     );
 
-    // TODO: Send email with reset link containing `token`
-    // For now, return token directly (dev only — remove in production)
-    res.json({
-      message: "If an account exists, a reset link has been sent.",
-      // Remove this in production:
-      _devToken: token,
-    });
+    await EmailService.sendPasswordReset(parsed.data.email, token);
+
+    res.json({ message: "If an account exists, a reset link has been sent." });
   } catch (err: any) {
     // Always return success to prevent email enumeration
     res.json({ message: "If an account exists, a reset link has been sent." });

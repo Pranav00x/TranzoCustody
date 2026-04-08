@@ -116,7 +116,7 @@ export class AuthService {
     smartWalletAddr: string;
     chainId: number;
     emailVerified?: boolean;
-  }) {
+  }): Promise<{ user: any; isNewUser: boolean }> {
     const existing = await prisma.user.findFirst({
       where: {
         OR: [
@@ -128,7 +128,7 @@ export class AuthService {
 
     if (existing) {
       // If user exists, update their OAuth/WebAuthn info if missing
-      return prisma.user.update({
+      const user = await prisma.user.update({
         where: { id: existing.id },
         data: {
           googleId: data.googleId ?? existing.googleId,
@@ -136,6 +136,7 @@ export class AuthService {
           emailVerified: data.emailVerified ?? existing.emailVerified,
         },
       });
+      return { user, isNewUser: false };
     }
 
     const user = await prisma.user.create({
@@ -150,7 +151,7 @@ export class AuthService {
       },
     });
 
-    return user;
+    return { user, isNewUser: true };
   }
 
   // ──────────────────────────── OTP ─────────────────────────────
@@ -187,10 +188,6 @@ export class AuthService {
     await EmailService.sendOTP(email, otp);
   }
 
-  /**
-   * Verifies an OTP by hashing it and matching against active database records.
-   * Marks the OTP as used upon successful verification.
-   */
   static async verifyOTP(email: string, otp: string): Promise<boolean> {
     const tokenHash = crypto.createHash("sha256").update(otp).digest("hex");
     const user = await prisma.user.findUnique({
@@ -211,10 +208,16 @@ export class AuthService {
 
     if (!record) return false;
 
-    await prisma.passwordResetToken.update({
-      where: { id: record.id },
-      data: { used: true },
-    });
+    await prisma.$transaction([
+      prisma.passwordResetToken.update({
+        where: { id: record.id },
+        data: { used: true },
+      }),
+      prisma.user.update({
+        where: { id: user.id },
+        data: { emailVerified: true },
+      }),
+    ]);
 
     return true;
   }

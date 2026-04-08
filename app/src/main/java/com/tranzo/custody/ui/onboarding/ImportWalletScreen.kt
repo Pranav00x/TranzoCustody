@@ -28,7 +28,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.compose.foundation.layout.Box
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import com.tranzo.custody.ui.theme.LocalTranzoTheme
+import com.tranzo.custody.ui.util.glassCard
 
 @Composable
 fun ImportWalletScreen(
@@ -41,13 +46,33 @@ fun ImportWalletScreen(
 
     LaunchedEffect(Unit) { viewModel.setMode(OnboardingMode.IMPORT) }
 
-    Column(
+    Box(
         modifier = Modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
-            .padding(horizontal = 24.dp)
-            .verticalScroll(rememberScrollState())
+            .drawBehind {
+                drawCircle(
+                    brush = Brush.radialGradient(
+                        colors = listOf(Color(0xFF6366F1).copy(0.12f), Color.Transparent)
+                    ),
+                    radius = size.width * 0.8f,
+                    center = androidx.compose.ui.geometry.Offset(size.width * 0.9f, size.height * 0.1f)
+                )
+                drawCircle(
+                    brush = Brush.radialGradient(
+                        colors = listOf(Color(0xFFEC4899).copy(0.10f), Color.Transparent)
+                    ),
+                    radius = size.width * 0.7f,
+                    center = androidx.compose.ui.geometry.Offset(size.width * 0.1f, size.height * 0.4f)
+                )
+            }
     ) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(horizontal = 24.dp)
+                .verticalScroll(rememberScrollState())
+        ) {
         Spacer(modifier = Modifier.height(16.dp))
         IconButton(onClick = onBack) {
             Icon(Icons.AutoMirrored.Filled.ArrowBack, "Back", tint = MaterialTheme.colorScheme.onBackground)
@@ -71,13 +96,17 @@ fun ImportWalletScreen(
         OutlinedTextField(
             value = state.importMnemonicInput,
             onValueChange = { viewModel.setImportMnemonic(it) },
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .glassCard(cornerRadius = 16.dp, alpha = 0.05f),
             minLines = 4,
             shape = RoundedCornerShape(12.dp),
             colors = OutlinedTextFieldDefaults.colors(
                 focusedBorderColor = MaterialTheme.colorScheme.primary,
-                unfocusedBorderColor = MaterialTheme.colorScheme.outline,
-                cursorColor = MaterialTheme.colorScheme.primary
+                unfocusedBorderColor = Color.Transparent,
+                cursorColor = MaterialTheme.colorScheme.primary,
+                focusedContainerColor = Color.White.copy(0.05f),
+                unfocusedContainerColor = Color.White.copy(0.05f)
             ),
             placeholder = { Text("word1 word2 word3 ...", color = tranzoTheme.textMuted) }
         )

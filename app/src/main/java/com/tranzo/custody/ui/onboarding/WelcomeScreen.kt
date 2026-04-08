@@ -27,7 +27,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.draw.drawBehind
 import com.tranzo.custody.ui.theme.LocalTranzoTheme
+import com.tranzo.custody.ui.util.glassCard
 
 @Composable
 fun WelcomeScreen(
@@ -37,28 +41,48 @@ fun WelcomeScreen(
 ) {
     val tranzoTheme = LocalTranzoTheme.current
 
-    Column(
+    Box(
         modifier = Modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
-            .padding(horizontal = 32.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
+            .drawBehind {
+                drawCircle(
+                    brush = Brush.radialGradient(
+                        colors = listOf(Color(0xFF6366F1).copy(0.15f), Color.Transparent)
+                    ),
+                    radius = size.width * 0.9f,
+                    center = androidx.compose.ui.geometry.Offset(size.width * 0.8f, size.height * 0.2f)
+                )
+                drawCircle(
+                    brush = Brush.radialGradient(
+                        colors = listOf(Color(0xFFEC4899).copy(0.12f), Color.Transparent)
+                    ),
+                    radius = size.width * 0.8f,
+                    center = androidx.compose.ui.geometry.Offset(size.width * 0.2f, size.height * 0.8f)
+                )
+            }
     ) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(horizontal = 32.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
         Spacer(modifier = Modifier.weight(1f))
 
         Box(
             modifier = Modifier
                 .size(80.dp)
-                .clip(RoundedCornerShape(20.dp))
-                .background(MaterialTheme.colorScheme.primary),
+                .glassCard(cornerRadius = 24.dp, alpha = 0.1f)
+                .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.15f)),
             contentAlignment = Alignment.Center
         ) {
             Box(
                 modifier = Modifier
                     .size(36.dp)
                     .rotate(45f)
-                    .border(3.dp, MaterialTheme.colorScheme.onPrimary, RoundedCornerShape(4.dp))
+                    .border(3.dp, MaterialTheme.colorScheme.primary, RoundedCornerShape(4.dp))
             )
         }
 

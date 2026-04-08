@@ -30,6 +30,7 @@ import com.tranzo.custody.domain.model.CryptoCard
 import com.tranzo.custody.ui.theme.GoldChip
 import com.tranzo.custody.ui.theme.GoldChipLight
 import com.tranzo.custody.ui.theme.LocalTranzoTheme
+import com.tranzo.custody.ui.util.glassOnDark
 
 @Composable
 fun CryptoCardView(
@@ -43,12 +44,12 @@ fun CryptoCardView(
         modifier = modifier
             .fillMaxWidth()
             .height(210.dp)
-            .clip(RoundedCornerShape(16.dp))
             .background(
                 Brush.linearGradient(
                     colors = listOf(cardDarkStart, cardDarkEnd)
                 )
             )
+            .glassOnDark(cornerRadius = 20.dp, alpha = 0.2f)
             .padding(24.dp)
     ) {
         Column(
