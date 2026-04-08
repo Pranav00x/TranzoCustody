@@ -1,15 +1,7 @@
 package com.tranzo.custody.data.repository
 
 import com.tranzo.custody.data.local.UserSessionManager
-import com.tranzo.custody.data.remote.AuthApi
-import com.tranzo.custody.data.remote.AuthUser
-import com.tranzo.custody.data.remote.ForgotPasswordRequest
-import com.tranzo.custody.data.remote.LoginRequest
-import com.tranzo.custody.data.remote.MessageResponse
-import com.tranzo.custody.data.remote.OtpSendRequest
-import com.tranzo.custody.data.remote.OtpVerifyRequest
-import com.tranzo.custody.data.remote.ResetPasswordRequest
-import com.tranzo.custody.data.remote.SignupRequest
+import com.tranzo.custody.data.remote.*
 import javax.inject.Inject
 import javax.inject.Singleton
 
