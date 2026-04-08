@@ -55,7 +55,7 @@ jobs:
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
       - name: Build with Gradle
-        run: ./gradlew assembleDebug
+        run: ./gradlew assembleDebug -Dorg.gradle.java.home=$JAVA_HOME
 
       - name: Upload debug APK to Telegram
         if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop')
