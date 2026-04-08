@@ -259,6 +259,7 @@ fun SettingsScreen(
         Text("Tranzo v${state.appVersion}", style = MaterialTheme.typography.bodySmall, color = tranzoTheme.textMuted, modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 8.dp))
         Spacer(modifier = Modifier.height(32.dp))
     }
+    }
 }
 
 @Composable
