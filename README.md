@@ -17,6 +17,8 @@ Tranzo Custody is a monorepo: **Android app** (Kotlin / Compose), **Node backend
 7. [Local development checklist](#7-local-development-checklist)
 8. [Security and operational notes](#8-security-and-operational-notes)
 9. [Troubleshooting](#9-troubleshooting)
+10. [Design System](#10-design-system) — [Glassmorphism](#101-glassmorphism)
+11. [Onboarding Flow](#11-onboarding-flow) — [Security First](#111-security-first)
 
 ---
 
@@ -158,9 +160,9 @@ sequenceDiagram
 
 ### 3.1 Requirements
 
-- **JDK 17+** (Android Gradle Plugin 8.5.x)
+- **JDK 17** (Critical: Local and CI environments must use Java 17 for AGP 8.5+ stability)
 - **Android SDK** with API 35; `compileSdk = 35`, `minSdk = 26`, `targetSdk = 35`
-- **Android Studio** (recommended) or command-line Gradle
+- **Android Studio Ladybug** or newer (recommended)
 
 ### 3.2 Build commands
 
@@ -365,6 +367,44 @@ If secrets are missing, that step fails with instructions in the log.
 ## Appendix: Gradle / Maven note
 
 `settings.gradle.kts` adds the Consensys Maven repository for web3j transitive dependencies (`jc-kzg-4844`). Without it, resolution can fail on Maven Central alone.
+
+---
+
+---
+
+## 10. Design System
+
+Tranzo uses a custom **Glassmorphism Design System** to provide a premium, modern experience while maintaining high readability.
+
+### 10.1 Glassmorphism
+
+The core of the UI is built on the `GlassModifiers.kt` utility, which provides:
+- **`glassCard`**: A frosted glass effect with configurable corner radius, alpha, and border stroke.
+- **`glassOnDark`**: Specialized glass effect for dark backgrounds with higher contrast.
+- **Vibrance Blobs**: Dynamic background light blobs (Indigo and Pink radial gradients) placed behind glass surfaces to create depth and visual interest.
+
+Implementation Example:
+```kotlin
+Box(
+    modifier = Modifier
+        .fillMaxWidth()
+        .glassCard(cornerRadius = 24.dp, alpha = 0.08f)
+) {
+    // Content
+}
+```
+
+---
+
+## 11. Onboarding Flow
+
+We have revamped the onboarding flow to prioritize **user accountability** and **security communication**.
+
+### 11.1 Security First
+
+- **High-Stakes Recovery Phrase**: The `CreateImportScreen` now features a prominent Red-tinted glass warning box explaining the non-custodial nature of the wallet.
+- **Mandatory Confirmation**: Users must explicitly check a box confirming they have written down their phrase before they can proceed. there is **NO** way to recover the wallet if the phrase is lost.
+- **Streamlined Verification**: We removed redundant word-selection challenges in favor of a high-friction acknowledgment gate, ensuring users understand the stakes without unnecessary complexity.
 
 ---
 
