@@ -74,17 +74,17 @@ fun HomeScreen(
                 // Background white frost blobs for glass support
                 drawCircle(
                     brush = Brush.radialGradient(
-                        colors = listOf(Color.White.copy(0.08f), Color.Transparent)
+                        colors = listOf(Color.White.copy(0.12f), Color.Transparent)
                     ),
-                    radius = size.width * 0.8f,
-                    center = androidx.compose.ui.geometry.Offset(size.width * 0.9f, size.height * 0.1f)
+                    radius = size.width * 0.9f,
+                    center = androidx.compose.ui.geometry.Offset(size.width * 0.9f, size.height * 0.05f)
                 )
                 drawCircle(
                     brush = Brush.radialGradient(
-                        colors = listOf(Color.White.copy(0.06f), Color.Transparent)
+                        colors = listOf(Color.White.copy(0.08f), Color.Transparent)
                     ),
-                    radius = size.width * 0.7f,
-                    center = androidx.compose.ui.geometry.Offset(size.width * 0.1f, size.height * 0.4f)
+                    radius = size.width * 0.8f,
+                    center = androidx.compose.ui.geometry.Offset(size.width * 0.1f, size.height * 0.45f)
                 )
             }
     ) {
@@ -242,8 +242,8 @@ fun HomeScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 20.dp)
-                        .clip(RoundedCornerShape(12.dp))
-                        .background(LocalTranzoTheme.current.positive.copy(alpha = 0.15f))
+                        .glassCard(cornerRadius = 12.dp, alpha = 0.12f)
+                        .background(LocalTranzoTheme.current.positive.copy(alpha = 0.1f))
                         .clickable(onClick = onAddToSpend)
                         .padding(horizontal = 16.dp, vertical = 12.dp)
                 ) {

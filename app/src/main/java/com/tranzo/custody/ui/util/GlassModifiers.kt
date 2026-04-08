@@ -23,15 +23,15 @@ import androidx.compose.ui.unit.dp
 fun Modifier.glassCard(
     cornerRadius: Dp = 20.dp,
     borderWidth: Dp = 1.dp,
-    alpha: Float = 0.1f,
+    alpha: Float = 0.15f,
     shadowElevation: Dp = 0.dp
 ): Modifier = this
     .clip(RoundedCornerShape(cornerRadius))
     .background(
         Brush.verticalGradient(
             colors = listOf(
-                Color.White.copy(alpha = alpha + 0.05f),
-                Color.White.copy(alpha = alpha - 0.02f)
+                Color.White.copy(alpha = alpha + 0.08f),
+                Color.White.copy(alpha = alpha - 0.05f)
             )
         )
     )
@@ -39,9 +39,9 @@ fun Modifier.glassCard(
         width = borderWidth,
         brush = Brush.linearGradient(
             colors = listOf(
-                Color.White.copy(alpha = 0.25f),
+                Color.White.copy(alpha = 0.4f),
                 Color.White.copy(alpha = 0.05f),
-                Color.White.copy(alpha = 0.15f)
+                Color.White.copy(alpha = 0.25f)
             )
         ),
         shape = RoundedCornerShape(cornerRadius)
@@ -49,24 +49,24 @@ fun Modifier.glassCard(
 
 fun Modifier.glassOnDark(
     cornerRadius: Dp = 20.dp,
-    alpha: Float = 0.15f
+    alpha: Float = 0.2f
 ): Modifier = this
     .clip(RoundedCornerShape(cornerRadius))
     .background(
         Brush.linearGradient(
             colors = listOf(
                 Color.White.copy(alpha = alpha),
-                Color.White.copy(alpha = alpha * 0.5f)
+                Color.White.copy(alpha = alpha * 0.4f)
             )
         )
     )
     .border(
-        width = 1.dp,
+        width = 1.5.dp,
         brush = Brush.linearGradient(
             colors = listOf(
-                Color.White.copy(alpha = 0.3f),
+                Color.White.copy(alpha = 0.45f),
                 Color.Transparent,
-                Color.White.copy(alpha = 0.1f)
+                Color.White.copy(alpha = 0.15f)
             )
         ),
         shape = RoundedCornerShape(cornerRadius)

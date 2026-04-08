@@ -1,6 +1,7 @@
 package com.tranzo.custody.ui.card
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -14,6 +15,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.ui.draw.rotate
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -77,14 +79,14 @@ fun CardScreen(
             .drawBehind {
                 drawCircle(
                     brush = Brush.radialGradient(
-                        colors = listOf(Color.White.copy(0.08f), Color.Transparent)
+                        colors = listOf(Color.White.copy(0.12f), Color.Transparent)
                     ),
-                    radius = size.width * 0.8f,
+                    radius = size.width * 0.9f,
                     center = androidx.compose.ui.geometry.Offset(size.width * 0.9f, size.height * 0.1f)
                 )
                 drawCircle(
                     brush = Brush.radialGradient(
-                        colors = listOf(Color.White.copy(0.06f), Color.Transparent)
+                        colors = listOf(Color.White.copy(0.08f), Color.Transparent)
                     ),
                     radius = size.width * 0.7f,
                     center = androidx.compose.ui.geometry.Offset(size.width * 0.1f, size.height * 0.4f)
@@ -140,45 +142,132 @@ fun CardScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 20.dp)
-                        .glassOnDark(cornerRadius = 24.dp, alpha = 0.15f)
-                        .padding(24.dp)
-                ) {
-                    Column {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Text("Spendable Balance", style = MaterialTheme.typography.labelLarge, color = tranzoTheme.textMuted)
-                            Spacer(modifier = Modifier.weight(1f))
-                            Text(
-                                if (card.spendMode == SpendMode.AUTO_CONVERT) "Auto-convert ON" else "Prepaid Wallet",
-                                style = MaterialTheme.typography.labelSmall,
-                                color = if (card.spendMode == SpendMode.AUTO_CONVERT) MaterialTheme.colorScheme.tertiary else tranzoTheme.textMuted,
-                                fontWeight = FontWeight.SemiBold,
-                                modifier = Modifier
-                                    .clip(RoundedCornerShape(999.dp))
-                                    .background(if (card.spendMode == SpendMode.AUTO_CONVERT) tranzoTheme.positive.copy(alpha = 0.15f) else Color.White.copy(0.05f))
-                                    .padding(horizontal = 10.dp, vertical = 4.dp)
+                        .height(210.dp)
+                        .glassOnDark(cornerRadius = 24.dp, alpha = 0.25f)
+                        .background(
+                            Brush.linearGradient(
+                                colors = listOf(
+                                    Color(0xFF1A1A1A),
+                                    Color(0xFF0D0D0D),
+                                    Color(0xFF1E1E1E)
+                                )
                             )
-                        }
-                        Spacer(modifier = Modifier.height(12.dp))
-                        Text(
-                            formatCurrency(card.spendableBalance),
-                            style = MaterialTheme.typography.displaySmall,
-                            fontWeight = FontWeight.ExtraBold,
-                            color = MaterialTheme.colorScheme.onBackground
                         )
-                        Spacer(modifier = Modifier.height(20.dp))
+                ) {
+                    // Glossy Sheen Overlay
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .drawBehind {
+                                drawRect(
+                                    brush = Brush.linearGradient(
+                                        colors = listOf(
+                                            Color.White.copy(0.12f),
+                                            Color.Transparent,
+                                            Color.White.copy(0.05f)
+                                        ),
+                                        start = androidx.compose.ui.geometry.Offset(0f, 0f),
+                                        end = androidx.compose.ui.geometry.Offset(size.width, size.height)
+                                    )
+                                )
+                            }
+                    )
 
-                        Button(
-                            onClick = onAddFunds,
-                            modifier = Modifier.fillMaxWidth().height(52.dp),
-                            shape = RoundedCornerShape(999.dp),
-                            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary, contentColor = MaterialTheme.colorScheme.onPrimary),
-                            enabled = card.kycStatus == KycStatus.VERIFIED
+                    Column(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(24.dp),
+                        verticalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.Top
                         ) {
-                            Icon(Icons.Default.Add, null, modifier = Modifier.size(20.dp))
-                            Spacer(modifier = Modifier.width(10.dp))
-                            Text("Top Up Balance", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                            Column {
+                                Text(
+                                    "Spendable Balance",
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = Color.White.copy(0.6f),
+                                    fontWeight = FontWeight.Medium
+                                )
+                                Spacer(modifier = Modifier.height(6.dp))
+                                Text(
+                                    formatCurrency(card.spendableBalance),
+                                    style = MaterialTheme.typography.displaySmall,
+                                    color = Color.White,
+                                    fontWeight = FontWeight.Bold,
+                                    letterSpacing = (-1).sp
+                                )
+                            }
+                            // Logo
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Box(
+                                    modifier = Modifier
+                                        .size(26.dp)
+                                        .rotate(45f)
+                                        .border(2.5.dp, Color.White, RoundedCornerShape(5.dp))
+                                )
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Text(
+                                    "Tranzo",
+                                    style = MaterialTheme.typography.titleMedium,
+                                    color = Color.White,
+                                    fontWeight = FontWeight.ExtraBold
+                                )
+                            }
+                        }
+
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.Bottom
+                        ) {
+                            Column {
+                                Text(
+                                    if (card.spendMode == SpendMode.AUTO_CONVERT) "Auto-convert Mode" else "Prepaid Wallet",
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = if (card.spendMode == SpendMode.AUTO_CONVERT) MaterialTheme.colorScheme.tertiary else Color.White.copy(0.4f),
+                                    fontWeight = FontWeight.SemiBold
+                                )
+                                Text(
+                                    "Visa Debit **** 4892",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = Color.White.copy(0.7f),
+                                    fontWeight = FontWeight.Medium,
+                                    letterSpacing = 1.sp
+                                )
+                            }
+                            Box(
+                                modifier = Modifier
+                                    .size(42.dp, 26.dp)
+                                    .clip(RoundedCornerShape(4.dp))
+                                    .background(Color.White.copy(0.12f))
+                                    .border(1.dp, Color.White.copy(0.25f), RoundedCornerShape(4.dp)),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text("DEBIT", style = MaterialTheme.typography.labelSmall, color = Color.White, fontWeight = FontWeight.Bold)
+                            }
                         }
                     }
+                }
+                Spacer(modifier = Modifier.height(24.dp))
+
+                // Top Up Button (Separate for better UX)
+                Button(
+                    onClick = onAddFunds,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 20.dp)
+                        .height(56.dp)
+                        .glassCard(cornerRadius = 999.dp, alpha = 0.12f),
+                    shape = RoundedCornerShape(999.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.9f), contentColor = MaterialTheme.colorScheme.onPrimary),
+                    enabled = card.kycStatus == KycStatus.VERIFIED
+                ) {
+                    Icon(Icons.Default.Add, null, modifier = Modifier.size(20.dp))
+                    Spacer(modifier = Modifier.width(10.dp))
+                    Text("Top Up Balance", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
                 }
             }
             Spacer(modifier = Modifier.height(24.dp))

@@ -80,10 +80,17 @@ fun SettingsScreen(
             .drawBehind {
                 drawCircle(
                     brush = Brush.radialGradient(
+                        colors = listOf(Color.White.copy(0.12f), Color.Transparent)
+                    ),
+                    radius = size.width * 1.1f,
+                    center = androidx.compose.ui.geometry.Offset(size.width * 0.95f, size.height * 0.1f)
+                )
+                drawCircle(
+                    brush = Brush.radialGradient(
                         colors = listOf(Color.White.copy(0.08f), Color.Transparent)
                     ),
-                    radius = size.width * 0.8f,
-                    center = androidx.compose.ui.geometry.Offset(size.width * 0.1f, size.height * 0.9f)
+                    radius = size.width * 0.9f,
+                    center = androidx.compose.ui.geometry.Offset(size.width * 0.05f, size.height * 0.45f)
                 )
             }
     ) {

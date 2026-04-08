@@ -48,17 +48,17 @@ fun WelcomeScreen(
             .drawBehind {
                 drawCircle(
                     brush = Brush.radialGradient(
-                        colors = listOf(Color.White.copy(0.08f), Color.Transparent)
+                        colors = listOf(Color.White.copy(0.12f), Color.Transparent)
                     ),
-                    radius = size.width * 0.9f,
-                    center = androidx.compose.ui.geometry.Offset(size.width * 0.8f, size.height * 0.2f)
+                    radius = size.width * 1.1f,
+                    center = androidx.compose.ui.geometry.Offset(size.width * 0.9f, size.height * 0.15f)
                 )
                 drawCircle(
                     brush = Brush.radialGradient(
-                        colors = listOf(Color.White.copy(0.06f), Color.Transparent)
+                        colors = listOf(Color.White.copy(0.08f), Color.Transparent)
                     ),
-                    radius = size.width * 0.8f,
-                    center = androidx.compose.ui.geometry.Offset(size.width * 0.2f, size.height * 0.8f)
+                    radius = size.width * 0.9f,
+                    center = androidx.compose.ui.geometry.Offset(size.width * 0.1f, size.height * 0.85f)
                 )
             }
     ) {
@@ -111,11 +111,12 @@ fun WelcomeScreen(
             onClick = onCreateWallet,
             modifier = Modifier
                 .fillMaxWidth()
-                .height(56.dp),
+                .height(58.dp)
+                .glassCard(cornerRadius = 999.dp, alpha = 0.15f),
             shape = RoundedCornerShape(999.dp),
-            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary, contentColor = MaterialTheme.colorScheme.onPrimary)
+            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.9f), contentColor = MaterialTheme.colorScheme.onPrimary)
         ) {
-            Text("Create new wallet", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
+            Text("Create new wallet", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
         }
 
         Spacer(modifier = Modifier.height(12.dp))
