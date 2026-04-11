@@ -13,9 +13,9 @@ class BiometricHelper @Inject constructor() {
 
     fun isBiometricAvailable(context: Context): Boolean {
         val biometricManager = BiometricManager.from(context)
-        return biometricManager.canAuthenticate(
-            BiometricManager.Authenticators.BIOMETRIC_STRONG
-        ) == BiometricManager.BIOMETRIC_SUCCESS
+        val authenticators = BiometricManager.Authenticators.BIOMETRIC_STRONG or 
+                           BiometricManager.Authenticators.BIOMETRIC_WEAK
+        return biometricManager.canAuthenticate(authenticators) == BiometricManager.BIOMETRIC_SUCCESS
     }
 
     fun showBiometricPrompt(
@@ -52,7 +52,8 @@ class BiometricHelper @Inject constructor() {
             .setTitle(title)
             .setSubtitle(subtitle)
             .setNegativeButtonText(negativeButtonText)
-            .setAllowedAuthenticators(BiometricManager.Authenticators.BIOMETRIC_STRONG)
+            .setAllowedAuthenticators(BiometricManager.Authenticators.BIOMETRIC_STRONG or 
+                                     BiometricManager.Authenticators.BIOMETRIC_WEAK)
             .build()
 
         BiometricPrompt(activity, executor, callback).authenticate(promptInfo)

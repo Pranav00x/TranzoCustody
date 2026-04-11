@@ -33,6 +33,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.tranzo.custody.ui.theme.LocalTranzoTheme
+import androidx.fragment.app.FragmentActivity
+import androidx.compose.ui.platform.LocalContext
+import com.tranzo.custody.security.BiometricHelper
+import androidx.compose.runtime.remember
 
 @Composable
 fun SecurityScreen(
@@ -41,6 +45,24 @@ fun SecurityScreen(
 ) {
     val state by viewModel.state.collectAsState()
     val tranzoTheme = LocalTranzoTheme.current
+    val context = LocalContext.current
+    val biometricHelper = remember { BiometricHelper() }
+
+    fun tryEnableBiometric() {
+        if (!biometricHelper.isBiometricAvailable(context)) {
+            // In a real app, show a snackbar or dialog: "Biometrics not available"
+            return
+        }
+
+        val activity = context as? FragmentActivity ?: return
+        biometricHelper.showBiometricPrompt(
+            activity = activity,
+            title = "Confirm Biometric",
+            subtitle = "Verify to enable biometric unlock",
+            onSuccess = { viewModel.toggleBiometric(true) },
+            onError = { /* Handle error */ }
+        )
+    }
 
     Column(
         modifier = Modifier
@@ -76,7 +98,13 @@ fun SecurityScreen(
             title = "Biometric Unlock",
             subtitle = "Use fingerprint or face to unlock",
             checked = state.biometricEnabled,
-            onCheckedChange = { viewModel.toggleBiometric(it) }
+            onCheckedChange = { 
+                if (it) {
+                    tryEnableBiometric()
+                } else {
+                    viewModel.toggleBiometric(false)
+                }
+            }
         )
 
         HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
