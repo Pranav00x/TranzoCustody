@@ -38,9 +38,9 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import com.tranzo.custody.ui.components.TransactionItem
 import com.tranzo.custody.ui.theme.LocalTranzoTheme
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.ui.unit.sp
+import com.tranzo.custody.ui.util.glassCard
+import com.tranzo.custody.ui.util.glassAccent
 
 
 
@@ -55,7 +55,15 @@ fun ActivityScreen(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)
+            .background(
+                Brush.verticalGradient(
+                    listOf(
+                        MaterialTheme.colorScheme.background,
+                        MaterialTheme.colorScheme.surface.copy(alpha = 0.5f),
+                        MaterialTheme.colorScheme.background
+                    )
+                )
+            )
     ) {
         Column(
             modifier = Modifier.fillMaxSize()
@@ -76,13 +84,12 @@ fun ActivityScreen(
                 )
             }
 
-            // Search (Neumorphic)
+            // Search
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 24.dp)
-                    .clip(RoundedCornerShape(16.dp))
-                    .background(MaterialTheme.colorScheme.surfaceVariant)
+                    .glassCard(cornerRadius = 16.dp)
                     .padding(horizontal = 16.dp, vertical = 4.dp),
                 contentAlignment = Alignment.CenterStart
             ) {
@@ -117,13 +124,12 @@ fun ActivityScreen(
                         modifier = Modifier
                             .then(
                                 if (isSelected) {
-                                    Modifier
-                                        .clip(RoundedCornerShape(12.dp))
-                                        .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.15f))
+                                    Modifier.glassAccent(
+                                        cornerRadius = 12.dp,
+                                        accentColor = MaterialTheme.colorScheme.primary
+                                    )
                                 } else {
-                                    Modifier
-                                        .clip(RoundedCornerShape(12.dp))
-                                        .background(MaterialTheme.colorScheme.surfaceVariant)
+                                    Modifier.glassCard(cornerRadius = 12.dp, alpha = 0.35f)
                                 }
                             )
                             .clickable { viewModel.setFilter(filter) }

@@ -56,10 +56,12 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.tranzo.custody.domain.model.KycStatus
 import com.tranzo.custody.domain.model.SpendMode
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.sp
-
 import com.tranzo.custody.ui.theme.LocalTranzoTheme
+import com.tranzo.custody.ui.util.glassCard
+import com.tranzo.custody.ui.util.glassAccent
 
 @Composable
 fun SettingsScreen(
@@ -79,7 +81,15 @@ fun SettingsScreen(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)
+            .background(
+                Brush.verticalGradient(
+                    listOf(
+                        MaterialTheme.colorScheme.background,
+                        MaterialTheme.colorScheme.surface.copy(alpha = 0.5f),
+                        MaterialTheme.colorScheme.background
+                    )
+                )
+            )
     ) {
         Column(
             modifier = Modifier
@@ -97,14 +107,12 @@ fun SettingsScreen(
                 modifier = Modifier.padding(horizontal = 24.dp, vertical = 16.dp)
             )
 
-            // Profile Box (Neumorphic)
+            // Profile Box
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 24.dp, vertical = 12.dp)
-                    .clip(RoundedCornerShape(24.dp))
-                    .background(MaterialTheme.colorScheme.surfaceVariant)
-                    .border(1.dp, Color.White.copy(alpha = 0.04f), RoundedCornerShape(24.dp))
+                    .glassCard(cornerRadius = 24.dp, shadowElevation = 4.dp)
                     .padding(24.dp)
             ) {
                 Column {
@@ -112,8 +120,7 @@ fun SettingsScreen(
                         Box(
                             modifier = Modifier
                                 .size(48.dp)
-                                .clip(RoundedCornerShape(24.dp))
-                                .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.08f)),
+                                .glassAccent(cornerRadius = 24.dp, accentColor = MaterialTheme.colorScheme.primary),
                             contentAlignment = Alignment.Center
                         ) {
                             Icon(Icons.Default.Person, null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(24.dp))
@@ -153,9 +160,7 @@ fun SettingsScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 24.dp, vertical = 8.dp)
-                    .clip(RoundedCornerShape(24.dp))
-                    .background(MaterialTheme.colorScheme.surfaceVariant)
-                    .border(1.dp, Color.White.copy(alpha = 0.04f), RoundedCornerShape(24.dp))
+                    .glassCard(cornerRadius = 24.dp)
                     .padding(vertical = 8.dp)
             ) {
                 Column {
@@ -173,9 +178,7 @@ fun SettingsScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 24.dp, vertical = 8.dp)
-                    .clip(RoundedCornerShape(24.dp))
-                    .background(MaterialTheme.colorScheme.surfaceVariant)
-                    .border(1.dp, Color.White.copy(alpha = 0.04f), RoundedCornerShape(24.dp))
+                    .glassCard(cornerRadius = 24.dp)
                     .padding(vertical = 8.dp)
             ) {
                 Column {
@@ -207,14 +210,12 @@ fun SettingsScreen(
 
             Spacer(modifier = Modifier.height(40.dp))
 
-            // Logout (Neumorphic)
+            // Logout
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 24.dp)
-                    .clip(RoundedCornerShape(16.dp))
-                    .background(MaterialTheme.colorScheme.surfaceVariant)
-                    .border(1.dp, Color.White.copy(alpha = 0.04f), RoundedCornerShape(16.dp))
+                    .glassAccent(cornerRadius = 16.dp, accentColor = MaterialTheme.colorScheme.error, alpha = 0.08f)
                     .clickable { viewModel.logout { onLogout() } }
                     .padding(16.dp),
                 contentAlignment = Alignment.Center
@@ -263,8 +264,7 @@ private fun SettingsItem(icon: ImageVector, title: String, subtitle: String? = n
         Box(
             modifier = Modifier
                 .size(40.dp)
-                .clip(RoundedCornerShape(20.dp))
-                .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.08f)),
+                .glassAccent(cornerRadius = 12.dp, accentColor = MaterialTheme.colorScheme.primary, alpha = 0.10f),
             contentAlignment = Alignment.Center
         ) {
             Icon(icon, null, tint = MaterialTheme.colorScheme.onBackground, modifier = Modifier.size(20.dp))

@@ -25,6 +25,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import com.tranzo.custody.ui.theme.LocalTranzoTheme
+import com.tranzo.custody.ui.util.glassCard
+import com.tranzo.custody.ui.util.glassAccent
 
 data class BottomNavItem(
     val route: String,
@@ -59,16 +61,7 @@ fun TranzoBottomBar(
             modifier = Modifier
                 .height(64.dp)
                 .fillMaxWidth()
-                .clip(RoundedCornerShape(32.dp))
-                .background(
-                    Brush.verticalGradient(
-                        listOf(
-                            MaterialTheme.colorScheme.surface,
-                            MaterialTheme.colorScheme.surface.copy(alpha = 0.95f)
-                        )
-                    )
-                )
-                .border(1.dp, Color.White.copy(alpha = 0.06f), RoundedCornerShape(32.dp))
+                .glassCard(cornerRadius = 32.dp, shadowElevation = 8.dp, alpha = 0.7f)
         ) {
             Row(
                 modifier = Modifier.fillMaxSize(),
@@ -83,12 +76,12 @@ fun TranzoBottomBar(
                             .size(48.dp)
                             .then(
                                 if (selected) {
-                                    Modifier
-                                        .clip(CircleShape)
-                                        .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.12f))
-                                } else Modifier
+                                    Modifier.glassAccent(
+                                        cornerRadius = 24.dp,
+                                        accentColor = MaterialTheme.colorScheme.primary
+                                    )
+                                } else Modifier.clip(CircleShape)
                             )
-                            .clip(CircleShape)
                             .clickable { onItemSelected(item.route) },
                         contentAlignment = Alignment.Center
                     ) {

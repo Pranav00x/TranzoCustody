@@ -57,8 +57,9 @@ import com.tranzo.custody.ui.theme.LocalTranzoTheme
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
-
-
+import androidx.compose.ui.graphics.Brush
+import com.tranzo.custody.ui.util.glassCard
+import com.tranzo.custody.ui.util.glassAccent
 
 @Composable
 fun CardScreen(
@@ -72,7 +73,15 @@ fun CardScreen(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)
+            .background(
+                Brush.verticalGradient(
+                    listOf(
+                        MaterialTheme.colorScheme.background,
+                        MaterialTheme.colorScheme.surface.copy(alpha = 0.5f),
+                        MaterialTheme.colorScheme.background
+                    )
+                )
+            )
     ) {
         LazyColumn(
             modifier = Modifier.fillMaxSize()
@@ -90,8 +99,7 @@ fun CardScreen(
                     Box(
                         modifier = Modifier
                             .size(44.dp)
-                            .clip(RoundedCornerShape(22.dp))
-                            .background(MaterialTheme.colorScheme.surfaceVariant)
+                            .glassCard(cornerRadius = 22.dp)
                             .clickable { },
                         contentAlignment = Alignment.Center
                     ) {
@@ -170,8 +178,7 @@ private fun CardActionItem(icon: ImageVector, label: String, onClick: () -> Unit
         Box(
             modifier = Modifier
                 .size(56.dp)
-                .clip(RoundedCornerShape(28.dp))
-                .background(MaterialTheme.colorScheme.surfaceVariant)
+                .glassCard(cornerRadius = 28.dp)
                 .clickable(onClick = onClick),
             contentAlignment = Alignment.Center
         ) {
@@ -188,8 +195,7 @@ private fun CardTransactionItem(transaction: CardTransaction) {
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 24.dp, vertical = 6.dp)
-            .clip(RoundedCornerShape(16.dp))
-            .background(MaterialTheme.colorScheme.surfaceVariant)
+            .glassCard(cornerRadius = 16.dp)
             .padding(16.dp)
     ) {
         Row(
@@ -198,8 +204,7 @@ private fun CardTransactionItem(transaction: CardTransaction) {
             Box(
                 modifier = Modifier
                     .size(44.dp)
-                    .clip(RoundedCornerShape(22.dp))
-                    .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)),
+                    .glassAccent(cornerRadius = 22.dp, accentColor = MaterialTheme.colorScheme.primary),
                 contentAlignment = Alignment.Center
             ) {
                 Text(

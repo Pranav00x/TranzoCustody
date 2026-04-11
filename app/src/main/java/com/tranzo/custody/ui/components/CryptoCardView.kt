@@ -31,6 +31,7 @@ import androidx.compose.ui.unit.sp
 import com.tranzo.custody.domain.model.CryptoCard
 import com.tranzo.custody.ui.theme.GoldChip
 import com.tranzo.custody.ui.theme.LocalTranzoTheme
+import com.tranzo.custody.ui.util.accentGlow
 
 @Composable
 fun CryptoCardView(
@@ -42,6 +43,7 @@ fun CryptoCardView(
         modifier = modifier
             .fillMaxWidth()
             .height(210.dp)
+            .accentGlow(accentColor = theme.accent, cornerRadius = 24.dp, glowAlpha = 0.25f)
             .clip(RoundedCornerShape(24.dp))
             .background(
                 Brush.linearGradient(

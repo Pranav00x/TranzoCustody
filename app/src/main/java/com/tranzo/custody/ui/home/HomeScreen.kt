@@ -1,7 +1,6 @@
 package com.tranzo.custody.ui.home
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -13,13 +12,12 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountBalanceWallet
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowDownward
 import androidx.compose.material.icons.filled.ArrowUpward
 import androidx.compose.material.icons.filled.CreditCard
@@ -29,7 +27,6 @@ import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material.icons.filled.SwapHoriz
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
@@ -39,19 +36,19 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.compose.ui.graphics.Color
 import com.tranzo.custody.ui.components.AssetListItem
 import com.tranzo.custody.ui.components.QuickActionButton
 import com.tranzo.custody.ui.components.ShimmerAssetItem
 import com.tranzo.custody.ui.components.formatCurrency
 import com.tranzo.custody.ui.theme.LocalTranzoTheme
-import androidx.compose.foundation.border
+import com.tranzo.custody.ui.util.glassCard
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -64,19 +61,26 @@ fun HomeScreen(
     viewModel: HomeViewModel = hiltViewModel()
 ) {
     val state by viewModel.state.collectAsState()
+    val theme = LocalTranzoTheme.current
 
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)
+            .background(
+                Brush.verticalGradient(
+                    listOf(
+                        MaterialTheme.colorScheme.background,
+                        MaterialTheme.colorScheme.surface.copy(alpha = 0.5f),
+                        MaterialTheme.colorScheme.background
+                    )
+                )
+            )
     ) {
         PullToRefreshBox(
             isRefreshing = state.isRefreshing,
             onRefresh = { viewModel.refresh() }
         ) {
-            LazyColumn(
-                modifier = Modifier.fillMaxSize()
-            ) {
+            LazyColumn(modifier = Modifier.fillMaxSize()) {
                 // Header
                 item {
                     Row(
@@ -89,31 +93,25 @@ fun HomeScreen(
                         Box(
                             modifier = Modifier
                                 .size(44.dp)
-                                .clip(RoundedCornerShape(22.dp))
-                                .background(MaterialTheme.colorScheme.surfaceVariant)
-                                .border(1.dp, Color.White.copy(alpha = 0.04f), RoundedCornerShape(22.dp))
+                                .glassCard(cornerRadius = 22.dp)
                                 .clickable { },
                             contentAlignment = Alignment.Center
                         ) {
                             Icon(Icons.Default.QrCode, "QR Code", tint = MaterialTheme.colorScheme.onBackground, modifier = Modifier.size(20.dp))
                         }
 
-                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                            Text(
-                                text = "TRANZO",
-                                style = MaterialTheme.typography.titleMedium,
-                                fontWeight = FontWeight.Black,
-                                letterSpacing = 4.sp,
-                                color = MaterialTheme.colorScheme.onBackground
-                            )
-                        }
+                        Text(
+                            text = "TRANZO",
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Black,
+                            letterSpacing = 4.sp,
+                            color = MaterialTheme.colorScheme.onBackground
+                        )
 
                         Box(
                             modifier = Modifier
                                 .size(44.dp)
-                                .clip(RoundedCornerShape(22.dp))
-                                .background(MaterialTheme.colorScheme.surfaceVariant)
-                                .border(1.dp, Color.White.copy(alpha = 0.04f), RoundedCornerShape(22.dp))
+                                .glassCard(cornerRadius = 22.dp)
                                 .clickable { },
                             contentAlignment = Alignment.Center
                         ) {
@@ -122,7 +120,7 @@ fun HomeScreen(
                     }
                 }
 
-                // Total Portfolio Balance
+                // Portfolio Balance
                 item {
                     Column(
                         modifier = Modifier
@@ -130,11 +128,10 @@ fun HomeScreen(
                             .padding(horizontal = 24.dp, vertical = 20.dp),
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-                        Text("Portfolio Value", style = MaterialTheme.typography.bodyMedium, color = LocalTranzoTheme.current.textMuted)
+                        Text("Portfolio Value", style = MaterialTheme.typography.bodyMedium, color = theme.textMuted)
                         Spacer(modifier = Modifier.height(8.dp))
-
                         if (state.isLoading) {
-                            Text("Loading...", style = MaterialTheme.typography.bodyMedium, color = LocalTranzoTheme.current.textMuted)
+                            Text("Loading...", style = MaterialTheme.typography.bodyMedium, color = theme.textMuted)
                         } else {
                             state.portfolio?.let { portfolio ->
                                 Text(
@@ -165,19 +162,16 @@ fun HomeScreen(
                             .padding(horizontal = 24.dp),
                         horizontalArrangement = Arrangement.spacedBy(16.dp)
                     ) {
-                        // Wallet Balance
                         Box(
                             modifier = Modifier
                                 .weight(1f)
-                                .clip(RoundedCornerShape(24.dp))
-                                .background(MaterialTheme.colorScheme.surfaceVariant)
-                                .border(1.dp, Color.White.copy(alpha = 0.04f), RoundedCornerShape(24.dp))
+                                .glassCard(cornerRadius = 24.dp, shadowElevation = 4.dp)
                                 .padding(20.dp)
                         ) {
                             Column {
-                                Icon(Icons.Default.AccountBalanceWallet, null, tint = MaterialTheme.colorScheme.primary.copy(0.6f), modifier = Modifier.size(20.dp))
+                                Icon(Icons.Default.AccountBalanceWallet, null, tint = MaterialTheme.colorScheme.primary.copy(0.8f), modifier = Modifier.size(22.dp))
                                 Spacer(modifier = Modifier.height(12.dp))
-                                Text("Wallet", style = MaterialTheme.typography.labelSmall, color = LocalTranzoTheme.current.textMuted)
+                                Text("Wallet", style = MaterialTheme.typography.labelSmall, color = theme.textMuted)
                                 Text(
                                     text = formatCurrency(state.portfolio?.walletBalanceFiat ?: 0.0),
                                     style = MaterialTheme.typography.titleLarge,
@@ -187,20 +181,17 @@ fun HomeScreen(
                             }
                         }
 
-                        // Spendable Balance
                         Box(
                             modifier = Modifier
                                 .weight(1f)
-                                .clip(RoundedCornerShape(24.dp))
-                                .background(MaterialTheme.colorScheme.surfaceVariant)
-                                .border(1.dp, Color.White.copy(alpha = 0.04f), RoundedCornerShape(24.dp))
+                                .glassCard(cornerRadius = 24.dp, shadowElevation = 4.dp)
                                 .clickable(onClick = onAddToSpend)
                                 .padding(20.dp)
                         ) {
                             Column {
-                                Icon(Icons.Default.CreditCard, null, tint = MaterialTheme.colorScheme.tertiary, modifier = Modifier.size(20.dp))
+                                Icon(Icons.Default.CreditCard, null, tint = MaterialTheme.colorScheme.tertiary, modifier = Modifier.size(22.dp))
                                 Spacer(modifier = Modifier.height(12.dp))
-                                Text("Spendable", style = MaterialTheme.typography.labelSmall, color = LocalTranzoTheme.current.textMuted)
+                                Text("Spendable", style = MaterialTheme.typography.labelSmall, color = theme.textMuted)
                                 Text(
                                     text = formatCurrency(state.portfolio?.spendableBalanceFiat ?: 0.0),
                                     style = MaterialTheme.typography.titleLarge,
@@ -229,7 +220,7 @@ fun HomeScreen(
                     Spacer(modifier = Modifier.height(32.dp))
                 }
 
-                // Assets Header
+                // Assets
                 item {
                     Text(
                         text = "Assets",
@@ -247,7 +238,6 @@ fun HomeScreen(
                         AssetListItem(token = token)
                     }
                 }
-
             }
         }
     }
