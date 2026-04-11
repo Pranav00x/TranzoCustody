@@ -54,6 +54,7 @@ import com.tranzo.custody.ui.onboarding.VerifyPinViewModel
 import com.tranzo.custody.ui.settings.AppearanceScreen
 import com.tranzo.custody.ui.settings.DripperScreen
 import com.tranzo.custody.ui.settings.HelpSupportScreen
+import com.tranzo.custody.ui.settings.NetworkScreen
 import com.tranzo.custody.ui.settings.SecurityScreen
 import com.tranzo.custody.ui.settings.SettingsScreen
 
@@ -316,6 +317,7 @@ fun TranzoNavigation(
             composable(Screen.Settings.route) {
                 SettingsScreen(
                     onSecurityClick = { navController.navigate(Screen.Security.route) },
+                    onNetworksClick = { navController.navigate(Screen.Networks.route) },
                     onDripperClick = { navController.navigate(Screen.DripperDevices.route) },
                     onCardSettingsClick = { navController.navigate(Screen.CardSettings.route) },
                     onAppearanceClick = { navController.navigate(Screen.Appearance.route) },
@@ -365,6 +367,9 @@ fun TranzoNavigation(
             }
             composable(Screen.Security.route) {
                 SecurityScreen(onBack = { navController.popBackStack() })
+            }
+            composable(Screen.Networks.route) {
+                NetworkScreen(onBack = { navController.popBackStack() })
             }
             composable(Screen.DripperDevices.route) {
                 DripperScreen(onBack = { navController.popBackStack() })

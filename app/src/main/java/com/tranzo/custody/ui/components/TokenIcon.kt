@@ -72,6 +72,26 @@ object TokenColors {
     val uniPrimary = Color(0xFFFF007A)
     val uniSecondary = Color(0xFFD60066)
 
+    // AVAX (Avalanche)
+    val avaxPrimary = Color(0xFFE84142)
+    val avaxSecondary = Color(0xFFB31212)
+
+    // OP (Optimism)
+    val opPrimary = Color(0xFFFF0420)
+    val opSecondary = Color(0xFFD1031A)
+
+    // ZK (zkSync)
+    val zkPrimary = Color(0xFFFFFFFF)
+    val zkSecondary = Color(0xFF000000)
+
+    // MNT (Mantle)
+    val mntPrimary = Color(0xFF000000)
+    val mntSecondary = Color(0xFF282828)
+
+    // BLAST
+    val blastPrimary = Color(0xFFFCFC03)
+    val blastSecondary = Color(0xFFD9D902)
+
     // Default
     val defaultPrimary = Color(0xFF6B7280)
     val defaultSecondary = Color(0xFF4B5563)
@@ -90,6 +110,11 @@ object TokenColors {
         "LINK" -> linkPrimary to linkSecondary
         "AAVE" -> aavePrimary to aaveSecondary
         "UNI" -> uniPrimary to uniSecondary
+        "AVAX" -> avaxPrimary to avaxSecondary
+        "OP" -> opPrimary to opSecondary
+        "ZK" -> zkPrimary to zkSecondary
+        "MNT" -> mntPrimary to mntSecondary
+        "BLAST" -> blastPrimary to blastSecondary
         else -> defaultPrimary to defaultSecondary
     }
 
@@ -103,6 +128,11 @@ object TokenColors {
         "DAI" -> "◈"
         "LINK" -> "⬡"
         "UNI" -> "🦄"
+        "AVAX" -> "A"
+        "OP" -> "O"
+        "ZK" -> "Z"
+        "MNT" -> "M"
+        "BLAST" -> "B"
         else -> symbol.take(1).uppercase()
     }
 }

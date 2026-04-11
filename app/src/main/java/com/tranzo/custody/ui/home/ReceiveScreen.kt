@@ -37,6 +37,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import com.tranzo.custody.ui.components.TokenListItem
 import com.tranzo.custody.ui.theme.LocalTranzoTheme
 import com.tranzo.custody.ui.util.qrBitmap
 
@@ -46,13 +50,16 @@ fun ReceiveScreen(
     viewModel: ReceiveViewModel = hiltViewModel()
 ) {
     val state by viewModel.address.collectAsState()
+    val tokens by viewModel.tokens.collectAsState()
     val context = LocalContext.current
+    val scrollState = rememberScrollState()
 
     Column(
         modifier = Modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
-            .padding(horizontal = 24.dp),
+            .padding(horizontal = 24.dp)
+            .verticalScroll(scrollState),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Spacer(modifier = Modifier.height(16.dp))
@@ -146,5 +153,27 @@ fun ReceiveScreen(
                 Text("Share", fontWeight = FontWeight.SemiBold)
             }
         }
+        Spacer(modifier = Modifier.height(48.dp))
+
+        Text(
+            text = "Supported Assets",
+            style = MaterialTheme.typography.titleLarge,
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier.align(Alignment.Start)
+        )
+        Text(
+            text = "Only send tokens on supported networks",
+            style = MaterialTheme.typography.bodyMedium,
+            color = LocalTranzoTheme.current.textMuted,
+            modifier = Modifier.align(Alignment.Start)
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        tokens.forEach { token ->
+            TokenListItem(token = token)
+        }
+
+        Spacer(modifier = Modifier.height(32.dp))
     }
 }

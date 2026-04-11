@@ -30,6 +30,7 @@ import androidx.compose.material.icons.filled.Description
 import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Palette
+import androidx.compose.material.icons.filled.Public
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material.icons.filled.Security
@@ -63,6 +64,7 @@ import com.tranzo.custody.ui.util.minimalCard
 @Composable
 fun SettingsScreen(
     onSecurityClick: () -> Unit,
+    onNetworksClick: () -> Unit = {},
     onDripperClick: () -> Unit,
     onCardSettingsClick: () -> Unit,
     onAppearanceClick: () -> Unit = {},
@@ -189,6 +191,7 @@ fun SettingsScreen(
         // Security
         SectionTitle("Security")
         SettingsItem(Icons.Default.Security, "Security Settings", onClick = onSecurityClick)
+        SettingsItem(Icons.Default.Public, "Networks & Relayers", onClick = onNetworksClick)
         SettingsItem(Icons.Default.UsbOff, "Dripper Hardware Wallet", subtitle = "No device paired", onClick = onDripperClick)
 
         Spacer(modifier = Modifier.height(8.dp))
