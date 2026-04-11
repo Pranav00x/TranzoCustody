@@ -21,8 +21,8 @@ fun Modifier.neumorphicExtruded(
     cornerRadius: Dp = 20.dp,
     elevation: Dp = 4.dp,
     backgroundColor: Color,
-    lightShadowColor: Color = Color(0xFF2E3137), // Lighter than Slate
-    darkShadowColor: Color = Color(0xFF101113)   // Darker than Slate
+    lightShadowColor: Color = Color(0xFF1E2235),
+    darkShadowColor: Color = Color(0xFF050710)
 ) = this.drawBehind {
     val distance = elevation.toPx()
     val radius = cornerRadius.toPx()
@@ -50,8 +50,8 @@ fun Modifier.neumorphicPressed(
     cornerRadius: Dp = 20.dp,
     elevation: Dp = 4.dp,
     backgroundColor: Color,
-    lightShadowColor: Color = Color(0xFF2E3137),
-    darkShadowColor: Color = Color(0xFF101113)
+    lightShadowColor: Color = Color(0xFF1E2235),
+    darkShadowColor: Color = Color(0xFF050710)
 ) = this.drawBehind {
     val distance = elevation.toPx()
     val radius = cornerRadius.toPx()

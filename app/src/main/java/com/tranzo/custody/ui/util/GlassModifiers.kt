@@ -18,13 +18,12 @@ import androidx.compose.ui.unit.dp
 
 /**
  * A modifier that applies a premium minimal card look.
- * Replaces the old glassmorphism effect with a clean, modern aesthetic.
  */
 fun Modifier.minimalCard(
     cornerRadius: Dp = 20.dp,
-    backgroundColor: Color = Color.White,
+    backgroundColor: Color = Color(0xFF1E2235),
     borderWidth: Dp = 1.dp,
-    borderColor: Color = Color(0x0D000000), // Very subtle black border
+    borderColor: Color = Color(0x1AFFFFFF),
     elevation: Dp = 0.dp
 ): Modifier = this
     .then(
@@ -32,8 +31,8 @@ fun Modifier.minimalCard(
             Modifier.shadow(
                 elevation = elevation,
                 shape = RoundedCornerShape(cornerRadius),
-                ambientColor = Color.Black.copy(alpha = 0.1f),
-                spotColor = Color.Black.copy(alpha = 0.1f)
+                ambientColor = Color.Black.copy(alpha = 0.3f),
+                spotColor = Color.Black.copy(alpha = 0.3f)
             )
         } else Modifier
     )
@@ -55,9 +54,9 @@ fun Modifier.glassCard(
     shadowElevation: Dp = 0.dp
 ): Modifier = this.minimalCard(
     cornerRadius = cornerRadius,
-    backgroundColor = Color.White.copy(alpha = 0.6f + (alpha * 0.4f)), // Lighter but still has some transparency if needed
+    backgroundColor = Color(0xFF1E2235).copy(alpha = 0.85f + (alpha * 0.15f)),
     borderWidth = borderWidth,
-    borderColor = Color.Black.copy(alpha = 0.08f),
+    borderColor = Color.White.copy(alpha = 0.06f),
     elevation = shadowElevation
 )
 
@@ -66,7 +65,7 @@ fun Modifier.glassOnDark(
     alpha: Float = 0.2f
 ): Modifier = this.minimalCard(
     cornerRadius = cornerRadius,
-    backgroundColor = Color(0xFF1A1A1A).copy(alpha = 0.95f), // Minimal dark card
+    backgroundColor = Color(0xFF1A1D2E).copy(alpha = 0.95f),
     borderWidth = 1.dp,
-    borderColor = Color.White.copy(alpha = 0.1f)
+    borderColor = Color.White.copy(alpha = 0.08f)
 )

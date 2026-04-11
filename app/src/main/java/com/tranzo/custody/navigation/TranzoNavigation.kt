@@ -73,6 +73,7 @@ fun TranzoNavigation(
     val showBottomBar = currentRoute in mainTabs
 
     Scaffold(
+        containerColor = MaterialTheme.colorScheme.background,
         bottomBar = {
             if (showBottomBar) {
                 TranzoBottomBar(

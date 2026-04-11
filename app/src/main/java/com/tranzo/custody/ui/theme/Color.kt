@@ -4,29 +4,44 @@ import androidx.compose.ui.graphics.Color
 
 val White = Color(0xFFFFFFFF)
 val Black = Color(0xFF000000)
-val Background = Color(0xFFFFFFFF)
-val SurfaceSecondary = Color(0xFFF7F7F8)
-val CardBackground = Color(0xFFFAFAFA)
 
-val TextPrimary = Color(0xFF000000)
-val TextSecondary = Color(0xFF727272)
-val TextMuted = Color(0xFF999999)
+// Dark surfaces (used as defaults / by MIDNIGHT theme)
+val Background = Color(0xFF0B0D17)
+val Surface = Color(0xFF141829)
+val SurfaceSecondary = Color(0xFF1C2039)
+val CardBackground = Color(0xFF1E2235)
 
-val Accent = Color(0xFF000000)
-val AccentLight = Color(0xFF1A1A1A)
+// Text
+val TextPrimary = Color(0xFFEEEFF5)
+val TextSecondary = Color(0xFF8E93A7)
+val TextMuted = Color(0xFF5A5F73)
 
-val Positive = Color(0xFF10B981)
-val PositiveLight = Color(0xFFD1FAE5)
+// Accent — vibrant indigo/violet
+val Accent = Color(0xFF635BFF)
+val AccentLight = Color(0xFF8B5CF6)
+val AccentSurface = Color(0x1A635BFF)
+
+// States
+val Positive = Color(0xFF34D399)
+val PositiveLight = Color(0x1A34D399)
 val Negative = Color(0xFFEF4444)
-val NegativeLight = Color(0xFFFEE2E2)
+val NegativeLight = Color(0x1AEF4444)
+val Warning = Color(0xFFF59E0B)
+val WarningLight = Color(0x1AF59E0B)
 
-val BorderColor = Color(0x0F000000)
-val DividerColor = Color(0x0A000000)
+// Borders & dividers
+val BorderColor = Color(0xFF2A2E45)
+val DividerColor = Color(0xFF1F2337)
 
-val CardDarkStart = Color(0xFF1A1A1A)
-val CardDarkEnd = Color(0xFF2D2D2D)
+// Card gradient
+val CardDarkStart = Color(0xFF1A1D2E)
+val CardDarkEnd = Color(0xFF252842)
 val GoldChip = Color(0xFFD4A843)
 val GoldChipLight = Color(0xFFE8C96A)
 
-val ShimmerBase = Color(0xFFE0E0E0)
-val ShimmerHighlight = Color(0xFFF5F5F5)
+// Shimmer
+val ShimmerBase = Color(0xFF1C2039)
+val ShimmerHighlight = Color(0xFF252842)
+
+// Bottom bar
+val BottomBarBg = Color(0xFF111425)
