@@ -35,8 +35,8 @@ fun QuickActionButton(
         Box(
             modifier = Modifier
                 .size(56.dp)
-                .glassCard(cornerRadius = 28.dp, alpha = 0.1f)
-                .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.05f)),
+                .clip(CircleShape)
+                .background(MaterialTheme.colorScheme.surfaceSecondary),
             contentAlignment = Alignment.Center
         ) {
             Icon(

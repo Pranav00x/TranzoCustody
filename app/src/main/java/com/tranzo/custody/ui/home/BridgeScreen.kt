@@ -76,22 +76,6 @@ fun BridgeScreen(
         modifier = Modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
-            .drawBehind {
-                drawCircle(
-                    brush = Brush.radialGradient(
-                        colors = listOf(Color.White.copy(0.12f), Color.Transparent)
-                    ),
-                    radius = size.width * 1.1f,
-                    center = androidx.compose.ui.geometry.Offset(size.width * 0.95f, size.height * 0.1f)
-                )
-                drawCircle(
-                    brush = Brush.radialGradient(
-                        colors = listOf(Color.White.copy(0.08f), Color.Transparent)
-                    ),
-                    radius = size.width * 0.9f,
-                    center = androidx.compose.ui.geometry.Offset(size.width * 0.05f, size.height * 0.45f)
-                )
-            }
     ) {
         Column(
             modifier = Modifier
@@ -127,8 +111,11 @@ fun BridgeScreen(
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .glassCard(cornerRadius = 16.dp, alpha = 0.08f)
-                .background(MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f))
+                .minimalCard(
+                    cornerRadius = 20.dp,
+                    backgroundColor = MaterialTheme.colorScheme.surfaceSecondary,
+                    borderWidth = 0.dp
+                )
                 .padding(20.dp)
         ) {
             Column {
@@ -227,8 +214,11 @@ fun BridgeScreen(
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .glassOnDark(cornerRadius = 16.dp, alpha = 0.12f)
-                .background(MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f))
+                .minimalCard(
+                    cornerRadius = 20.dp,
+                    backgroundColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.03f),
+                    borderColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)
+                )
                 .padding(20.dp)
         ) {
             Row(verticalAlignment = Alignment.CenterVertically) {
@@ -253,7 +243,11 @@ fun BridgeScreen(
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .glassCard(cornerRadius = 16.dp, alpha = 0.05f)
+                        .minimalCard(
+                            cornerRadius = 20.dp,
+                            backgroundColor = MaterialTheme.colorScheme.surface,
+                            borderColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.1f)
+                        )
                         .padding(20.dp)
                 ) {
                     Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
@@ -289,7 +283,7 @@ fun BridgeScreen(
         Button(
             onClick = { viewModel.executeTopUp() },
             modifier = Modifier.fillMaxWidth().height(56.dp),
-            shape = RoundedCornerShape(999.dp),
+            shape = RoundedCornerShape(16.dp),
             colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary, contentColor = MaterialTheme.colorScheme.onPrimary),
             enabled = state.preview != null && !state.isProcessing && state.error == null
         ) {
@@ -357,7 +351,7 @@ private fun BridgeSuccessView(creditedAmount: Double, onDone: () -> Unit) {
         Button(
             onClick = onDone,
             modifier = Modifier.fillMaxWidth().height(56.dp),
-            shape = RoundedCornerShape(999.dp),
+            shape = RoundedCornerShape(16.dp),
             colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary, contentColor = MaterialTheme.colorScheme.onPrimary)
         ) {
             Text("Done", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)

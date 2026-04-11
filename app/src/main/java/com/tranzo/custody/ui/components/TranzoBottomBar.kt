@@ -58,16 +58,13 @@ fun TranzoBottomBar(
             modifier = Modifier
                 .height(64.dp)
                 .fillMaxWidth()
-                .glassCard(cornerRadius = 32.dp, alpha = 0.12f)
-                .border(
-                    width = 1.dp,
-                    brush = Brush.linearGradient(
-                        colors = listOf(Color.White.copy(0.2f), Color.Transparent, Color.White.copy(0.1f))
-                    ),
-                    shape = RoundedCornerShape(32.dp)
+                .minimalCard(
+                    cornerRadius = 32.dp,
+                    backgroundColor = MaterialTheme.colorScheme.surface,
+                    borderColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.15f)
                 ),
             color = Color.Transparent,
-            tonalElevation = 0.dp
+            tonalElevation = 6.dp
         ) {
             Row(
                 modifier = Modifier.fillMaxSize(),
@@ -84,15 +81,13 @@ fun TranzoBottomBar(
                             .clickable { onItemSelected(item.route) },
                         contentAlignment = Alignment.Center
                     ) {
-                        // Background glow for selected item
+                        // Background tint for selected item
                         if (selected) {
                             Box(
                                 modifier = Modifier
                                     .size(40.dp)
                                     .background(
-                                        brush = Brush.radialGradient(
-                                            colors = listOf(MaterialTheme.colorScheme.primary.copy(0.2f), Color.Transparent)
-                                        ),
+                                        color = MaterialTheme.colorScheme.primary.copy(0.08f),
                                         shape = CircleShape
                                     )
                             )
@@ -101,8 +96,8 @@ fun TranzoBottomBar(
                         Icon(
                             imageVector = if (selected) item.selectedIcon else item.unselectedIcon,
                             contentDescription = item.label,
-                            modifier = Modifier.size(26.dp),
-                            tint = if (selected) MaterialTheme.colorScheme.primary else Color.White.copy(0.4f)
+                            modifier = Modifier.size(24.dp),
+                            tint = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
                         )
                     }
                 }

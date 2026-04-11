@@ -76,22 +76,6 @@ fun CardScreen(
         modifier = Modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
-            .drawBehind {
-                drawCircle(
-                    brush = Brush.radialGradient(
-                        colors = listOf(Color.White.copy(0.12f), Color.Transparent)
-                    ),
-                    radius = size.width * 0.9f,
-                    center = androidx.compose.ui.geometry.Offset(size.width * 0.9f, size.height * 0.1f)
-                )
-                drawCircle(
-                    brush = Brush.radialGradient(
-                        colors = listOf(Color.White.copy(0.08f), Color.Transparent)
-                    ),
-                    radius = size.width * 0.7f,
-                    center = androidx.compose.ui.geometry.Offset(size.width * 0.1f, size.height * 0.4f)
-                )
-            }
     ) {
         LazyColumn(
             modifier = Modifier.fillMaxSize()
@@ -129,7 +113,6 @@ fun CardScreen(
                     card = card, 
                     modifier = Modifier
                         .padding(horizontal = 20.dp)
-                        .glassCard(cornerRadius = 20.dp, alpha = 0.1f)
                 )
             }
             Spacer(modifier = Modifier.height(24.dp))
@@ -143,35 +126,13 @@ fun CardScreen(
                         .fillMaxWidth()
                         .padding(horizontal = 20.dp)
                         .height(210.dp)
-                        .glassOnDark(cornerRadius = 24.dp, alpha = 0.25f)
-                        .background(
-                            Brush.linearGradient(
-                                colors = listOf(
-                                    Color(0xFF1A1A1A),
-                                    Color(0xFF0D0D0D),
-                                    Color(0xFF1E1E1E)
-                                )
-                            )
+                        .minimalCard(
+                            cornerRadius = 24.dp,
+                            backgroundColor = Color(0xFF1A1A1A),
+                            borderWidth = 0.dp
                         )
                 ) {
-                    // Glossy Sheen Overlay
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .drawBehind {
-                                drawRect(
-                                    brush = Brush.linearGradient(
-                                        colors = listOf(
-                                            Color.White.copy(0.12f),
-                                            Color.Transparent,
-                                            Color.White.copy(0.05f)
-                                        ),
-                                        start = androidx.compose.ui.geometry.Offset(0f, 0f),
-                                        end = androidx.compose.ui.geometry.Offset(size.width, size.height)
-                                    )
-                                )
-                            }
-                    )
+
 
                     Column(
                         modifier = Modifier
@@ -259,10 +220,9 @@ fun CardScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 20.dp)
-                        .height(56.dp)
-                        .glassCard(cornerRadius = 999.dp, alpha = 0.12f),
-                    shape = RoundedCornerShape(999.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.9f), contentColor = MaterialTheme.colorScheme.onPrimary),
+                        .height(56.dp),
+                    shape = RoundedCornerShape(16.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary, contentColor = MaterialTheme.colorScheme.onPrimary),
                     enabled = card.kycStatus == KycStatus.VERIFIED
                 ) {
                     Icon(Icons.Default.Add, null, modifier = Modifier.size(20.dp))
@@ -397,7 +357,7 @@ private fun CardActionItem(icon: ImageVector, label: String, onClick: () -> Unit
     Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(8.dp)) {
         IconButton(
             onClick = onClick,
-            modifier = Modifier.size(52.dp).clip(CircleShape).background(MaterialTheme.colorScheme.primaryContainer)
+            modifier = Modifier.size(52.dp).clip(CircleShape).background(MaterialTheme.colorScheme.surfaceSecondary)
         ) {
             Icon(icon, label, tint = MaterialTheme.colorScheme.onBackground, modifier = Modifier.size(24.dp))
         }

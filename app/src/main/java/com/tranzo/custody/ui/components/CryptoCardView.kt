@@ -47,13 +47,13 @@ fun CryptoCardView(
         modifier = modifier
             .fillMaxWidth()
             .height(210.dp)
+            .clip(RoundedCornerShape(20.dp))
             .background(
                 Brush.linearGradient(
                     colors = listOf(cardDarkStart, cardDarkEnd)
                 )
             )
-            .glassOnDark(cornerRadius = 20.dp, alpha = 0.2f)
-            .border(1.dp, Color.White.copy(0.15f), RoundedCornerShape(20.dp))
+            .border(1.dp, Color.White.copy(0.1f), RoundedCornerShape(20.dp))
             .padding(24.dp)
     ) {
         Column(

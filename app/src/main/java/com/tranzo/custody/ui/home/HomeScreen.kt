@@ -70,23 +70,6 @@ fun HomeScreen(
         modifier = Modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
-            .drawBehind {
-                // Background white frost blobs for glass support
-                drawCircle(
-                    brush = Brush.radialGradient(
-                        colors = listOf(Color.White.copy(0.12f), Color.Transparent)
-                    ),
-                    radius = size.width * 0.9f,
-                    center = androidx.compose.ui.geometry.Offset(size.width * 0.9f, size.height * 0.05f)
-                )
-                drawCircle(
-                    brush = Brush.radialGradient(
-                        colors = listOf(Color.White.copy(0.08f), Color.Transparent)
-                    ),
-                    radius = size.width * 0.8f,
-                    center = androidx.compose.ui.geometry.Offset(size.width * 0.1f, size.height * 0.45f)
-                )
-            }
     ) {
         PullToRefreshBox(
             isRefreshing = state.isRefreshing,
@@ -185,7 +168,11 @@ fun HomeScreen(
                     Box(
                         modifier = Modifier
                             .weight(1f)
-                            .glassCard(cornerRadius = 16.dp, alpha = 0.08f)
+                            .minimalCard(
+                                cornerRadius = 20.dp,
+                                backgroundColor = MaterialTheme.colorScheme.surface,
+                                borderColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.1f)
+                            )
                             .padding(16.dp)
                     ) {
                         Column {
@@ -211,7 +198,11 @@ fun HomeScreen(
                     Box(
                         modifier = Modifier
                             .weight(1f)
-                            .glassOnDark(cornerRadius = 16.dp, alpha = 0.15f)
+                            .minimalCard(
+                                cornerRadius = 20.dp,
+                                backgroundColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.03f),
+                                borderColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)
+                            )
                             .clickable(onClick = onAddToSpend)
                             .padding(16.dp)
                     ) {
@@ -242,10 +233,13 @@ fun HomeScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 20.dp)
-                        .glassCard(cornerRadius = 12.dp, alpha = 0.12f)
-                        .background(LocalTranzoTheme.current.positive.copy(alpha = 0.1f))
+                        .minimalCard(
+                            cornerRadius = 16.dp,
+                            backgroundColor = MaterialTheme.colorScheme.surfaceSecondary,
+                            borderWidth = 0.dp
+                        )
                         .clickable(onClick = onAddToSpend)
-                        .padding(horizontal = 16.dp, vertical = 12.dp)
+                        .padding(horizontal = 16.dp, vertical = 16.dp)
                 ) {
                     Row(
                         modifier = Modifier.fillMaxWidth(),

@@ -65,22 +65,6 @@ fun CreateWalletScreen(
         modifier = Modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
-            .drawBehind {
-                drawCircle(
-                    brush = Brush.radialGradient(
-                        colors = listOf(Color.White.copy(0.08f), Color.Transparent)
-                    ),
-                    radius = size.width * 0.8f,
-                    center = androidx.compose.ui.geometry.Offset(size.width * 0.9f, size.height * 0.1f)
-                )
-                drawCircle(
-                    brush = Brush.radialGradient(
-                        colors = listOf(Color.White.copy(0.06f), Color.Transparent)
-                    ),
-                    radius = size.width * 0.7f,
-                    center = androidx.compose.ui.geometry.Offset(size.width * 0.1f, size.height * 0.4f)
-                )
-            }
     ) {
         Column(
             modifier = Modifier
@@ -105,8 +89,11 @@ fun CreateWalletScreen(
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .glassCard(cornerRadius = 16.dp, alpha = 0.05f)
-                .background(Color(0xFFEF4444).copy(0.08f))
+                .minimalCard(
+                    cornerRadius = 16.dp,
+                    backgroundColor = Color(0xFFEF4444).copy(0.08f),
+                    borderColor = Color(0xFFEF4444).copy(0.15f)
+                )
                 .padding(16.dp)
         ) {
             Text(
@@ -134,7 +121,11 @@ fun CreateWalletScreen(
                         Box(
                             modifier = Modifier
                                 .weight(1f)
-                                .glassCard(cornerRadius = 12.dp, alpha = 0.08f)
+                                .minimalCard(
+                                    cornerRadius = 12.dp,
+                                    backgroundColor = MaterialTheme.colorScheme.surfaceSecondary,
+                                    borderWidth = 0.dp
+                                )
                                 .padding(12.dp)
                         ) {
                             Row(verticalAlignment = Alignment.CenterVertically) {
@@ -167,7 +158,11 @@ fun CreateWalletScreen(
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .glassCard(cornerRadius = 16.dp, alpha = 0.05f)
+                .minimalCard(
+                    cornerRadius = 16.dp,
+                    backgroundColor = MaterialTheme.colorScheme.surface,
+                    borderColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.1f)
+                )
                 .clickable { confirmed = !confirmed }
                 .padding(16.dp)
         ) {
@@ -201,7 +196,7 @@ fun CreateWalletScreen(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(56.dp),
-            shape = RoundedCornerShape(999.dp),
+            shape = RoundedCornerShape(16.dp),
             colors = ButtonDefaults.buttonColors(
                 containerColor = MaterialTheme.colorScheme.primary,
                 contentColor = MaterialTheme.colorScheme.onPrimary

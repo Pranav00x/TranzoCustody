@@ -62,22 +62,6 @@ fun EmailPasswordScreen(
         modifier = Modifier
             .fillMaxSize()
             .background(colorScheme.background)
-            .drawBehind {
-                drawCircle(
-                    brush = Brush.radialGradient(
-                        colors = listOf(Color.White.copy(0.12f), Color.Transparent)
-                    ),
-                    radius = size.width * 1.1f,
-                    center = androidx.compose.ui.geometry.Offset(size.width * 0.95f, size.height * 0.1f)
-                )
-                drawCircle(
-                    brush = Brush.radialGradient(
-                        colors = listOf(Color.White.copy(0.08f), Color.Transparent)
-                    ),
-                    radius = size.width * 0.9f,
-                    center = androidx.compose.ui.geometry.Offset(size.width * 0.05f, size.height * 0.45f)
-                )
-            }
     ) {
         Column(modifier = Modifier.fillMaxSize()) {
             TopAppBar(
@@ -121,7 +105,7 @@ fun EmailPasswordScreen(
                         placeholder = { Text("John", color = tranzoTheme.textMuted) },
                         modifier = Modifier
                             .weight(1f)
-                            .glassCard(cornerRadius = 12.dp, alpha = 0.05f),
+                            .minimalCard(cornerRadius = 12.dp, backgroundColor = Color.Transparent, borderWidth = 0.dp),
                         singleLine = true,
                         keyboardOptions = KeyboardOptions(
                             keyboardType = KeyboardType.Text,
@@ -130,9 +114,9 @@ fun EmailPasswordScreen(
                         shape = RoundedCornerShape(12.dp),
                         colors = OutlinedTextFieldDefaults.colors(
                             focusedBorderColor = colorScheme.primary,
-                            unfocusedBorderColor = Color.Transparent,
-                            focusedContainerColor = Color.White.copy(0.05f),
-                            unfocusedContainerColor = Color.White.copy(0.05f)
+                            unfocusedBorderColor = colorScheme.outline.copy(alpha = 0.2f),
+                            focusedContainerColor = colorScheme.surface,
+                            unfocusedContainerColor = colorScheme.surface
                         )
                     )
 
@@ -143,7 +127,7 @@ fun EmailPasswordScreen(
                         placeholder = { Text("Doe", color = tranzoTheme.textMuted) },
                         modifier = Modifier
                             .weight(1f)
-                            .glassCard(cornerRadius = 12.dp, alpha = 0.05f),
+                            .minimalCard(cornerRadius = 12.dp, backgroundColor = Color.Transparent, borderWidth = 0.dp),
                         singleLine = true,
                         keyboardOptions = KeyboardOptions(
                             keyboardType = KeyboardType.Text,
@@ -152,9 +136,9 @@ fun EmailPasswordScreen(
                         shape = RoundedCornerShape(12.dp),
                         colors = OutlinedTextFieldDefaults.colors(
                             focusedBorderColor = colorScheme.primary,
-                            unfocusedBorderColor = Color.Transparent,
-                            focusedContainerColor = Color.White.copy(0.05f),
-                            unfocusedContainerColor = Color.White.copy(0.05f)
+                            unfocusedBorderColor = colorScheme.outline.copy(alpha = 0.2f),
+                            focusedContainerColor = colorScheme.surface,
+                            unfocusedContainerColor = colorScheme.surface
                         )
                     )
                 }
@@ -168,7 +152,7 @@ fun EmailPasswordScreen(
                     placeholder = { Text("DD/MM/YYYY", color = tranzoTheme.textMuted) },
                     modifier = Modifier
                         .fillMaxWidth()
-                        .glassCard(cornerRadius = 12.dp, alpha = 0.05f),
+                        .minimalCard(cornerRadius = 12.dp, backgroundColor = Color.Transparent, borderWidth = 0.dp),
                     singleLine = true,
                     keyboardOptions = KeyboardOptions(
                         keyboardType = KeyboardType.Number,
@@ -177,9 +161,9 @@ fun EmailPasswordScreen(
                     shape = RoundedCornerShape(12.dp),
                     colors = OutlinedTextFieldDefaults.colors(
                         focusedBorderColor = colorScheme.primary,
-                        unfocusedBorderColor = Color.Transparent,
-                        focusedContainerColor = Color.White.copy(0.05f),
-                        unfocusedContainerColor = Color.White.copy(0.05f)
+                        unfocusedBorderColor = colorScheme.outline.copy(alpha = 0.2f),
+                        focusedContainerColor = colorScheme.surface,
+                        unfocusedContainerColor = colorScheme.surface
                     )
                 )
 
@@ -192,7 +176,7 @@ fun EmailPasswordScreen(
                     placeholder = { Text("you@example.com", color = tranzoTheme.textMuted) },
                     modifier = Modifier
                         .fillMaxWidth()
-                        .glassCard(cornerRadius = 12.dp, alpha = 0.05f),
+                        .minimalCard(cornerRadius = 12.dp, backgroundColor = Color.Transparent, borderWidth = 0.dp),
                     singleLine = true,
                     keyboardOptions = KeyboardOptions(
                         keyboardType = KeyboardType.Email,
@@ -201,9 +185,9 @@ fun EmailPasswordScreen(
                     shape = RoundedCornerShape(12.dp),
                     colors = OutlinedTextFieldDefaults.colors(
                         focusedBorderColor = colorScheme.primary,
-                        unfocusedBorderColor = Color.Transparent,
-                        focusedContainerColor = Color.White.copy(0.05f),
-                        unfocusedContainerColor = Color.White.copy(0.05f)
+                        unfocusedBorderColor = colorScheme.outline.copy(alpha = 0.2f),
+                        focusedContainerColor = colorScheme.surface,
+                        unfocusedContainerColor = colorScheme.surface
                     )
                 )
 
@@ -216,7 +200,7 @@ fun EmailPasswordScreen(
                     placeholder = { Text("+1 234 567 8900", color = tranzoTheme.textMuted) },
                     modifier = Modifier
                         .fillMaxWidth()
-                        .glassCard(cornerRadius = 12.dp, alpha = 0.05f),
+                        .minimalCard(cornerRadius = 12.dp, backgroundColor = Color.Transparent, borderWidth = 0.dp),
                     singleLine = true,
                     keyboardOptions = KeyboardOptions(
                         keyboardType = KeyboardType.Phone,
@@ -225,9 +209,9 @@ fun EmailPasswordScreen(
                     shape = RoundedCornerShape(12.dp),
                     colors = OutlinedTextFieldDefaults.colors(
                         focusedBorderColor = colorScheme.primary,
-                        unfocusedBorderColor = Color.Transparent,
-                        focusedContainerColor = Color.White.copy(0.05f),
-                        unfocusedContainerColor = Color.White.copy(0.05f)
+                        unfocusedBorderColor = colorScheme.outline.copy(alpha = 0.2f),
+                        focusedContainerColor = colorScheme.surface,
+                        unfocusedContainerColor = colorScheme.surface
                     )
                 )
 
@@ -240,7 +224,7 @@ fun EmailPasswordScreen(
                     placeholder = { Text("At least 8 characters", color = tranzoTheme.textMuted) },
                     modifier = Modifier
                         .fillMaxWidth()
-                        .glassCard(cornerRadius = 12.dp, alpha = 0.05f),
+                        .minimalCard(cornerRadius = 12.dp, backgroundColor = Color.Transparent, borderWidth = 0.dp),
                     singleLine = true,
                     visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
                     keyboardOptions = KeyboardOptions(
@@ -258,9 +242,9 @@ fun EmailPasswordScreen(
                     shape = RoundedCornerShape(12.dp),
                     colors = OutlinedTextFieldDefaults.colors(
                         focusedBorderColor = colorScheme.primary,
-                        unfocusedBorderColor = Color.Transparent,
-                        focusedContainerColor = Color.White.copy(0.05f),
-                        unfocusedContainerColor = Color.White.copy(0.05f)
+                        unfocusedBorderColor = colorScheme.outline.copy(alpha = 0.2f),
+                        focusedContainerColor = colorScheme.surface,
+                        unfocusedContainerColor = colorScheme.surface
                     )
                 )
 
@@ -279,11 +263,10 @@ fun EmailPasswordScreen(
                     onClick = { if (viewModel.validateRegistration()) onContinue() },
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(58.dp)
-                        .glassCard(cornerRadius = 999.dp, alpha = 0.15f),
-                    shape = RoundedCornerShape(999.dp),
+                        .height(58.dp),
+                    shape = RoundedCornerShape(16.dp),
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = colorScheme.primary.copy(alpha = 0.9f),
+                        containerColor = colorScheme.primary,
                         contentColor = colorScheme.onPrimary
                     ),
                     enabled = state.firstName.isNotBlank() && state.lastName.isNotBlank() && 

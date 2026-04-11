@@ -51,22 +51,6 @@ fun ImportWalletScreen(
         modifier = Modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
-            .drawBehind {
-                drawCircle(
-                    brush = Brush.radialGradient(
-                        colors = listOf(Color.White.copy(0.08f), Color.Transparent)
-                    ),
-                    radius = size.width * 0.8f,
-                    center = androidx.compose.ui.geometry.Offset(size.width * 0.9f, size.height * 0.1f)
-                )
-                drawCircle(
-                    brush = Brush.radialGradient(
-                        colors = listOf(Color.White.copy(0.06f), Color.Transparent)
-                    ),
-                    radius = size.width * 0.7f,
-                    center = androidx.compose.ui.geometry.Offset(size.width * 0.1f, size.height * 0.4f)
-                )
-            }
     ) {
         Column(
             modifier = Modifier
@@ -98,16 +82,15 @@ fun ImportWalletScreen(
             value = state.importMnemonicInput,
             onValueChange = { viewModel.setImportMnemonic(it) },
             modifier = Modifier
-                .fillMaxWidth()
-                .glassCard(cornerRadius = 16.dp, alpha = 0.05f),
-            minLines = 4,
-            shape = RoundedCornerShape(12.dp),
+                .fillMaxWidth(),
+            minLines = 5,
+            shape = RoundedCornerShape(16.dp),
             colors = OutlinedTextFieldDefaults.colors(
                 focusedBorderColor = MaterialTheme.colorScheme.primary,
-                unfocusedBorderColor = Color.Transparent,
+                unfocusedBorderColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f),
                 cursorColor = MaterialTheme.colorScheme.primary,
-                focusedContainerColor = Color.White.copy(0.05f),
-                unfocusedContainerColor = Color.White.copy(0.05f)
+                focusedContainerColor = MaterialTheme.colorScheme.surface,
+                unfocusedContainerColor = MaterialTheme.colorScheme.surface
             ),
             placeholder = { Text("word1 word2 word3 ...", color = tranzoTheme.textMuted) }
         )
