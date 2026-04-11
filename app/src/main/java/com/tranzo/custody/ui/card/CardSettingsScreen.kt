@@ -102,7 +102,7 @@ fun CardSettingsScreen(
             Button(
                 onClick = { },
                 modifier = Modifier.fillMaxWidth().height(52.dp),
-                shape = RoundedCornerShape(999.dp),
+                shape = RoundedCornerShape(16.dp),
                 colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary, contentColor = MaterialTheme.colorScheme.onPrimary)
             ) {
                 Text("Order Physical Card", fontWeight = FontWeight.SemiBold)

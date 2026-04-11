@@ -58,6 +58,7 @@ import com.tranzo.custody.domain.model.SpendMode
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.graphics.Brush
 import com.tranzo.custody.ui.theme.LocalTranzoTheme
+import com.tranzo.custody.ui.util.minimalCard
 
 @Composable
 fun SettingsScreen(
@@ -77,22 +78,6 @@ fun SettingsScreen(
         modifier = Modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
-            .drawBehind {
-                drawCircle(
-                    brush = Brush.radialGradient(
-                        colors = listOf(Color.White.copy(0.12f), Color.Transparent)
-                    ),
-                    radius = size.width * 1.1f,
-                    center = androidx.compose.ui.geometry.Offset(size.width * 0.95f, size.height * 0.1f)
-                )
-                drawCircle(
-                    brush = Brush.radialGradient(
-                        colors = listOf(Color.White.copy(0.08f), Color.Transparent)
-                    ),
-                    radius = size.width * 0.9f,
-                    center = androidx.compose.ui.geometry.Offset(size.width * 0.05f, size.height * 0.45f)
-                )
-            }
     ) {
         Column(
             modifier = Modifier
@@ -113,8 +98,11 @@ fun SettingsScreen(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 20.dp, vertical = 8.dp)
-                .clip(RoundedCornerShape(16.dp))
-                .border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(16.dp))
+                .minimalCard(
+                    cornerRadius = 16.dp,
+                    backgroundColor = MaterialTheme.colorScheme.surface,
+                    borderColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.1f)
+                )
                 .padding(16.dp)
         ) {
             Column {
@@ -143,8 +131,11 @@ fun SettingsScreen(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 20.dp, vertical = 4.dp)
-                .clip(RoundedCornerShape(16.dp))
-                .background(MaterialTheme.colorScheme.primaryContainer)
+                .minimalCard(
+                    cornerRadius = 20.dp,
+                    backgroundColor = tranzoTheme.surfaceSecondary,
+                    borderWidth = 0.dp
+                )
                 .padding(16.dp)
         ) {
             Column {
@@ -308,12 +299,12 @@ private fun SpendModeOption(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(12.dp))
-            .then(
-                if (isSelected) Modifier.border(2.dp, MaterialTheme.colorScheme.primary, RoundedCornerShape(12.dp))
-                else Modifier.border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(12.dp))
+            .minimalCard(
+                cornerRadius = 12.dp,
+                backgroundColor = MaterialTheme.colorScheme.surface,
+                borderColor = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline.copy(alpha = 0.1f),
+                borderWidth = if (isSelected) 2.dp else 1.dp
             )
-            .background(MaterialTheme.colorScheme.surface)
             .clickable(onClick = onClick)
             .padding(14.dp),
         verticalAlignment = Alignment.CenterVertically
