@@ -24,7 +24,8 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
-import com.tranzo.custody.ui.util.minimalCard
+import com.tranzo.custody.ui.util.neumorphicExtruded
+import com.tranzo.custody.ui.util.neumorphicPressed
 import com.tranzo.custody.ui.theme.LocalTranzoTheme
 
 data class BottomNavItem(
@@ -41,6 +42,8 @@ val bottomNavItems = listOf(
     BottomNavItem("settings", "Settings", Icons.Filled.Settings, Icons.Outlined.Settings)
 )
 
+
+
 @Composable
 fun TranzoBottomBar(
     currentRoute: String?,
@@ -51,20 +54,18 @@ fun TranzoBottomBar(
         modifier = modifier
             .fillMaxWidth()
             .navigationBarsPadding()
-            .padding(horizontal = 32.dp, vertical = 24.dp),
+            .padding(horizontal = 24.dp, vertical = 24.dp),
         contentAlignment = Alignment.BottomCenter
     ) {
-        Surface(
+        Box(
             modifier = Modifier
-                .height(64.dp)
+                .height(68.dp)
                 .fillMaxWidth()
-                .minimalCard(
-                    cornerRadius = 32.dp,
-                    backgroundColor = MaterialTheme.colorScheme.surface,
-                    borderColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.15f)
-                ),
-            color = Color.Transparent,
-            tonalElevation = 6.dp
+                .neumorphicExtruded(
+                    cornerRadius = 34.dp, 
+                    elevation = 6.dp, 
+                    backgroundColor = MaterialTheme.colorScheme.background
+                )
         ) {
             Row(
                 modifier = Modifier.fillMaxSize(),
@@ -76,28 +77,25 @@ fun TranzoBottomBar(
                     
                     Box(
                         modifier = Modifier
-                            .size(48.dp)
+                            .size(52.dp)
+                            .then(
+                                if (selected) {
+                                    Modifier.neumorphicPressed(
+                                        cornerRadius = 26.dp, 
+                                        elevation = 3.dp, 
+                                        backgroundColor = MaterialTheme.colorScheme.background
+                                    )
+                                } else Modifier
+                            )
                             .clip(CircleShape)
                             .clickable { onItemSelected(item.route) },
                         contentAlignment = Alignment.Center
                     ) {
-                        // Background tint for selected item
-                        if (selected) {
-                            Box(
-                                modifier = Modifier
-                                    .size(40.dp)
-                                    .background(
-                                        color = MaterialTheme.colorScheme.primary.copy(0.08f),
-                                        shape = CircleShape
-                                    )
-                            )
-                        }
-
                         Icon(
                             imageVector = if (selected) item.selectedIcon else item.unselectedIcon,
                             contentDescription = item.label,
                             modifier = Modifier.size(24.dp),
-                            tint = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
+                            tint = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
                         )
                     }
                 }

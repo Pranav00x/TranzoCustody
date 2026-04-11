@@ -57,10 +57,11 @@ import com.tranzo.custody.ui.theme.LocalTranzoTheme
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import com.tranzo.custody.ui.util.neumorphicCard
+import com.tranzo.custody.ui.util.neumorphicExtruded
+import com.tranzo.custody.ui.util.neumorphicPressed
 
-import androidx.compose.ui.draw.drawBehind
-import androidx.compose.ui.graphics.Brush
-import com.tranzo.custody.ui.util.minimalCard
+
 
 @Composable
 fun CardScreen(
@@ -79,273 +80,87 @@ fun CardScreen(
         LazyColumn(
             modifier = Modifier.fillMaxSize()
         ) {
-        // Header
-        item {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 20.dp, vertical = 16.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text("My Card", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.ExtraBold, color = MaterialTheme.colorScheme.onBackground)
-                IconButton(onClick = { }) {
-                    Icon(Icons.Default.Lock, "Lock", tint = MaterialTheme.colorScheme.onBackground, modifier = Modifier.size(22.dp))
-                }
-            }
-        }
-
-        // KYC Banner
-        item {
-            state.card?.let { card ->
-                if (card.kycStatus != KycStatus.VERIFIED) {
-                    KycBanner(status = card.kycStatus)
-                    Spacer(modifier = Modifier.height(16.dp))
-                }
-            }
-        }
-
-        // Card Visual
-        item {
-            state.card?.let { card ->
-                CryptoCardView(
-                    card = card, 
-                    modifier = Modifier
-                        .padding(horizontal = 20.dp)
-                )
-            }
-            Spacer(modifier = Modifier.height(24.dp))
-        }
-
-        // Spendable Balance (prominent)
-        item {
-            state.card?.let { card ->
-                Box(
+            // Header
+            item {
+                Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = 20.dp)
-                        .height(210.dp)
-                        .minimalCard(
-                            cornerRadius = 24.dp,
-                            backgroundColor = Color(0xFF1A1A1A),
-                            borderWidth = 0.dp
-                        )
+                        .padding(horizontal = 24.dp, vertical = 20.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-
-
-                    Column(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(24.dp),
-                        verticalArrangement = Arrangement.SpaceBetween
-                    ) {
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.Top
-                        ) {
-                            Column {
-                                Text(
-                                    "Spendable Balance",
-                                    style = MaterialTheme.typography.labelSmall,
-                                    color = Color.White.copy(0.6f),
-                                    fontWeight = FontWeight.Medium
-                                )
-                                Spacer(modifier = Modifier.height(6.dp))
-                                Text(
-                                    formatCurrency(card.spendableBalance),
-                                    style = MaterialTheme.typography.displaySmall,
-                                    color = Color.White,
-                                    fontWeight = FontWeight.Bold,
-                                    letterSpacing = (-1).sp
-                                )
-                            }
-                            // Logo
-                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                Box(
-                                    modifier = Modifier
-                                        .size(26.dp)
-                                        .rotate(45f)
-                                        .border(2.5.dp, Color.White, RoundedCornerShape(5.dp))
-                                )
-                                Spacer(modifier = Modifier.width(8.dp))
-                                Text(
-                                    "Tranzo",
-                                    style = MaterialTheme.typography.titleMedium,
-                                    color = Color.White,
-                                    fontWeight = FontWeight.ExtraBold
-                                )
-                            }
-                        }
-
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.Bottom
-                        ) {
-                            Column {
-                                Text(
-                                    if (card.spendMode == SpendMode.AUTO_CONVERT) "Auto-convert Mode" else "Prepaid Wallet",
-                                    style = MaterialTheme.typography.labelSmall,
-                                    color = if (card.spendMode == SpendMode.AUTO_CONVERT) MaterialTheme.colorScheme.tertiary else Color.White.copy(0.4f),
-                                    fontWeight = FontWeight.SemiBold
-                                )
-                                Text(
-                                    "Visa Debit **** 4892",
-                                    style = MaterialTheme.typography.bodySmall,
-                                    color = Color.White.copy(0.7f),
-                                    fontWeight = FontWeight.Medium,
-                                    letterSpacing = 1.sp
-                                )
-                            }
-                            Box(
-                                modifier = Modifier
-                                    .size(42.dp, 26.dp)
-                                    .clip(RoundedCornerShape(4.dp))
-                                    .background(Color.White.copy(0.12f))
-                                    .border(1.dp, Color.White.copy(0.25f), RoundedCornerShape(4.dp)),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Text("DEBIT", style = MaterialTheme.typography.labelSmall, color = Color.White, fontWeight = FontWeight.Bold)
-                            }
-                        }
-                    }
-                }
-                Spacer(modifier = Modifier.height(24.dp))
-
-                // Top Up Button (Separate for better UX)
-                Button(
-                    onClick = onAddFunds,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 20.dp)
-                        .height(56.dp),
-                    shape = RoundedCornerShape(16.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary, contentColor = MaterialTheme.colorScheme.onPrimary),
-                    enabled = card.kycStatus == KycStatus.VERIFIED
-                ) {
-                    Icon(Icons.Default.Add, null, modifier = Modifier.size(20.dp))
-                    Spacer(modifier = Modifier.width(10.dp))
-                    Text("Top Up Balance", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
-                }
-            }
-            Spacer(modifier = Modifier.height(24.dp))
-        }
-
-        // Card Actions
-        item {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 32.dp),
-                horizontalArrangement = Arrangement.SpaceEvenly
-            ) {
-                CardActionItem(
-                    icon = if (state.card?.isFrozen == true) Icons.Default.AcUnit else Icons.Default.AcUnit,
-                    label = if (state.card?.isFrozen == true) "Unfreeze" else "Freeze",
-                    onClick = { viewModel.toggleFreeze() }
-                )
-                CardActionItem(
-                    icon = Icons.Default.RemoveRedEye,
-                    label = "Details",
-                    onClick = { viewModel.toggleShowDetails() }
-                )
-                CardActionItem(
-                    icon = Icons.Default.Wallet,
-                    label = "Google Pay",
-                    onClick = { }
-                )
-            }
-            Spacer(modifier = Modifier.height(28.dp))
-        }
-
-        // Monthly Spending
-        item {
-            state.card?.let { card ->
-                Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp)) {
-                    Text("Spending Limit", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onBackground)
-                    Spacer(modifier = Modifier.height(12.dp))
-
+                    Text("MY CARD", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Black, letterSpacing = 2.sp, color = MaterialTheme.colorScheme.onBackground)
                     Box(
                         modifier = Modifier
-                            .fillMaxWidth()
-                            .minimalCard(cornerRadius = 20.dp, borderWidth = 0.dp)
-                            .padding(24.dp)
+                            .size(44.dp)
+                            .neumorphicExtruded(cornerRadius = 22.dp, elevation = 3.dp, backgroundColor = MaterialTheme.colorScheme.background)
+                            .clickable { },
+                        contentAlignment = Alignment.Center
                     ) {
-                        Column {
-                            Row(Modifier.fillMaxWidth(), Arrangement.SpaceBetween, Alignment.Bottom) {
-                                Column {
-                                    Text("Spent this month", style = MaterialTheme.typography.labelMedium, color = tranzoTheme.textMuted)
-                                    Text(formatCurrency(card.monthlySpent), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onBackground)
-                                }
-                                Text("Limit: ${formatCurrency(card.monthlyLimit)}", style = MaterialTheme.typography.bodySmall, color = tranzoTheme.textMuted)
-                            }
-                            Spacer(modifier = Modifier.height(16.dp))
-                            val progress = (if (card.monthlyLimit > 0) card.monthlySpent / card.monthlyLimit else 0.0)
-                                .coerceIn(0.0, 1.0)
-                                .toFloat()
-                                .takeIf { !it.isNaN() } ?: 0f
-                            LinearProgressIndicator(
-                                progress = { progress },
-                                modifier = Modifier.fillMaxWidth().height(10.dp).clip(RoundedCornerShape(5.dp)),
-                                color = MaterialTheme.colorScheme.primary,
-                                trackColor = Color.White.copy(0.05f),
-                                strokeCap = StrokeCap.Round,
-                            )
-                        }
+                        Icon(Icons.Default.Lock, "Lock", tint = MaterialTheme.colorScheme.onBackground, modifier = Modifier.size(20.dp))
                     }
+                }
+            }
+
+            // Card Visual
+            item {
+                state.card?.let { card ->
+                    CryptoCardView(
+                        card = card, 
+                        modifier = Modifier
+                            .padding(horizontal = 24.dp)
+                    )
                 }
                 Spacer(modifier = Modifier.height(32.dp))
             }
-        }
 
-        // Recent Transactions
-        item {
-            Text("Recent Transactions", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.ExtraBold, color = MaterialTheme.colorScheme.onBackground, modifier = Modifier.padding(horizontal = 20.dp))
-            Spacer(modifier = Modifier.height(12.dp))
-        }
+            // Card Actions
+            item {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 24.dp, vertical = 8.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    CardActionItem(
+                        icon = if (state.card?.isFrozen == true) Icons.Default.AcUnit else Icons.Default.AcUnit,
+                        label = if (state.card?.isFrozen == true) "Unfreeze" else "Freeze",
+                        onClick = { viewModel.toggleFreeze() }
+                    )
+                    CardActionItem(
+                        icon = Icons.Default.RemoveRedEye,
+                        label = "Details",
+                        onClick = { viewModel.toggleShowDetails() }
+                    )
+                    CardActionItem(
+                        icon = Icons.Default.Add,
+                        label = "Top Up",
+                        onClick = onAddFunds
+                    )
+                    CardActionItem(
+                        icon = Icons.Default.Wallet,
+                        label = "GPay",
+                        onClick = { }
+                    )
+                }
+                Spacer(modifier = Modifier.height(40.dp))
+            }
 
-        items(state.transactions) { tx ->
-            CardTransactionItem(transaction = tx)
-        }
+            // Recent Transactions
+            item {
+                Text(
+                    text = "Activity",
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onBackground,
+                    modifier = Modifier.padding(horizontal = 24.dp, vertical = 12.dp)
+                )
+            }
 
-        item { Spacer(modifier = Modifier.height(100.dp)) }
-    }
-}
-}
+            items(state.transactions) { tx ->
+                CardTransactionItem(transaction = tx)
+            }
 
-@Composable
-private fun KycBanner(status: KycStatus) {
-    val bgColor: Color
-    val iconColor: Color
-    val icon: ImageVector
-    val text: String
-
-    when (status) {
-        KycStatus.NOT_STARTED -> {
-            bgColor = MaterialTheme.colorScheme.error.copy(alpha = 0.15f); iconColor = MaterialTheme.colorScheme.error; icon = Icons.Default.Warning; text = "KYC required to activate card"
-        }
-        KycStatus.PENDING -> {
-            bgColor = Color(0xFFFEF3C7); iconColor = Color(0xFFF59E0B); icon = Icons.Default.Schedule; text = "KYC verification in progress"
-        }
-        KycStatus.REJECTED -> {
-            bgColor = MaterialTheme.colorScheme.error.copy(alpha = 0.15f); iconColor = MaterialTheme.colorScheme.error; icon = Icons.Default.Warning; text = "KYC rejected — please resubmit"
-        }
-        else -> return
-    }
-
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 20.dp)
-            .clip(RoundedCornerShape(12.dp))
-            .background(bgColor)
-            .padding(14.dp)
-    ) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Icon(icon, null, tint = iconColor, modifier = Modifier.size(20.dp))
-            Spacer(modifier = Modifier.width(10.dp))
-            Text(text, style = MaterialTheme.typography.bodySmall, fontWeight = FontWeight.SemiBold, color = iconColor)
         }
     }
 }
@@ -353,45 +168,65 @@ private fun KycBanner(status: KycStatus) {
 @Composable
 private fun CardActionItem(icon: ImageVector, label: String, onClick: () -> Unit) {
     val tranzoTheme = LocalTranzoTheme.current
-    Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        IconButton(
-            onClick = onClick,
-            modifier = Modifier.size(52.dp).clip(CircleShape).background(LocalTranzoTheme.current.surfaceSecondary)
+    Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(10.dp)) {
+        Box(
+            modifier = Modifier
+                .size(56.dp)
+                .neumorphicExtruded(cornerRadius = 28.dp, elevation = 2.dp, backgroundColor = MaterialTheme.colorScheme.background)
+                .clickable(onClick = onClick),
+            contentAlignment = Alignment.Center
         ) {
             Icon(icon, label, tint = MaterialTheme.colorScheme.onBackground, modifier = Modifier.size(24.dp))
         }
-        Text(label, style = MaterialTheme.typography.labelSmall, color = tranzoTheme.textMuted)
+        Text(label.uppercase(), style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold, letterSpacing = 1.sp, color = tranzoTheme.textMuted)
     }
 }
 
 @Composable
 private fun CardTransactionItem(transaction: CardTransaction) {
     val tranzoTheme = LocalTranzoTheme.current
-    Row(
-        modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 12.dp),
-        verticalAlignment = Alignment.CenterVertically
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 24.dp, vertical = 6.dp)
+            .neumorphicExtruded(cornerRadius = 16.dp, elevation = 2.dp, backgroundColor = MaterialTheme.colorScheme.background)
+            .padding(16.dp)
     ) {
-        Box(
-            modifier = Modifier.size(44.dp).clip(CircleShape).background(MaterialTheme.colorScheme.primaryContainer),
-            contentAlignment = Alignment.Center
+        Row(
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            Text(transaction.merchantIcon, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onBackground)
-        }
-        Column(modifier = Modifier.weight(1f).padding(start = 12.dp)) {
-            Text(transaction.merchantName, style = MaterialTheme.typography.titleSmall, color = MaterialTheme.colorScheme.onBackground)
-            Row {
+            Box(
+                modifier = Modifier
+                    .size(44.dp)
+                    .neumorphicPressed(cornerRadius = 22.dp, elevation = 1.dp, backgroundColor = MaterialTheme.colorScheme.background),
+                contentAlignment = Alignment.Center
+            ) {
                 Text(
-                    SimpleDateFormat("MMM d, h:mm a", Locale.US).format(Date(transaction.timestamp)),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = tranzoTheme.textMuted
+                    transaction.merchantIcon, 
+                    style = MaterialTheme.typography.titleMedium, 
+                    fontWeight = FontWeight.Bold, 
+                    color = MaterialTheme.colorScheme.onBackground
+                )
+            }
+            Column(modifier = Modifier.weight(1f).padding(start = 12.dp)) {
+                Text(
+                    transaction.merchantName, 
+                    style = MaterialTheme.typography.bodyLarge, 
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onBackground
                 )
                 Text(
-                    " · ${transaction.sourceLabel}",
-                    style = MaterialTheme.typography.bodySmall,
+                    SimpleDateFormat("MMM d, h:mm a", Locale.US).format(Date(transaction.timestamp)),
+                    style = MaterialTheme.typography.labelSmall,
                     color = tranzoTheme.textMuted
                 )
             }
+            Text(
+                "-${formatCurrency(transaction.amount)}", 
+                style = MaterialTheme.typography.titleMedium, 
+                fontWeight = FontWeight.Black, 
+                color = MaterialTheme.colorScheme.onBackground
+            )
         }
-        Text("-${formatCurrency(transaction.amount)}", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.onBackground)
     }
 }

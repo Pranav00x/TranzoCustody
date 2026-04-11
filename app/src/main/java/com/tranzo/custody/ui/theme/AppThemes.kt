@@ -66,28 +66,28 @@ val AppThemes: Map<AppThemeId, TranzoAppTheme> = mapOf(
         cardDarkEnd = Color(0xFF2D2D2D),
     ),
 
-    // ── 2. Midnight (pure dark) ──
+    // ── 2. Midnight (Neumorphic Slate) ──
     AppThemeId.MIDNIGHT to TranzoAppTheme(
         id = AppThemeId.MIDNIGHT,
         displayName = "Midnight",
         isDark = true,
         primary = Color(0xFFFFFFFF),
-        onPrimary = Color(0xFF000000),
-        background = Color(0xFF0D0D0D),
-        surface = Color(0xFF1A1A1A),
-        surfaceSecondary = Color(0xFF222222),
-        cardBackground = Color(0xFF1E1E1E),
-        textPrimary = Color(0xFFFFFFFF),
-        textSecondary = Color(0xFFAAAAAA),
-        textMuted = Color(0xFF777777),
-        accent = Color(0xFFFFFFFF),
-        accentLight = Color(0xFFE0E0E0),
+        onPrimary = Color(0xFF1C1E21),
+        background = Color(0xFF1C1E21), // Soft Slate
+        surface = Color(0xFF1C1E21),    // Same as background for Neumorphism
+        surfaceSecondary = Color(0xFF22252A),
+        cardBackground = Color(0xFF1C1E21),
+        textPrimary = Color(0xFFE2E8F0),
+        textSecondary = Color(0xFF94A3B8),
+        textMuted = Color(0xFF64748B),
+        accent = Color(0xFF38BDF8),
+        accentLight = Color(0xFF7DD3FC),
         positive = Color(0xFF34D399),
         negative = Color(0xFFF87171),
-        border = Color(0x1AFFFFFF),
-        divider = Color(0x0DFFFFFF),
-        cardDarkStart = Color(0xFF2A2A2A),
-        cardDarkEnd = Color(0xFF3D3D3D),
+        border = Color(0x33FFFFFF),
+        divider = Color(0x1AFFFFFF),
+        cardDarkStart = Color(0xFF24272B),
+        cardDarkEnd = Color(0xFF2C3036),
     ),
 
     // ── 3. Ocean (deep blue) ──

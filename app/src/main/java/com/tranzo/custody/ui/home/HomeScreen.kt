@@ -51,8 +51,8 @@ import com.tranzo.custody.ui.components.QuickActionButton
 import com.tranzo.custody.ui.components.ShimmerAssetItem
 import com.tranzo.custody.ui.components.formatCurrency
 import com.tranzo.custody.ui.theme.LocalTranzoTheme
-import com.tranzo.custody.ui.util.minimalCard
-import com.tranzo.custody.ui.util.glassOnDark
+import com.tranzo.custody.ui.util.neumorphicCard
+import com.tranzo.custody.ui.util.neumorphicExtruded
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -78,230 +78,170 @@ fun HomeScreen(
             LazyColumn(
                 modifier = Modifier.fillMaxSize()
             ) {
-            // Header
-            item {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 20.dp, vertical = 16.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    IconButton(onClick = { }) {
-                        Icon(Icons.Default.QrCode, "QR Code", tint = MaterialTheme.colorScheme.onBackground, modifier = Modifier.size(24.dp))
-                    }
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        modifier = Modifier.weight(1f)
+                // Header
+                item {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 24.dp, vertical = 20.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Text(
-                            text = "Tranzo",
-                            style = MaterialTheme.typography.headlineMedium,
-                            fontWeight = FontWeight.ExtraBold,
-                            color = MaterialTheme.colorScheme.onBackground
-                        )
-                        if (state.smartWalletAddress.isNotEmpty()) {
-                            Spacer(modifier = Modifier.height(4.dp))
-                            val truncated = if (state.smartWalletAddress.length > 12) {
-                                state.smartWalletAddress.take(6) + "…" + state.smartWalletAddress.takeLast(4)
-                            } else state.smartWalletAddress
-                            Text(
-                                text = truncated,
-                                style = MaterialTheme.typography.labelSmall,
-                                color = LocalTranzoTheme.current.textMuted,
-                                maxLines = 1
-                            )
+                        Box(
+                            modifier = Modifier
+                                .size(44.dp)
+                                .neumorphicExtruded(cornerRadius = 22.dp, elevation = 3.dp, backgroundColor = MaterialTheme.colorScheme.background)
+                                .clickable { },
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(Icons.Default.QrCode, "QR Code", tint = MaterialTheme.colorScheme.onBackground, modifier = Modifier.size(20.dp))
                         }
-                    }
-                    IconButton(onClick = { }) {
-                        Icon(Icons.Default.Notifications, "Notifications", tint = MaterialTheme.colorScheme.onBackground, modifier = Modifier.size(24.dp))
-                    }
-                }
-            }
 
-            // Total Portfolio Balance
-            item {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 20.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    Text("Total Portfolio", style = MaterialTheme.typography.bodyMedium, color = LocalTranzoTheme.current.textMuted)
-                    Spacer(modifier = Modifier.height(4.dp))
-
-                    if (state.isLoading) {
-                        Text("Loading...", style = MaterialTheme.typography.bodyMedium, color = LocalTranzoTheme.current.textMuted)
-                    } else {
-                        state.portfolio?.let { portfolio ->
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
                             Text(
-                                text = formatCurrency(portfolio.totalBalanceFiat),
-                                style = MaterialTheme.typography.displayLarge,
-                                fontWeight = FontWeight.ExtraBold,
+                                text = "TRANZO",
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.Black,
+                                letterSpacing = 4.sp,
                                 color = MaterialTheme.colorScheme.onBackground
                             )
-                            Spacer(modifier = Modifier.height(4.dp))
-                            val changeColor = if (portfolio.dailyChangePercent >= 0) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.error
-                            val prefix = if (portfolio.dailyChangePercent >= 0) "+" else ""
-                            Text(
-                                text = "$prefix${"%.2f".format(portfolio.dailyChangePercent)}% today",
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = changeColor,
-                                fontWeight = FontWeight.SemiBold
-                            )
+                        }
+
+                        Box(
+                            modifier = Modifier
+                                .size(44.dp)
+                                .neumorphicExtruded(cornerRadius = 22.dp, elevation = 3.dp, backgroundColor = MaterialTheme.colorScheme.background)
+                                .clickable { },
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(Icons.Default.Notifications, "Notifications", tint = MaterialTheme.colorScheme.onBackground, modifier = Modifier.size(20.dp))
                         }
                     }
+                }
 
+                // Total Portfolio Balance
+                item {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 24.dp, vertical = 20.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Text("Portfolio Value", style = MaterialTheme.typography.bodyMedium, color = LocalTranzoTheme.current.textMuted)
+                        Spacer(modifier = Modifier.height(8.dp))
+
+                        if (state.isLoading) {
+                            Text("Loading...", style = MaterialTheme.typography.bodyMedium, color = LocalTranzoTheme.current.textMuted)
+                        } else {
+                            state.portfolio?.let { portfolio ->
+                                Text(
+                                    text = formatCurrency(portfolio.totalBalanceFiat),
+                                    style = MaterialTheme.typography.displayMedium,
+                                    fontWeight = FontWeight.Bold,
+                                    color = MaterialTheme.colorScheme.onBackground
+                                )
+                                Spacer(modifier = Modifier.height(8.dp))
+                                val changeColor = if (portfolio.dailyChangePercent >= 0) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.error
+                                val prefix = if (portfolio.dailyChangePercent >= 0) "+" else ""
+                                Text(
+                                    text = "$prefix${"%.2f".format(portfolio.dailyChangePercent)}% today",
+                                    style = MaterialTheme.typography.labelLarge,
+                                    color = changeColor,
+                                    fontWeight = FontWeight.SemiBold
+                                )
+                            }
+                        }
+                    }
+                }
+
+                // Balance Cards
+                item {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 24.dp),
+                        horizontalArrangement = Arrangement.spacedBy(16.dp)
+                    ) {
+                        // Wallet Balance
+                        Box(
+                            modifier = Modifier
+                                .weight(1f)
+                                .neumorphicExtruded(cornerRadius = 24.dp, elevation = 6.dp, backgroundColor = MaterialTheme.colorScheme.background)
+                                .padding(20.dp)
+                        ) {
+                            Column {
+                                Icon(Icons.Default.AccountBalanceWallet, null, tint = MaterialTheme.colorScheme.primary.copy(0.6f), modifier = Modifier.size(20.dp))
+                                Spacer(modifier = Modifier.height(12.dp))
+                                Text("Wallet", style = MaterialTheme.typography.labelSmall, color = LocalTranzoTheme.current.textMuted)
+                                Text(
+                                    text = formatCurrency(state.portfolio?.walletBalanceFiat ?: 0.0),
+                                    style = MaterialTheme.typography.titleLarge,
+                                    fontWeight = FontWeight.Bold,
+                                    color = MaterialTheme.colorScheme.onBackground
+                                )
+                            }
+                        }
+
+                        // Spendable Balance
+                        Box(
+                            modifier = Modifier
+                                .weight(1f)
+                                .neumorphicExtruded(cornerRadius = 24.dp, elevation = 6.dp, backgroundColor = MaterialTheme.colorScheme.background)
+                                .clickable(onClick = onAddToSpend)
+                                .padding(20.dp)
+                        ) {
+                            Column {
+                                Icon(Icons.Default.CreditCard, null, tint = MaterialTheme.colorScheme.tertiary, modifier = Modifier.size(20.dp))
+                                Spacer(modifier = Modifier.height(12.dp))
+                                Text("Spendable", style = MaterialTheme.typography.labelSmall, color = LocalTranzoTheme.current.textMuted)
+                                Text(
+                                    text = formatCurrency(state.portfolio?.spendableBalanceFiat ?: 0.0),
+                                    style = MaterialTheme.typography.titleLarge,
+                                    fontWeight = FontWeight.Bold,
+                                    color = MaterialTheme.colorScheme.tertiary
+                                )
+                            }
+                        }
+                    }
                     Spacer(modifier = Modifier.height(24.dp))
                 }
-            }
 
-            // Two Balance Cards
-            item {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 20.dp),
-                    horizontalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                    // Wallet Balance
-                    Box(
-                        modifier = Modifier
-                            .weight(1f)
-                            .minimalCard(
-                                cornerRadius = 20.dp,
-                                backgroundColor = MaterialTheme.colorScheme.surface,
-                                borderColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.1f)
-                            )
-                            .padding(16.dp)
-                    ) {
-                        Column {
-                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                Icon(Icons.Default.AccountBalanceWallet, null, tint = MaterialTheme.colorScheme.onBackground, modifier = Modifier.size(16.dp))
-                                Spacer(modifier = Modifier.width(6.dp))
-                                Text("Wallet", style = MaterialTheme.typography.labelMedium, color = LocalTranzoTheme.current.textMuted)
-                            }
-                            Spacer(modifier = Modifier.height(8.dp))
-                            Text(
-                                text = formatCurrency(state.portfolio?.walletBalanceFiat ?: 0.0),
-                                style = MaterialTheme.typography.titleLarge,
-                                fontWeight = FontWeight.Bold,
-                                color = MaterialTheme.colorScheme.onBackground,
-                                fontSize = 20.sp
-                            )
-                            Spacer(modifier = Modifier.height(2.dp))
-                            Text("Deposited · Crypto assets", style = MaterialTheme.typography.labelSmall, color = LocalTranzoTheme.current.textMuted, lineHeight = 14.sp)
-                        }
-                    }
-
-                    // Spendable Balance
-                    Box(
-                        modifier = Modifier
-                            .weight(1f)
-                            .minimalCard(
-                                cornerRadius = 20.dp,
-                                backgroundColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.03f),
-                                borderColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)
-                            )
-                            .clickable(onClick = onAddToSpend)
-                            .padding(16.dp)
-                    ) {
-                        Column {
-                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                Icon(Icons.Default.CreditCard, null, tint = MaterialTheme.colorScheme.tertiary, modifier = Modifier.size(16.dp))
-                                Spacer(modifier = Modifier.width(6.dp))
-                                Text("Spendable", style = MaterialTheme.typography.labelMedium, color = LocalTranzoTheme.current.textMuted)
-                            }
-                            Spacer(modifier = Modifier.height(8.dp))
-                            Text(
-                                text = formatCurrency(state.portfolio?.spendableBalanceFiat ?: 0.0),
-                                style = MaterialTheme.typography.titleLarge,
-                                fontWeight = FontWeight.Bold,
-                                color = MaterialTheme.colorScheme.tertiary,
-                                fontSize = 20.sp
-                            )
-                            Spacer(modifier = Modifier.height(2.dp))
-                            Text("Card balance · Payments", style = MaterialTheme.typography.labelSmall, color = LocalTranzoTheme.current.textMuted, lineHeight = 14.sp)
-                        }
-                    }
-                }
-
-                Spacer(modifier = Modifier.height(12.dp))
-
-                // Add to Spend button
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 20.dp)
-                        .minimalCard(
-                            cornerRadius = 16.dp,
-                            backgroundColor = LocalTranzoTheme.current.surfaceSecondary,
-                            borderWidth = 0.dp
-                        )
-                        .clickable(onClick = onAddToSpend)
-                        .padding(horizontal = 16.dp, vertical = 16.dp)
-                ) {
+                // Quick Actions
+                item {
                     Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.Center
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 24.dp, vertical = 12.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween
                     ) {
-                        Icon(Icons.Default.Add, null, tint = MaterialTheme.colorScheme.tertiary, modifier = Modifier.size(18.dp))
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text(
-                            "Add to Spendable Balance",
-                            style = MaterialTheme.typography.labelLarge,
-                            color = MaterialTheme.colorScheme.tertiary,
-                            fontWeight = FontWeight.SemiBold
-                        )
+                        QuickActionButton(icon = Icons.Default.ArrowUpward, label = "Send", onClick = onSendClick)
+                        QuickActionButton(icon = Icons.Default.ArrowDownward, label = "Receive", onClick = onReceiveClick)
+                        QuickActionButton(icon = Icons.Default.SwapHoriz, label = "Swap", onClick = onSwapClick)
+                        QuickActionButton(icon = Icons.Default.ShoppingCart, label = "Buy", onClick = onBuyClick)
+                    }
+                    Spacer(modifier = Modifier.height(32.dp))
+                }
+
+                // Assets Header
+                item {
+                    Text(
+                        text = "Assets",
+                        style = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onBackground,
+                        modifier = Modifier.padding(horizontal = 24.dp, vertical = 12.dp)
+                    )
+                }
+
+                if (state.isLoading) {
+                    items(5) { ShimmerAssetItem() }
+                } else {
+                    items(state.portfolio?.tokens ?: emptyList()) { token ->
+                        AssetListItem(token = token)
                     }
                 }
 
-                Spacer(modifier = Modifier.height(28.dp))
             }
-
-            // Quick Actions
-            item {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 32.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    QuickActionButton(icon = Icons.Default.ArrowUpward, label = "Send", onClick = onSendClick)
-                    QuickActionButton(icon = Icons.Default.ArrowDownward, label = "Receive", onClick = onReceiveClick)
-                    QuickActionButton(icon = Icons.Default.SwapHoriz, label = "Swap", onClick = onSwapClick)
-                    QuickActionButton(icon = Icons.Default.ShoppingCart, label = "Buy", onClick = onBuyClick)
-                }
-                Spacer(modifier = Modifier.height(32.dp))
-            }
-
-            // Assets header
-            item {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 20.dp, vertical = 8.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Column {
-                        Text("Your Assets", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onBackground)
-                        Text("Deposited crypto · Managed by Tranzo", style = MaterialTheme.typography.bodySmall, color = LocalTranzoTheme.current.textMuted)
-                    }
-                }
-            }
-
-            if (state.isLoading) {
-                items(5) { ShimmerAssetItem() }
-            } else {
-                items(state.portfolio?.tokens ?: emptyList()) { token ->
-                    AssetListItem(token = token)
-                }
-            }
-
-            item { Spacer(modifier = Modifier.height(16.dp)) }
         }
     }
-}
 }

@@ -35,25 +35,22 @@ import com.tranzo.custody.ui.theme.GoldChipLight
 import com.tranzo.custody.ui.theme.LocalTranzoTheme
 import com.tranzo.custody.ui.util.glassOnDark
 
+import com.tranzo.custody.ui.util.neumorphicExtruded
+
 @Composable
 fun CryptoCardView(
     card: CryptoCard,
     modifier: Modifier = Modifier
 ) {
-    val cardDarkStart = LocalTranzoTheme.current.cardDarkStart
-    val cardDarkEnd = LocalTranzoTheme.current.cardDarkEnd
-
     Box(
         modifier = modifier
             .fillMaxWidth()
             .height(210.dp)
-            .clip(RoundedCornerShape(20.dp))
-            .background(
-                Brush.linearGradient(
-                    colors = listOf(cardDarkStart, cardDarkEnd)
-                )
+            .neumorphicExtruded(
+                cornerRadius = 24.dp, 
+                elevation = 8.dp, 
+                backgroundColor = MaterialTheme.colorScheme.background
             )
-            .border(1.dp, Color.White.copy(0.1f), RoundedCornerShape(20.dp))
             .padding(24.dp)
     ) {
         Column(
@@ -66,38 +63,36 @@ fun CryptoCardView(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = "Tranzo",
-                    color = MaterialTheme.colorScheme.onPrimary,
-                    fontSize = 22.sp,
-                    fontWeight = FontWeight.ExtraBold,
-                    letterSpacing = 1.sp
+                    text = "TRANZO",
+                    color = MaterialTheme.colorScheme.onBackground,
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.Black,
+                    letterSpacing = 4.sp
                 )
                 Icon(
                     imageVector = Icons.Default.Contactless,
                     contentDescription = "Contactless",
-                    tint = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.8f),
-                    modifier = Modifier.size(28.dp)
+                    tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.6f),
+                    modifier = Modifier.size(24.dp)
                 )
             }
 
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Box(
                     modifier = Modifier
-                        .size(width = 40.dp, height = 30.dp)
-                        .clip(RoundedCornerShape(4.dp))
-                        .background(
-                            Brush.horizontalGradient(
-                                colors = listOf(GoldChip, GoldChipLight)
-                            )
-                        )
+                        .size(width = 44.dp, height = 32.dp)
+                        .neumorphicExtruded(
+                            cornerRadius = 6.dp, 
+                            elevation = 2.dp, 
+                            backgroundColor = MaterialTheme.colorScheme.background
+                        ),
+                    contentAlignment = Alignment.Center
                 ) {
                     Icon(
                         imageVector = Icons.Default.Memory,
                         contentDescription = null,
-                        tint = GoldChip.copy(alpha = 0.6f),
-                        modifier = Modifier
-                            .size(20.dp)
-                            .align(Alignment.Center)
+                        tint = Color(0xFFD4A843).copy(alpha = 0.8f),
+                        modifier = Modifier.size(22.dp)
                     )
                 }
             }
@@ -105,12 +100,12 @@ fun CryptoCardView(
             Column {
                 Text(
                     text = "••••  ••••  ••••  ${card.lastFourDigits}",
-                    color = MaterialTheme.colorScheme.onPrimary,
-                    fontSize = 18.sp,
-                    fontWeight = FontWeight.Medium,
+                    color = MaterialTheme.colorScheme.onBackground,
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.Bold,
                     letterSpacing = 2.sp
                 )
-                Spacer(modifier = Modifier.height(8.dp))
+                Spacer(modifier = Modifier.height(12.dp))
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
@@ -118,24 +113,25 @@ fun CryptoCardView(
                 ) {
                     Column {
                         Text(
-                            text = card.cardholderName,
-                            color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.7f),
-                            fontSize = 10.sp,
-                            fontWeight = FontWeight.Medium,
+                            text = card.cardholderName.uppercase(),
+                            color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f),
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.Bold,
                             letterSpacing = 1.sp
                         )
                         Text(
                             text = "EXP ${card.expiryDate}",
-                            color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.5f),
-                            fontSize = 10.sp
+                            color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.4f),
+                            fontSize = 10.sp,
+                            fontWeight = FontWeight.Medium
                         )
                     }
                     Text(
                         text = "VISA",
-                        color = MaterialTheme.colorScheme.onPrimary,
-                        fontSize = 20.sp,
-                        fontWeight = FontWeight.ExtraBold,
-                        letterSpacing = 2.sp
+                        color = MaterialTheme.colorScheme.onBackground,
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.Black,
+                        letterSpacing = 1.sp
                     )
                 }
             }

@@ -18,6 +18,10 @@ import com.tranzo.custody.domain.model.Token
 import com.tranzo.custody.ui.theme.LocalTranzoTheme
 import java.text.NumberFormat
 import java.util.Locale
+import com.tranzo.custody.ui.util.neumorphicExtruded
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.size
 
 @Composable
 fun AssetListItem(
@@ -25,44 +29,52 @@ fun AssetListItem(
     onClick: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
-    Row(
+    Box(
         modifier = modifier
             .fillMaxWidth()
+            .padding(horizontal = 24.dp, vertical = 8.dp)
+            .neumorphicExtruded(cornerRadius = 16.dp, elevation = 3.dp, backgroundColor = MaterialTheme.colorScheme.background)
             .clickable(onClick = onClick)
-            .padding(horizontal = 20.dp, vertical = 14.dp),
-        verticalAlignment = Alignment.CenterVertically
+            .padding(16.dp)
     ) {
-        TokenIcon(
-            symbol = token.symbol,
-            size = 44.dp
-        )
+        Row(
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            TokenIcon(
+                symbol = token.symbol,
+                size = 40.dp
+            )
 
-        Spacer(modifier = Modifier.width(12.dp))
+            Spacer(modifier = Modifier.width(16.dp))
 
-        Column(modifier = Modifier.weight(1f)) {
-            Text(
-                text = token.symbol,
-                style = MaterialTheme.typography.titleSmall,
-                color = MaterialTheme.colorScheme.onBackground
-            )
-            Text(
-                text = token.name,
-                style = MaterialTheme.typography.bodySmall,
-                color = LocalTranzoTheme.current.textMuted
-            )
-        }
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = token.symbol,
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onBackground
+                )
+                Text(
+                    text = token.name,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = LocalTranzoTheme.current.textMuted
+                )
+            }
 
-        Column(horizontalAlignment = Alignment.End) {
-            Text(
-                text = formatCurrency(token.fiatValue),
-                style = MaterialTheme.typography.titleSmall,
-                color = MaterialTheme.colorScheme.onBackground
-            )
-            Text(
-                text = "${if (token.priceChange24h >= 0) "+" else ""}${"%.2f".format(token.priceChange24h)}%",
-                style = MaterialTheme.typography.bodySmall,
-                color = if (token.priceChange24h >= 0) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.error
-            )
+            Column(horizontalAlignment = Alignment.End) {
+                Text(
+                    text = formatCurrency(token.fiatValue),
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onBackground
+                )
+                Text(
+                    text = "${if (token.priceChange24h >= 0) "+" else ""}${"%.2f".format(token.priceChange24h)}%",
+                    style = MaterialTheme.typography.labelSmall,
+                    fontWeight = FontWeight.SemiBold,
+                    color = if (token.priceChange24h >= 0) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.error
+                )
+            }
         }
     }
 }
