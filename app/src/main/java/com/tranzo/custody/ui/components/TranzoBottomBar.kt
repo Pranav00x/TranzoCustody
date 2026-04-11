@@ -24,7 +24,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
-import com.tranzo.custody.ui.util.glassCard
+import com.tranzo.custody.ui.util.minimalCard
 import com.tranzo.custody.ui.theme.LocalTranzoTheme
 
 data class BottomNavItem(

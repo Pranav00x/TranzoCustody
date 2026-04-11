@@ -60,8 +60,7 @@ import java.util.Locale
 
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.graphics.Brush
-import com.tranzo.custody.ui.util.glassCard
-import com.tranzo.custody.ui.util.glassOnDark
+import com.tranzo.custody.ui.util.minimalCard
 
 @Composable
 fun CardScreen(
@@ -270,7 +269,7 @@ fun CardScreen(
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .glassCard(cornerRadius = 20.dp, alpha = 0.08f)
+                            .minimalCard(cornerRadius = 20.dp, borderWidth = 0.dp)
                             .padding(24.dp)
                     ) {
                         Column {
@@ -357,7 +356,7 @@ private fun CardActionItem(icon: ImageVector, label: String, onClick: () -> Unit
     Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(8.dp)) {
         IconButton(
             onClick = onClick,
-            modifier = Modifier.size(52.dp).clip(CircleShape).background(MaterialTheme.colorScheme.surfaceSecondary)
+            modifier = Modifier.size(52.dp).clip(CircleShape).background(LocalTranzoTheme.current.surfaceSecondary)
         ) {
             Icon(icon, label, tint = MaterialTheme.colorScheme.onBackground, modifier = Modifier.size(24.dp))
         }

@@ -51,7 +51,7 @@ import com.tranzo.custody.ui.components.QuickActionButton
 import com.tranzo.custody.ui.components.ShimmerAssetItem
 import com.tranzo.custody.ui.components.formatCurrency
 import com.tranzo.custody.ui.theme.LocalTranzoTheme
-import com.tranzo.custody.ui.util.glassCard
+import com.tranzo.custody.ui.util.minimalCard
 import com.tranzo.custody.ui.util.glassOnDark
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -235,7 +235,7 @@ fun HomeScreen(
                         .padding(horizontal = 20.dp)
                         .minimalCard(
                             cornerRadius = 16.dp,
-                            backgroundColor = MaterialTheme.colorScheme.surfaceSecondary,
+                            backgroundColor = LocalTranzoTheme.current.surfaceSecondary,
                             borderWidth = 0.dp
                         )
                         .clickable(onClick = onAddToSpend)

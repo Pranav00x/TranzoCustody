@@ -45,6 +45,7 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import com.tranzo.custody.ui.theme.LocalTranzoTheme
 import com.tranzo.custody.ui.util.glassCard
+import com.tranzo.custody.ui.util.minimalCard
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

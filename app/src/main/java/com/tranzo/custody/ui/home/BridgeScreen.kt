@@ -51,8 +51,7 @@ import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.graphics.Brush
 import com.tranzo.custody.ui.components.formatCurrency
 import com.tranzo.custody.ui.theme.LocalTranzoTheme
-import com.tranzo.custody.ui.util.glassCard
-import com.tranzo.custody.ui.util.glassOnDark
+import com.tranzo.custody.ui.util.minimalCard
 
 @Composable
 fun BridgeScreen(
@@ -113,7 +112,7 @@ fun BridgeScreen(
                 .fillMaxWidth()
                 .minimalCard(
                     cornerRadius = 20.dp,
-                    backgroundColor = MaterialTheme.colorScheme.surfaceSecondary,
+                    backgroundColor = LocalTranzoTheme.current.surfaceSecondary,
                     borderWidth = 0.dp
                 )
                 .padding(20.dp)

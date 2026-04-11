@@ -13,12 +13,11 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import com.tranzo.custody.ui.util.glassCard
+import com.tranzo.custody.ui.theme.LocalTranzoTheme
+import com.tranzo.custody.ui.util.minimalCard
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
-
-import com.tranzo.custody.ui.util.glassCard
 
 @Composable
 fun QuickActionButton(
@@ -27,6 +26,7 @@ fun QuickActionButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val tranzoTheme = LocalTranzoTheme.current
     Column(
         modifier = modifier.clickable(onClick = onClick),
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -36,7 +36,7 @@ fun QuickActionButton(
             modifier = Modifier
                 .size(56.dp)
                 .clip(CircleShape)
-                .background(MaterialTheme.colorScheme.surfaceSecondary),
+                .background(tranzoTheme.surfaceSecondary),
             contentAlignment = Alignment.Center
         ) {
             Icon(

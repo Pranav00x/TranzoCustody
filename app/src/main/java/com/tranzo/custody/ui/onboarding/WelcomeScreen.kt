@@ -31,7 +31,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.draw.drawBehind
 import com.tranzo.custody.ui.theme.LocalTranzoTheme
-import com.tranzo.custody.ui.util.glassCard
+import com.tranzo.custody.ui.util.minimalCard
 
 @Composable
 fun WelcomeScreen(

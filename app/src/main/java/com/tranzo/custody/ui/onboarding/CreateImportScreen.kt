@@ -44,7 +44,7 @@ import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import com.tranzo.custody.ui.theme.LocalTranzoTheme
-import com.tranzo.custody.ui.util.glassCard
+import com.tranzo.custody.ui.util.minimalCard
 
 @Composable
 fun CreateWalletScreen(
@@ -123,7 +123,7 @@ fun CreateWalletScreen(
                                 .weight(1f)
                                 .minimalCard(
                                     cornerRadius = 12.dp,
-                                    backgroundColor = MaterialTheme.colorScheme.surfaceSecondary,
+                                    backgroundColor = LocalTranzoTheme.current.surfaceSecondary,
                                     borderWidth = 0.dp
                                 )
                                 .padding(12.dp)
