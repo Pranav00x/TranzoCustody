@@ -12,6 +12,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -233,26 +234,41 @@ class OnboardingViewModel @Inject constructor(
             _state.value = _state.value.copy(isLoading = true, setupError = null, error = null)
             try {
                 withContext(Dispatchers.IO) {
+                    // 1. Derive credentials (ECKeyPair) - fast local computation
                     val creds = mnemonicManager.deriveCredentials(mnemonic)
-                    val predicted = smartAccountManager.computeCounterfactualAddress(
-                        creds.address,
-                        BigInteger.valueOf(SALT)
-                    )
-
-                    // Register with email/password — backend creates user + returns JWT tokens
-                    val smart = try {
-                        val authUser = authRepository.signup(
-                            email = email,
-                            password = password,
-                            ownerAddr = creds.address,
-                            chainId = BuildConfig.DEFAULT_CHAIN_ID
-                        )
-                        authUser.smartWalletAddr.lowercase().takeIf { it.isNotBlank() } ?: predicted
-                    } catch (_: Exception) {
-                        // Signup failed — continue with locally computed address
-                        predicted
+                    
+                    // 2. Compute predicted address and call signup IN PARALLEL
+                    val predictedDeferred = async {
+                        try {
+                            smartAccountManager.computeCounterfactualAddress(
+                                creds.address,
+                                BigInteger.valueOf(SALT)
+                            )
+                        } catch (e: Exception) {
+                            null as String?
+                        }
                     }
 
+                    val signupDeferred = async {
+                        try {
+                            authRepository.signup(
+                                email = email,
+                                password = password,
+                                ownerAddr = creds.address,
+                                chainId = BuildConfig.DEFAULT_CHAIN_ID
+                            )
+                        } catch (e: Exception) {
+                            null
+                        }
+                    }
+
+                    val predicted = predictedDeferred.await()
+                    val authUser = signupDeferred.await()
+                    
+                    val smart = (authUser?.smartWalletAddr?.lowercase()?.takeIf { it.isNotBlank() } 
+                                ?: predicted) ?: throw IllegalStateException("Failed to determine smart wallet address. Please check your connection.")
+
+                    // 3. Persist keys and session
                     signingManager.persistCredentials(creds)
                     sessionManager.saveWalletSession(
                         ownerAddress = creds.address,

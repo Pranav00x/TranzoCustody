@@ -46,11 +46,7 @@ class SmartAccountManager @Inject constructor(
                     w3.shutdown()
                 }
                 if (attempt < RETRIES_PER_URL - 1) {
-                    try {
-                        Thread.sleep(350L)
-                    } catch (_: InterruptedException) {
-                        Thread.currentThread().interrupt()
-                    }
+                    // Retry immediately without sleep to minimize wait time
                 }
             }
         }
