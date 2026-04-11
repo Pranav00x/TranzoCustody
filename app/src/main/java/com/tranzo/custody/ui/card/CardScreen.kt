@@ -57,9 +57,6 @@ import com.tranzo.custody.ui.theme.LocalTranzoTheme
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
-import com.tranzo.custody.ui.util.neumorphicCard
-import com.tranzo.custody.ui.util.neumorphicExtruded
-import com.tranzo.custody.ui.util.neumorphicPressed
 
 
 
@@ -93,7 +90,8 @@ fun CardScreen(
                     Box(
                         modifier = Modifier
                             .size(44.dp)
-                            .neumorphicExtruded(cornerRadius = 22.dp, elevation = 3.dp, backgroundColor = MaterialTheme.colorScheme.background)
+                            .clip(RoundedCornerShape(22.dp))
+                            .background(MaterialTheme.colorScheme.surfaceVariant)
                             .clickable { },
                         contentAlignment = Alignment.Center
                     ) {
@@ -172,7 +170,8 @@ private fun CardActionItem(icon: ImageVector, label: String, onClick: () -> Unit
         Box(
             modifier = Modifier
                 .size(56.dp)
-                .neumorphicExtruded(cornerRadius = 28.dp, elevation = 2.dp, backgroundColor = MaterialTheme.colorScheme.background)
+                .clip(RoundedCornerShape(28.dp))
+                .background(MaterialTheme.colorScheme.surfaceVariant)
                 .clickable(onClick = onClick),
             contentAlignment = Alignment.Center
         ) {
@@ -189,7 +188,8 @@ private fun CardTransactionItem(transaction: CardTransaction) {
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 24.dp, vertical = 6.dp)
-            .neumorphicExtruded(cornerRadius = 16.dp, elevation = 2.dp, backgroundColor = MaterialTheme.colorScheme.background)
+            .clip(RoundedCornerShape(16.dp))
+            .background(MaterialTheme.colorScheme.surfaceVariant)
             .padding(16.dp)
     ) {
         Row(
@@ -198,7 +198,8 @@ private fun CardTransactionItem(transaction: CardTransaction) {
             Box(
                 modifier = Modifier
                     .size(44.dp)
-                    .neumorphicPressed(cornerRadius = 22.dp, elevation = 1.dp, backgroundColor = MaterialTheme.colorScheme.background),
+                    .clip(RoundedCornerShape(22.dp))
+                    .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)),
                 contentAlignment = Alignment.Center
             ) {
                 Text(

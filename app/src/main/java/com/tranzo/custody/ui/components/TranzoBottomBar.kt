@@ -24,8 +24,6 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
-import com.tranzo.custody.ui.util.neumorphicExtruded
-import com.tranzo.custody.ui.util.neumorphicPressed
 import com.tranzo.custody.ui.theme.LocalTranzoTheme
 
 data class BottomNavItem(
@@ -59,13 +57,18 @@ fun TranzoBottomBar(
     ) {
         Box(
             modifier = Modifier
-                .height(68.dp)
+                .height(64.dp)
                 .fillMaxWidth()
-                .neumorphicExtruded(
-                    cornerRadius = 34.dp, 
-                    elevation = 6.dp, 
-                    backgroundColor = MaterialTheme.colorScheme.background
+                .clip(RoundedCornerShape(32.dp))
+                .background(
+                    Brush.verticalGradient(
+                        listOf(
+                            MaterialTheme.colorScheme.surface,
+                            MaterialTheme.colorScheme.surface.copy(alpha = 0.95f)
+                        )
+                    )
                 )
+                .border(1.dp, Color.White.copy(alpha = 0.06f), RoundedCornerShape(32.dp))
         ) {
             Row(
                 modifier = Modifier.fillMaxSize(),
@@ -74,17 +77,15 @@ fun TranzoBottomBar(
             ) {
                 bottomNavItems.forEach { item ->
                     val selected = currentRoute == item.route
-                    
+
                     Box(
                         modifier = Modifier
-                            .size(52.dp)
+                            .size(48.dp)
                             .then(
                                 if (selected) {
-                                    Modifier.neumorphicPressed(
-                                        cornerRadius = 26.dp, 
-                                        elevation = 3.dp, 
-                                        backgroundColor = MaterialTheme.colorScheme.background
-                                    )
+                                    Modifier
+                                        .clip(CircleShape)
+                                        .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.12f))
                                 } else Modifier
                             )
                             .clip(CircleShape)
@@ -94,8 +95,8 @@ fun TranzoBottomBar(
                         Icon(
                             imageVector = if (selected) item.selectedIcon else item.unselectedIcon,
                             contentDescription = item.label,
-                            modifier = Modifier.size(24.dp),
-                            tint = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
+                            modifier = Modifier.size(22.dp),
+                            tint = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f)
                         )
                     }
                 }

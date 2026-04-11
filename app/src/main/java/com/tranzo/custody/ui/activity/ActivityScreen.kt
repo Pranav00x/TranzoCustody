@@ -38,8 +38,8 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import com.tranzo.custody.ui.components.TransactionItem
 import com.tranzo.custody.ui.theme.LocalTranzoTheme
-import com.tranzo.custody.ui.util.neumorphicExtruded
-import com.tranzo.custody.ui.util.neumorphicPressed
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.ui.unit.sp
 
 
@@ -81,7 +81,8 @@ fun ActivityScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 24.dp)
-                    .neumorphicPressed(cornerRadius = 16.dp, elevation = 2.dp, backgroundColor = MaterialTheme.colorScheme.background)
+                    .clip(RoundedCornerShape(16.dp))
+                    .background(MaterialTheme.colorScheme.surfaceVariant)
                     .padding(horizontal = 16.dp, vertical = 4.dp),
                 contentAlignment = Alignment.CenterStart
             ) {
@@ -116,9 +117,13 @@ fun ActivityScreen(
                         modifier = Modifier
                             .then(
                                 if (isSelected) {
-                                    Modifier.neumorphicPressed(cornerRadius = 12.dp, elevation = 2.dp, backgroundColor = MaterialTheme.colorScheme.background)
+                                    Modifier
+                                        .clip(RoundedCornerShape(12.dp))
+                                        .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.15f))
                                 } else {
-                                    Modifier.neumorphicExtruded(cornerRadius = 12.dp, elevation = 2.dp, backgroundColor = MaterialTheme.colorScheme.background)
+                                    Modifier
+                                        .clip(RoundedCornerShape(12.dp))
+                                        .background(MaterialTheme.colorScheme.surfaceVariant)
                                 }
                             )
                             .clickable { viewModel.setFilter(filter) }

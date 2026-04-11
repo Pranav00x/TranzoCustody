@@ -51,8 +51,7 @@ import com.tranzo.custody.ui.components.QuickActionButton
 import com.tranzo.custody.ui.components.ShimmerAssetItem
 import com.tranzo.custody.ui.components.formatCurrency
 import com.tranzo.custody.ui.theme.LocalTranzoTheme
-import com.tranzo.custody.ui.util.neumorphicCard
-import com.tranzo.custody.ui.util.neumorphicExtruded
+import androidx.compose.foundation.border
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -90,7 +89,9 @@ fun HomeScreen(
                         Box(
                             modifier = Modifier
                                 .size(44.dp)
-                                .neumorphicExtruded(cornerRadius = 22.dp, elevation = 3.dp, backgroundColor = MaterialTheme.colorScheme.background)
+                                .clip(RoundedCornerShape(22.dp))
+                                .background(MaterialTheme.colorScheme.surfaceVariant)
+                                .border(1.dp, Color.White.copy(alpha = 0.04f), RoundedCornerShape(22.dp))
                                 .clickable { },
                             contentAlignment = Alignment.Center
                         ) {
@@ -110,7 +111,9 @@ fun HomeScreen(
                         Box(
                             modifier = Modifier
                                 .size(44.dp)
-                                .neumorphicExtruded(cornerRadius = 22.dp, elevation = 3.dp, backgroundColor = MaterialTheme.colorScheme.background)
+                                .clip(RoundedCornerShape(22.dp))
+                                .background(MaterialTheme.colorScheme.surfaceVariant)
+                                .border(1.dp, Color.White.copy(alpha = 0.04f), RoundedCornerShape(22.dp))
                                 .clickable { },
                             contentAlignment = Alignment.Center
                         ) {
@@ -166,7 +169,9 @@ fun HomeScreen(
                         Box(
                             modifier = Modifier
                                 .weight(1f)
-                                .neumorphicExtruded(cornerRadius = 24.dp, elevation = 6.dp, backgroundColor = MaterialTheme.colorScheme.background)
+                                .clip(RoundedCornerShape(24.dp))
+                                .background(MaterialTheme.colorScheme.surfaceVariant)
+                                .border(1.dp, Color.White.copy(alpha = 0.04f), RoundedCornerShape(24.dp))
                                 .padding(20.dp)
                         ) {
                             Column {
@@ -186,7 +191,9 @@ fun HomeScreen(
                         Box(
                             modifier = Modifier
                                 .weight(1f)
-                                .neumorphicExtruded(cornerRadius = 24.dp, elevation = 6.dp, backgroundColor = MaterialTheme.colorScheme.background)
+                                .clip(RoundedCornerShape(24.dp))
+                                .background(MaterialTheme.colorScheme.surfaceVariant)
+                                .border(1.dp, Color.White.copy(alpha = 0.04f), RoundedCornerShape(24.dp))
                                 .clickable(onClick = onAddToSpend)
                                 .padding(20.dp)
                         ) {

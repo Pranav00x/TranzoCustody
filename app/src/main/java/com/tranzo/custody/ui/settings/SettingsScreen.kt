@@ -56,9 +56,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.tranzo.custody.domain.model.KycStatus
 import com.tranzo.custody.domain.model.SpendMode
-import com.tranzo.custody.ui.util.neumorphicExtruded
 import androidx.compose.ui.text.style.TextAlign
-import com.tranzo.custody.ui.util.neumorphicPressed
 import androidx.compose.ui.unit.sp
 
 import com.tranzo.custody.ui.theme.LocalTranzoTheme
@@ -104,7 +102,9 @@ fun SettingsScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 24.dp, vertical = 12.dp)
-                    .neumorphicExtruded(cornerRadius = 24.dp, elevation = 4.dp, backgroundColor = MaterialTheme.colorScheme.background)
+                    .clip(RoundedCornerShape(24.dp))
+                    .background(MaterialTheme.colorScheme.surfaceVariant)
+                    .border(1.dp, Color.White.copy(alpha = 0.04f), RoundedCornerShape(24.dp))
                     .padding(24.dp)
             ) {
                 Column {
@@ -112,7 +112,8 @@ fun SettingsScreen(
                         Box(
                             modifier = Modifier
                                 .size(48.dp)
-                                .neumorphicPressed(cornerRadius = 24.dp, elevation = 2.dp, backgroundColor = MaterialTheme.colorScheme.background),
+                                .clip(RoundedCornerShape(24.dp))
+                                .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.08f)),
                             contentAlignment = Alignment.Center
                         ) {
                             Icon(Icons.Default.Person, null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(24.dp))
@@ -129,7 +130,8 @@ fun SettingsScreen(
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .neumorphicPressed(cornerRadius = 12.dp, elevation = 1.dp, backgroundColor = MaterialTheme.colorScheme.background)
+                            .clip(RoundedCornerShape(12.dp))
+                            .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
                             .padding(12.dp)
                     ) {
                         Text(
@@ -151,7 +153,9 @@ fun SettingsScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 24.dp, vertical = 8.dp)
-                    .neumorphicExtruded(cornerRadius = 24.dp, elevation = 4.dp, backgroundColor = MaterialTheme.colorScheme.background)
+                    .clip(RoundedCornerShape(24.dp))
+                    .background(MaterialTheme.colorScheme.surfaceVariant)
+                    .border(1.dp, Color.White.copy(alpha = 0.04f), RoundedCornerShape(24.dp))
                     .padding(vertical = 8.dp)
             ) {
                 Column {
@@ -169,7 +173,9 @@ fun SettingsScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 24.dp, vertical = 8.dp)
-                    .neumorphicExtruded(cornerRadius = 24.dp, elevation = 4.dp, backgroundColor = MaterialTheme.colorScheme.background)
+                    .clip(RoundedCornerShape(24.dp))
+                    .background(MaterialTheme.colorScheme.surfaceVariant)
+                    .border(1.dp, Color.White.copy(alpha = 0.04f), RoundedCornerShape(24.dp))
                     .padding(vertical = 8.dp)
             ) {
                 Column {
@@ -206,7 +212,9 @@ fun SettingsScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 24.dp)
-                    .neumorphicExtruded(cornerRadius = 16.dp, elevation = 2.dp, backgroundColor = MaterialTheme.colorScheme.background)
+                    .clip(RoundedCornerShape(16.dp))
+                    .background(MaterialTheme.colorScheme.surfaceVariant)
+                    .border(1.dp, Color.White.copy(alpha = 0.04f), RoundedCornerShape(16.dp))
                     .clickable { viewModel.logout { onLogout() } }
                     .padding(16.dp),
                 contentAlignment = Alignment.Center
@@ -255,7 +263,8 @@ private fun SettingsItem(icon: ImageVector, title: String, subtitle: String? = n
         Box(
             modifier = Modifier
                 .size(40.dp)
-                .neumorphicPressed(cornerRadius = 20.dp, elevation = 1.dp, backgroundColor = MaterialTheme.colorScheme.background),
+                .clip(RoundedCornerShape(20.dp))
+                .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.08f)),
             contentAlignment = Alignment.Center
         ) {
             Icon(icon, null, tint = MaterialTheme.colorScheme.onBackground, modifier = Modifier.size(20.dp))

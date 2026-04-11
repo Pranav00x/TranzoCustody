@@ -18,10 +18,14 @@ import com.tranzo.custody.domain.model.Token
 import com.tranzo.custody.ui.theme.LocalTranzoTheme
 import java.text.NumberFormat
 import java.util.Locale
-import com.tranzo.custody.ui.util.neumorphicExtruded
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 
 @Composable
 fun AssetListItem(
@@ -33,7 +37,9 @@ fun AssetListItem(
         modifier = modifier
             .fillMaxWidth()
             .padding(horizontal = 24.dp, vertical = 8.dp)
-            .neumorphicExtruded(cornerRadius = 16.dp, elevation = 3.dp, backgroundColor = MaterialTheme.colorScheme.background)
+            .clip(RoundedCornerShape(16.dp))
+            .background(MaterialTheme.colorScheme.surfaceVariant)
+            .border(1.dp, Color.White.copy(alpha = 0.04f), RoundedCornerShape(16.dp))
             .clickable(onClick = onClick)
             .padding(16.dp)
     ) {

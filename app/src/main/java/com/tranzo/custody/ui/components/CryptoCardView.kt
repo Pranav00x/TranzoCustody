@@ -27,29 +27,26 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.tranzo.custody.ui.util.glassOnDark
 import androidx.compose.ui.unit.sp
 import com.tranzo.custody.domain.model.CryptoCard
 import com.tranzo.custody.ui.theme.GoldChip
-import com.tranzo.custody.ui.theme.GoldChipLight
 import com.tranzo.custody.ui.theme.LocalTranzoTheme
-import com.tranzo.custody.ui.util.glassOnDark
-
-import com.tranzo.custody.ui.util.neumorphicExtruded
 
 @Composable
 fun CryptoCardView(
     card: CryptoCard,
     modifier: Modifier = Modifier
 ) {
+    val theme = LocalTranzoTheme.current
     Box(
         modifier = modifier
             .fillMaxWidth()
             .height(210.dp)
-            .neumorphicExtruded(
-                cornerRadius = 24.dp, 
-                elevation = 8.dp, 
-                backgroundColor = MaterialTheme.colorScheme.background
+            .clip(RoundedCornerShape(24.dp))
+            .background(
+                Brush.linearGradient(
+                    listOf(theme.accent, theme.accentLight)
+                )
             )
             .padding(24.dp)
     ) {
@@ -64,7 +61,7 @@ fun CryptoCardView(
             ) {
                 Text(
                     text = "TRANZO",
-                    color = MaterialTheme.colorScheme.onBackground,
+                    color = Color.White,
                     fontSize = 20.sp,
                     fontWeight = FontWeight.Black,
                     letterSpacing = 4.sp
@@ -72,7 +69,7 @@ fun CryptoCardView(
                 Icon(
                     imageVector = Icons.Default.Contactless,
                     contentDescription = "Contactless",
-                    tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.6f),
+                    tint = Color.White.copy(alpha = 0.7f),
                     modifier = Modifier.size(24.dp)
                 )
             }
@@ -81,17 +78,14 @@ fun CryptoCardView(
                 Box(
                     modifier = Modifier
                         .size(width = 44.dp, height = 32.dp)
-                        .neumorphicExtruded(
-                            cornerRadius = 6.dp, 
-                            elevation = 2.dp, 
-                            backgroundColor = MaterialTheme.colorScheme.background
-                        ),
+                        .clip(RoundedCornerShape(6.dp))
+                        .background(Color.White.copy(alpha = 0.15f)),
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
                         imageVector = Icons.Default.Memory,
                         contentDescription = null,
-                        tint = Color(0xFFD4A843).copy(alpha = 0.8f),
+                        tint = GoldChip,
                         modifier = Modifier.size(22.dp)
                     )
                 }
@@ -100,7 +94,7 @@ fun CryptoCardView(
             Column {
                 Text(
                     text = "••••  ••••  ••••  ${card.lastFourDigits}",
-                    color = MaterialTheme.colorScheme.onBackground,
+                    color = Color.White,
                     fontSize = 20.sp,
                     fontWeight = FontWeight.Bold,
                     letterSpacing = 2.sp
@@ -114,21 +108,21 @@ fun CryptoCardView(
                     Column {
                         Text(
                             text = card.cardholderName.uppercase(),
-                            color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f),
+                            color = Color.White.copy(alpha = 0.8f),
                             fontSize = 11.sp,
                             fontWeight = FontWeight.Bold,
                             letterSpacing = 1.sp
                         )
                         Text(
                             text = "EXP ${card.expiryDate}",
-                            color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.4f),
+                            color = Color.White.copy(alpha = 0.5f),
                             fontSize = 10.sp,
                             fontWeight = FontWeight.Medium
                         )
                     }
                     Text(
                         text = "VISA",
-                        color = MaterialTheme.colorScheme.onBackground,
+                        color = Color.White,
                         fontSize = 18.sp,
                         fontWeight = FontWeight.Black,
                         letterSpacing = 1.sp
