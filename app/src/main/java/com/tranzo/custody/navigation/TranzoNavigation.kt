@@ -46,7 +46,11 @@ import com.tranzo.custody.ui.onboarding.EmailPasswordScreen
 import com.tranzo.custody.ui.onboarding.ImportWalletScreen
 import com.tranzo.custody.ui.onboarding.LoginScreen
 import com.tranzo.custody.ui.onboarding.SetPinScreen
+import com.tranzo.custody.ui.onboarding.RestoreSetPinScreen
+import com.tranzo.custody.ui.onboarding.RestorePinViewModel
 import com.tranzo.custody.ui.onboarding.WelcomeScreen
+import com.tranzo.custody.ui.onboarding.VerifyPinScreen
+import com.tranzo.custody.ui.onboarding.VerifyPinViewModel
 import com.tranzo.custody.ui.settings.AppearanceScreen
 import com.tranzo.custody.ui.settings.DripperScreen
 import com.tranzo.custody.ui.settings.HelpSupportScreen
@@ -98,6 +102,31 @@ fun TranzoNavigation(
                 )
             }
 
+            // ── Verify PIN ──
+            composable(Screen.VerifyPin.route) {
+                VerifyPinScreen(
+                    onSuccess = {
+                        navController.navigate(Screen.Home.route) {
+                            popUpTo(Screen.VerifyPin.route) { inclusive = true }
+                            launchSingleTop = true
+                        }
+                    }
+                )
+            }
+
+            // ── Restore PIN Setup ──
+            composable(Screen.RestoreSetPin.route) {
+                RestoreSetPinScreen(
+                    onComplete = {
+                        navController.navigate(Screen.Home.route) {
+                            popUpTo(Screen.Welcome.route) { inclusive = true }
+                            launchSingleTop = true
+                        }
+                    },
+                    onBack = { navController.popBackStack() }
+                )
+            }
+
             // ── Login ──
             composable(Screen.Login.route) {
                 LoginScreen(
@@ -106,6 +135,9 @@ fun TranzoNavigation(
                             popUpTo(Screen.Welcome.route) { inclusive = true }
                             launchSingleTop = true
                         }
+                    },
+                    onRestoreNeedsPin = {
+                        navController.navigate(Screen.RestoreSetPin.route)
                     },
                     onBack = { navController.popBackStack() },
                     viewModel = hiltViewModel(),

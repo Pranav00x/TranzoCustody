@@ -30,6 +30,7 @@ data class LoginState(
     val needsWalletRestore: Boolean = false,
     val restoreError: String? = null,
     val isRestoring: Boolean = false,
+    val restoreNeedsPin: Boolean = false,
     val restoreSuccess: Boolean = false
 )
 
@@ -69,16 +70,11 @@ class LoginViewModel @Inject constructor(
                 // Check if wallet credentials exist locally
                 val hasWallet = signingManager.loadCredentials() != null
                 if (hasWallet) {
-                    // Wallet exists locally — save session and go to home
-                    sessionManager.saveWalletSession(
-                        ownerAddress = user.ownerAddr,
-                        smartWalletAddress = user.smartWalletAddr,
-                        chainId = user.chainId,
-                        pin = "" // PIN will be required on next app start
-                    )
+                    // Wallet exists locally — just ensure session is active and go to home
+                    // We don't want to call saveWalletSession("") because it overwrites the existing PIN
                     _state.value = _state.value.copy(isLoading = false, loginSuccess = true)
                 } else {
-                    // No local wallet — need to restore
+                    // No local wallet — need to restore from Drive or Seed
                     _state.value = _state.value.copy(
                         isLoading = false,
                         needsWalletRestore = true
@@ -125,21 +121,10 @@ class LoginViewModel @Inject constructor(
                         withContext(Dispatchers.IO) {
                             val creds = mnemonicManager.deriveCredentials(result.mnemonic)
                             signingManager.persistCredentials(creds)
-
-                            val predicted = smartAccountManager.computeCounterfactualAddress(
-                                creds.address,
-                                BigInteger.ONE
-                            )
-                            sessionManager.saveWalletSession(
-                                ownerAddress = creds.address,
-                                smartWalletAddress = predicted,
-                                chainId = BuildConfig.DEFAULT_CHAIN_ID,
-                                pin = ""
-                            )
                         }
                         _state.value = _state.value.copy(
                             isRestoring = false,
-                            restoreSuccess = true
+                            restoreNeedsPin = true
                         )
                     }
                     is RestoreResult.NoBackupFound -> {
@@ -183,19 +168,8 @@ class LoginViewModel @Inject constructor(
                     val normalized = mnemonicManager.normalizeMnemonic(mnemonic)
                     val creds = mnemonicManager.deriveCredentials(normalized)
                     signingManager.persistCredentials(creds)
-
-                    val predicted = smartAccountManager.computeCounterfactualAddress(
-                        creds.address,
-                        BigInteger.ONE
-                    )
-                    sessionManager.saveWalletSession(
-                        ownerAddress = creds.address,
-                        smartWalletAddress = predicted,
-                        chainId = BuildConfig.DEFAULT_CHAIN_ID,
-                        pin = ""
-                    )
                 }
-                _state.value = _state.value.copy(isRestoring = false, restoreSuccess = true)
+                _state.value = _state.value.copy(isRestoring = false, restoreNeedsPin = true)
             } catch (e: Exception) {
                 _state.value = _state.value.copy(
                     isRestoring = false,

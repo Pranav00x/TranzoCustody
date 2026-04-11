@@ -62,6 +62,7 @@ import com.tranzo.custody.ui.util.minimalCard
 @Composable
 fun LoginScreen(
     onLoginSuccess: () -> Unit,
+    onRestoreNeedsPin: () -> Unit,
     onBack: () -> Unit,
     viewModel: LoginViewModel,
     driveBackupManager: DriveBackupManager
@@ -93,6 +94,9 @@ fun LoginScreen(
     }
     LaunchedEffect(state.restoreSuccess) {
         if (state.restoreSuccess) onLoginSuccess()
+    }
+    LaunchedEffect(state.restoreNeedsPin) {
+        if (state.restoreNeedsPin) onRestoreNeedsPin()
     }
 
     // Show restore options when needed

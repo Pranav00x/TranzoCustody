@@ -51,7 +51,7 @@ class MainActivity : ComponentActivity() {
 
                 LaunchedEffect(Unit) {
                     startDestination = if (sessionManager.hasWallet()) {
-                        Screen.Home.route
+                        Screen.VerifyPin.route
                     } else {
                         Screen.Welcome.route
                     }
