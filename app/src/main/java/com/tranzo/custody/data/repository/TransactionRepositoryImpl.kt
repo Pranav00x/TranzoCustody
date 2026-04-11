@@ -62,7 +62,7 @@ class TransactionRepositoryImpl @Inject constructor(
         } catch (_: Exception) {
             // Fall back to local cache on failure
             if (_transactions.value.isEmpty()) {
-                val cached = transactionDao.getAllTransactions().first()
+                val cached = transactionDao.observeAllTransactions().first()
                 if (cached.isNotEmpty()) {
                     _transactions.value = cached.map { it.toDomain() }
                 }
