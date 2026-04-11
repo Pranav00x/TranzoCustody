@@ -10,10 +10,10 @@ import kotlinx.coroutines.flow.Flow
 @Dao
 interface TransactionDao {
     @Query("SELECT * FROM transactions ORDER BY timestamp DESC")
-    fun getAllTransactions(): Flow<List<TransactionEntity>>
+    fun observeAllTransactions(): Flow<List<TransactionEntity>>
 
     @Query("SELECT * FROM transactions WHERE type = :type ORDER BY timestamp DESC")
-    fun getTransactionsByType(type: String): Flow<List<TransactionEntity>>
+    fun observeTransactionsByType(type: String): Flow<List<TransactionEntity>>
 
     @Query("SELECT * FROM transactions WHERE title LIKE '%' || :query || '%' OR merchantName LIKE '%' || :query || '%' ORDER BY timestamp DESC")
     fun searchTransactions(query: String): Flow<List<TransactionEntity>>

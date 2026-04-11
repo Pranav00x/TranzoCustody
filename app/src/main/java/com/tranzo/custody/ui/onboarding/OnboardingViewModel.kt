@@ -19,6 +19,8 @@ import kotlinx.coroutines.withContext
 import java.io.IOException
 import java.math.BigInteger
 import javax.inject.Inject
+import com.tranzo.custody.data.local.dao.UserDao
+import com.tranzo.custody.data.local.entity.TranzoUserEntity
 
 enum class OnboardingMode { CREATE, IMPORT }
 
@@ -51,7 +53,8 @@ class OnboardingViewModel @Inject constructor(
     private val mnemonicManager: MnemonicManager,
     private val signingManager: SigningManager,
     private val smartAccountManager: SmartAccountManager,
-    private val authRepository: AuthRepository
+    private val authRepository: AuthRepository,
+    private val userDao: UserDao
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(OnboardingState())
@@ -222,6 +225,10 @@ class OnboardingViewModel @Inject constructor(
         val mnemonic = _state.value.mnemonic
         val email = _state.value.email
         val password = _state.value.password
+        val firstName = _state.value.firstName
+        val lastName = _state.value.lastName
+        val phone = _state.value.phone
+        val dob = _state.value.dob
         if (mnemonic.isBlank()) {
             _state.value = _state.value.copy(setupError = "Missing recovery phrase")
             return
@@ -268,7 +275,18 @@ class OnboardingViewModel @Inject constructor(
                     val smart = (authUser?.smartWalletAddr?.lowercase()?.takeIf { it.isNotBlank() } 
                                 ?: predicted) ?: throw IllegalStateException("Failed to determine smart wallet address. Please check your connection.")
 
-                    // 3. Persist keys and session
+                    // 3. Persist User data to local Database
+                    userDao.saveUser(TranzoUserEntity(
+                        id = authUser?.id ?: "local_user",
+                        firstName = firstName,
+                        lastName = lastName,
+                        email = email,
+                        phone = phone,
+                        dob = dob,
+                        onboardingComplete = true
+                    ))
+
+                    // 4. Persist keys and session
                     signingManager.persistCredentials(creds)
                     sessionManager.saveWalletSession(
                         ownerAddress = creds.address,

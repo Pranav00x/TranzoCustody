@@ -6,6 +6,7 @@ import com.tranzo.custody.data.local.TranzoDatabase
 import com.tranzo.custody.data.local.ThemePreferencesManager
 import com.tranzo.custody.data.local.UserSessionManager
 import com.tranzo.custody.data.local.dao.TransactionDao
+import com.tranzo.custody.data.local.dao.UserDao
 import com.tranzo.custody.data.backup.DriveBackupManager
 import dagger.Module
 import dagger.Provides
@@ -31,6 +32,11 @@ object DatabaseModule {
     @Provides
     fun provideTransactionDao(database: TranzoDatabase): TransactionDao {
         return database.transactionDao()
+    }
+
+    @Provides
+    fun provideUserDao(database: TranzoDatabase): UserDao {
+        return database.userDao()
     }
 
     @Provides
