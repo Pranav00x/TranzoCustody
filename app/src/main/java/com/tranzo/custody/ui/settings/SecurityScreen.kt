@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -25,6 +26,9 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.graphics.drawscope.rotate
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -60,6 +64,15 @@ fun SecurityScreen(
         Spacer(modifier = Modifier.height(16.dp))
 
         SecuritySwitchRow(
+            title = "PIN Security",
+            subtitle = "Require PIN to access wallet",
+            checked = state.pinRequired,
+            onCheckedChange = { viewModel.togglePinRequired(it) }
+        )
+
+        HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+
+        SecuritySwitchRow(
             title = "Biometric Unlock",
             subtitle = "Use fingerprint or face to unlock",
             checked = state.biometricEnabled,
@@ -68,9 +81,15 @@ fun SecurityScreen(
 
         HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
 
+        val lockTimes = listOf(1, 5, 10, 30, 0)
         Row(
             modifier = Modifier
                 .fillMaxWidth()
+                .clickable {
+                    val currentIdx = lockTimes.indexOf(state.autoLockMinutes)
+                    val nextIdx = (currentIdx + 1) % lockTimes.size
+                    viewModel.setAutoLockMinutes(lockTimes[nextIdx])
+                }
                 .padding(vertical = 16.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
@@ -79,7 +98,12 @@ fun SecurityScreen(
                 Text("Auto-Lock Timer", style = MaterialTheme.typography.bodyLarge)
                 Text("Lock app after inactivity", style = MaterialTheme.typography.bodySmall, color = tranzoTheme.textMuted)
             }
-            Text("${state.autoLockMinutes} min", style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.SemiBold)
+            Text(
+                text = if (state.autoLockMinutes == 0) "Never" else "${state.autoLockMinutes} min",
+                style = MaterialTheme.typography.bodyLarge,
+                fontWeight = FontWeight.SemiBold,
+                color = MaterialTheme.colorScheme.primary
+            )
         }
 
         HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
@@ -87,12 +111,13 @@ fun SecurityScreen(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
+                .clickable { /* TODO: Change PIN Flow */ }
                 .padding(vertical = 16.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text("Change PIN", style = MaterialTheme.typography.bodyLarge)
-            Icon(Icons.AutoMirrored.Filled.ArrowBack, null, tint = tranzoTheme.textMuted)
+            Icon(Icons.AutoMirrored.Filled.ArrowBack, null, tint = tranzoTheme.textMuted, modifier = Modifier.graphicsLayer(rotationZ = 180f))
         }
 
         Spacer(modifier = Modifier.height(32.dp))

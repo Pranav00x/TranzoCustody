@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -16,7 +17,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.lifecycle.lifecycleScope
 import com.tranzo.custody.data.backup.DriveBackupManager
+import com.tranzo.custody.data.local.SecurityPreferencesManager
 import com.tranzo.custody.data.local.ThemePreferencesManager
 import com.tranzo.custody.data.local.UserSessionManager
 import com.tranzo.custody.navigation.Screen
@@ -25,6 +28,8 @@ import com.tranzo.custody.ui.theme.AppFontId
 import com.tranzo.custody.ui.theme.AppThemeId
 import com.tranzo.custody.ui.theme.TranzoTheme
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -39,6 +44,9 @@ class MainActivity : ComponentActivity() {
     @Inject
     lateinit var themePreferencesManager: ThemePreferencesManager
 
+    @Inject
+    lateinit var securityPrefs: SecurityPreferencesManager
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -50,11 +58,23 @@ class MainActivity : ComponentActivity() {
                 var startDestination by remember { mutableStateOf<String?>(null) }
 
                 LaunchedEffect(Unit) {
-                    startDestination = if (sessionManager.hasWallet()) {
-                        Screen.VerifyPin.route
+                    val hasWallet = sessionManager.hasWallet()
+                    val isPinRequired = securityPrefs.isPinRequired.first()
+                    val autoLockMin = securityPrefs.autoLockMinutes.first()
+                    val lastActive = securityPrefs.getLastActiveTime()
+                    val now = System.currentTimeMillis()
+
+                    val shouldLock = hasWallet && isPinRequired && (autoLockMin > 0) && (now - lastActive > autoLockMin * 60 * 1000)
+
+                    startDestination = if (hasWallet) {
+                        if (shouldLock) Screen.VerifyPin.route else Screen.Home.route
                     } else {
                         Screen.Welcome.route
                     }
+                }
+
+                DisposableEffect(Unit) {
+                    onDispose { }
                 }
 
                 Surface(
@@ -75,6 +95,13 @@ class MainActivity : ComponentActivity() {
                     }
                 }
             }
+        }
+    }
+
+    override fun onUserInteraction() {
+        super.onUserInteraction()
+        lifecycleScope.launch {
+            securityPrefs.updateLastActiveTime()
         }
     }
 }

@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Backspace
+import androidx.compose.material.icons.filled.Fingerprint
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -61,6 +62,7 @@ fun PinDots(
 fun PinKeypad(
     onNumberClick: (Int) -> Unit,
     onDeleteClick: () -> Unit,
+    onBiometricClick: (() -> Unit)? = null,
     modifier: Modifier = Modifier
 ) {
     val keys = listOf(
@@ -82,7 +84,26 @@ fun PinKeypad(
             ) {
                 row.forEach { key ->
                     when (key) {
-                        -1 -> Spacer(modifier = Modifier.size(72.dp))
+                        -1 -> {
+                            if (onBiometricClick != null) {
+                                Box(
+                                    modifier = Modifier
+                                        .size(72.dp)
+                                        .clip(CircleShape)
+                                        .clickable(onClick = onBiometricClick),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.Fingerprint,
+                                        contentDescription = "Biometric",
+                                        tint = MaterialTheme.colorScheme.primary,
+                                        modifier = Modifier.size(32.dp)
+                                    )
+                                }
+                            } else {
+                                Spacer(modifier = Modifier.size(72.dp))
+                            }
+                        }
                         -2 -> {
                             Box(
                                 modifier = Modifier

@@ -18,6 +18,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
@@ -28,6 +29,11 @@ import com.tranzo.custody.ui.components.PinDots
 import com.tranzo.custody.ui.components.PinKeypad
 import com.tranzo.custody.ui.theme.LocalTranzoTheme
 
+import androidx.fragment.app.FragmentActivity
+import androidx.compose.ui.platform.LocalContext
+import com.tranzo.custody.security.BiometricHelper
+import androidx.compose.ui.graphics.graphicsLayer
+
 @Composable
 fun VerifyPinScreen(
     onSuccess: () -> Unit,
@@ -36,10 +42,29 @@ fun VerifyPinScreen(
 ) {
     val state by viewModel.state.collectAsState()
     val tranzoTheme = LocalTranzoTheme.current
+    val context = LocalContext.current
+    val biometricHelper = remember { BiometricHelper() }
+
+    fun showBiometric() {
+        val activity = context as? FragmentActivity ?: return
+        biometricHelper.showBiometricPrompt(
+            activity = activity,
+            title = "Unlock Tranzo",
+            subtitle = "Verify your identity to continue",
+            onSuccess = { viewModel.onBiometricSuccess() },
+            onError = { /* ViewModel handles errors if needed */ }
+        )
+    }
 
     LaunchedEffect(state.isSuccess) {
         if (state.isSuccess) {
             onSuccess()
+        }
+    }
+
+    LaunchedEffect(state.biometricEnabled) {
+        if (state.biometricEnabled && !state.isSuccess) {
+            showBiometric()
         }
     }
 
@@ -100,7 +125,8 @@ fun VerifyPinScreen(
 
             PinKeypad(
                 onNumberClick = { viewModel.addNumber(it) },
-                onDeleteClick = { viewModel.delete() }
+                onDeleteClick = { viewModel.delete() },
+                onBiometricClick = if (state.biometricEnabled) { { showBiometric() } } else null
             )
 
             Spacer(modifier = Modifier.height(48.dp))
